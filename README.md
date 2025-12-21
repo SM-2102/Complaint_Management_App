@@ -21,6 +21,7 @@
 | age | Auto-calculated |
 | phone | Contact number |
 | address | Residential address |
+| email | Email |
 | aadhar | Aadhaar number |
 | pan | PAN number |
 | uan | UAN number |
@@ -92,6 +93,16 @@
 | updated_time | VARCHAR(20) | `21-12-25 14:25PM` |			
 
 - [ ] **Stock**
+
+| Column Name | Data Type | Description / Example |
+|------------|----------|------------------------|
+| division | VARCHAR(20) | `FANS`, `APPL`, `LIGHT`, `WHC`, `SDA`, `PUMP`, `FHP MOTOR`, `LT MOTOR` |
+| spare_code | VARCHAR(20) | Unique spare identifier |
+| spare_description | VARCHAR(40) | `2MFD CAPACITOR` |
+| qty | INT | Available quantity |
+| alp | FLOAT | Authorized List Price |
+| sale_price | FLOAT | Selling price |
+
 - [ ] **GRC**
 
 ---
@@ -114,14 +125,47 @@
 - [ ] **PageNotFound** – 404 error page
 - [ ] **PageNotAvailable** – Maintenance/feature unavailable page
 
+### Pending Module
+- [ ] **PendingListPage** - Main Pending Page
+
 ### ComplaintNumber Module
-- [ ] **ComplaintNumberUpload** - Upload complaint number file .xlxs [ADMIN]
+- [ ] **ComplaintNumberUploadPage** - Upload complaint number file .xlxs [ADMIN]
+- Admin can upload a new complaint file with the following logic:
+1. **If complaint exists in both old and new file**
+   - No action taken
+2. **If complaint exists in new file but not in old**
+   - Insert as new complaint
+3. **If complaint exists in old file but not in new**
+   - Update complaint status to **Cancelled**
+- [ ] **ComplaintNumberCreatePage** - Create Complaint Number
+- Create new complaint records
+- Auto-generate complaint number
+- [ ] **ComplaintNumberUpdatePage** - Update Complaint Number
+- Update complaint details and status
+- **Visit Later Option**
+  - If selected:  
+    - A new complaint is automatically created
+    - Original complaint status updated accordingly
+- [ ] **ComplaintNumberSendPage** - Send pending pdf to technician
+- Generate pdf, either download or send to e-mail
+
+
 
 ### Stock Module
-- [ ] **StockUpload** - Upload stock file .xlxs [ADMIN]
+- [ ] **StockUploadPage** - Upload stock file .xlxs [ADMIN]
+- If stock item exists → Update quantity
+- If stock item does not exist → Insert new record
+- [ ] **StockEnquiryPage** - Stock Enquiry and Print
+
 
 ### GRC Module
-- [ ] **GRCUpload** - Upload GRC file .xlxs [ADMIN]
+- [ ] **GRCUploadPage** - Upload GRC file .xlxs [ADMIN]
+- Overwrite operation
+- Process:
+  1. Truncate existing GRC table
+  2. Insert fresh uploaded data
+- [ ] **GRCEnquiryPage** - GRC Enquiry and Print
+
 
 
 ---
@@ -144,11 +188,20 @@
 ### Notification Module
 - [ ] **/notification/add_notification** - [ADMIN]
 - [ ] **/notification/show_notification**
+- Notifications are generated per user
+- When a complaint is resolved:
+- It will be moved out of active notifications
+- Displayed as a **rolling bar** on the main dashboard
+
 
 ### Menu Module
 - [ ] **/menu/dashboard**
 
+### Pending Module
 
+### Stock Module
+
+### GRC Module
 
 ---
 
@@ -163,6 +216,7 @@
 - [ ] **Wishes**
 - [ ] **Notification**
 - [ ] **User**
+- [ ] **Email**
 - [ ] **Complaint Number**
 - [ ] **Stock**
 - [ ] **GRC**
