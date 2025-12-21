@@ -97,13 +97,38 @@
 | Column Name | Data Type | Description / Example |
 |------------|----------|------------------------|
 | division | VARCHAR(20) | `FANS`, `APPL`, `LIGHT`, `WHC`, `SDA`, `PUMP`, `FHP MOTOR`, `LT MOTOR` |
-| spare_code | VARCHAR(20) | Unique spare identifier |
+| spare_code | VARCHAR(30) | Unique spare identifier |
+| head | VARCHAR(10) | `CGCEL`, `CGPISL` |
 | spare_description | VARCHAR(40) | `2MFD CAPACITOR` |
 | qty | INT | Available quantity |
 | alp | FLOAT | Authorized List Price |
 | sale_price | FLOAT | Selling price |
 
 - [ ] **GRC**
+
+| Column Name | Data Type | Description / Example |
+|------------|----------|------------------------|
+| spare_code | VARCHAR(30) **(PK)** | Unique spare identifier |
+| division | VARCHAR(20) | `FANS`, `APPL`, `LIGHT`, `WHC`, `SDA`, `PUMP`, `FHP MOTOR`, `LT MOTOR` |
+| head | VARCHAR(10) | `CGCEL`, `CGPISL` |
+| grc_no | INT | GRC reference number |
+| grc_date | DATE | GRC transaction date |
+| spare_description | VARCHAR(40) | `2MFD CAPACITOR` |
+| issue_qty | INT | Quantity issued |
+| grc_pending_qty | INT | Pending quantity as per GRC |
+| good_qty | INT | Good condition quantity |
+| defective_qty | INT | Defective quantity |
+| returned_qty | INT | Quantity returned |
+| returning_qty | INT | Quantity in return process |
+| actual_pending_qty | INT | System-calculated pending quantity |
+| due_qty | INT | Quantity due |
+| dispute_remark | VARCHAR(40) | Dispute notes, if any |
+| challan_number | VARCHAR(10) | Delivery challan number |
+| challan_date | DATE | Challan date |
+| docket_number | VARCHAR(8) | Courier / docket reference |
+| sent_through | VARCHAR(20) | Courier / transport mode |
+| remark | VARCHAR(40) | General remarks |
+| challan_by | VARCHAR(20) | Foreign key to users |
 
 ---
 ## Frontend Pages
@@ -165,6 +190,7 @@
   1. Truncate existing GRC table
   2. Insert fresh uploaded data
 - [ ] **GRCEnquiryPage** - GRC Enquiry and Print
+- [ ] **GRCChallanCreatePage** - GRC Challan Creation
 
 
 
