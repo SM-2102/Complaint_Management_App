@@ -1,40 +1,10 @@
 # Complaint Management System  
 ## Unique Services
-
 ---
 
-## 1. Overview
+## Database Tables
+- [ ] **User**
 
-The **Complaint Management System (CMS)** is a role-based web application designed for **Unique Services** to manage customer complaints, employee operations, inventory, and reporting.  
-The system supports **administrative control**, **technician workflows**, **complaint lifecycle management**, and **data-driven analysis**.
-
----
-
-## 2. User Roles
-
-### 2.1 Admin
-- Full system access
-- Data upload and overwrite privileges
-- Stock and master data management
-- User and employee administration
-
-### 2.2 User (Employee / Technician)
-- Complaint handling
-- Reporting and daily operations
-- Stock and GRC view access
-- Notifications and alerts
-
----
-
-## 3. Authentication & Access Control
-
-### 3.1 Login
-- Secure login page
-- Username & password authentication
-- Role-based menu rendering
-- Inactive users are restricted from login
-
-### 3.2 User Authentication Table
 | Field Name | Description |
 |----------|------------|
 | username | Unique login ID |
@@ -42,11 +12,8 @@ The system supports **administrative control**, **technician workflows**, **comp
 | is_active | User active/inactive flag |
 | role | Admin / User |
 
----
+- [ ] **Employee**
 
-## 4. Employee Management
-
-### 4.1 Employee Master Table
 | Field | Description |
 |------|------------|
 | name | Employee full name |
@@ -62,164 +29,148 @@ The system supports **administrative control**, **technician workflows**, **comp
 | leaving_date | Date of leaving |
 | is_active | Active employment status |
 
-### 4.2 Employee Operations
-- Create employee
-- Delete employee
-- View all employees
-- Activate / deactivate employee
+- [ ] **Notification**
+- [ ] **ComplaintNumber**
+
+## Complaint Master Table Structure
+
+| Column Name | Data Type | Description / Example |
+|------------|----------|------------------------|
+| complaint_number | VARCHAR(15) **(PK)** | `CKK251205123456` / `N00001` |
+| complaint_head | VARCHAR(10) | `CGCEL`, `CGPISL` |
+| complaint_date | DATE | `12-12-2025` |
+| complaint_time | VARCHAR(7) | `03:12PM` |
+| complaint_type | VARCHAR(10) | `Service`, `Install`, `Sale` |
+| complaint_status | VARCHAR(15) | `pending`, `fresh`, `new`, `closed` |
+| complaint_priority | VARCHAR(15) | `NORMAL`, `HO-ESCALATION`, `CRM-ESCALATION`, `URGENT` |
+| action_head | VARCHAR(30) | `INDENT TO BE DONE`, `TO BE ATTENDED`, `MAIL TO BE SENT`, `MAIL SENT` |
+| action_by | VARCHAR(30) | Responsible person (Employee / CCO) |
+| technician | VARCHAR(30) | Technician allotted |
+| customer_type | VARCHAR(20) | `Dealer`, `Customer`, `Retailer` |
+| customer_name | VARCHAR(40) | `Abhishek Mondal` |
+| customer_add1 | VARCHAR(40) | `12, Ripon Lane` |
+| customer_add2 | VARCHAR(40) | `2nd Floor` |
+| customer_city | VARCHAR(30) | `Kolkata` |
+| customer_pincode | INT(6) | `700016` |
+| customer_contact1 | INT(10) | `9831025641` |
+| customer_contact2 | INT(10) | `9533254125` |
+| product_division | VARCHAR(20) | `FANS`, `APPL`, `LIGHT`, `WHC`, `SDA`, `PUMP`, `FHP MOTOR`, `LT MOTOR` |
+| product_slno | VARCHAR(20) | `MMF01YC123015` |
+| product_model | VARCHAR(25) | `CFHS48BRN1S` |
+| invoice_date | DATE | `10-05-2025` |
+| invoice_number | VARCHAR(25) | `SE/2025-26/0345` |
+| dealer_name | VARCHAR(40) | `PRAKASH ELECTRICALS` |
+| distributor_name | VARCHAR(40) | `RAMDEO FANS` |
+| spare_pending | CHAR(1) | `Y` / `N` |
+| spare1 | VARCHAR(30) | `2MFD CAPACITOR` |
+| qty1 | INT(3) | `1` |
+| indent_date1 | DATE | — |
+| spare2 | VARCHAR(30) | — |
+| qty2 | INT(3) | — |
+| indent_date2 | DATE | — |
+| spare3 | VARCHAR(30) | — |
+| qty3 | INT(3) | — |
+| indent_date3 | DATE | — |
+| spare4 | VARCHAR(30) | — |
+| qty4 | INT(3) | — |
+| indent_date4 | DATE | — |
+| spare5 | VARCHAR(30) | — |
+| qty5 | INT(3) | — |
+| indent_date5 | DATE | — |
+| spare6 | VARCHAR(30) | — |
+| qty6 | INT(3) | — |
+| indent_date6 | DATE | — |
+| current_status | VARCHAR(50) | `CAPACITOR TO BE CHANGED, SPARE AVAILABLE` |
+| rfr_number | VARCHAR(9) | `RFR000001` |
+| rfr_date | DATE | `21-12-2025` |
+| replacement_reason | VARCHAR(30) | `DOA`, `Dent/Damage`, `Part Not Available`, `Repeat Failure`, `Quality Issue`, `Others` |
+| replacement_remark | VARCHAR(40) | `CUSTOMER IS NOT ALLOWING TO REPAIR` |
+| indentso_number | VARCHAR(20) | `2564125` |
+| indentso_date | DATE | `18-12-2025` |
+| created_by | VARCHAR(20) | `D Manna` |
+| updated_by | VARCHAR(20) | `Milan Majhi` |
+| updated_time | VARCHAR(20) | `21-12-25 14:25PM` |			
+
+- [ ] **Stock**
+- [ ] **GRC**
+
+---
+## Frontend Pages
+
+### Auth Module
+- [ ] **LoginPage** – User authentication
+
+### User Module
+- [ ] **CreateUserPage** – Create User [ADMIN]
+- [ ] **DeleteUserPage** – Delete User [ADMIN]
+- [ ] **ShowAllUsersPage** – View All Users [ADMIN]
+- [ ] **ShowStandardUsersPage** - View Standard Users
+- [ ] **ChangePasswordPage** – Change password
+- [ ] **AddNotificationPage** - Add notification [ADMIN]
+- [ ] **NotificationResolvePage** - Resolving Notifications
+
+### Dashboard Module
+- [ ] **MenuDashboardPage** – Main dashboard for menu navigation
+- [ ] **PageNotFound** – 404 error page
+- [ ] **PageNotAvailable** – Maintenance/feature unavailable page
+
+### ComplaintNumber Module
+- [ ] **ComplaintNumberUpload** - Upload complaint number file .xlxs [ADMIN]
+
+### Stock Module
+- [ ] **StockUpload** - Upload stock file .xlxs [ADMIN]
+
+### GRC Module
+- [ ] **GRCUpload** - Upload GRC file .xlxs [ADMIN]
+
 
 ---
 
-## 5. User Menu Features
 
-After login, users will have access to:
+## Backend Routes
 
-- Create Employee *(Admin only)*
-- Delete Employee *(Admin only)*
-- Change Password
-- View All Users
-- Send Internal Messages
+### Auth Module
+- [ ] **/auth/login**
+- [ ] **/auth/logout**
+- [ ] **/auth/me**
 
----
+### User Module
+- [ ] **/user/all_users** - [ADMIN]
+- [ ] **/user/standard_users** 
+- [ ] **/user/create_user** - [ADMIN]
+- [ ] **/user/delete_user** - [ADMIN]
+- [ ] **/user/reset_password**
 
-## 6. Dashboard & Notifications
+### Notification Module
+- [ ] **/notification/add_notification** - [ADMIN]
+- [ ] **/notification/show_notification**
 
-### 6.1 Post-Login Dashboard
-- 🎉 **Birthday wishes** for employees
-- 📅 **Holiday list**
-- 🔔 **User-specific notifications**
+### Menu Module
+- [ ] **/menu/dashboard**
 
-### 6.2 Notification System
-- Notifications are generated per user
-- When a complaint is resolved:
-  - It is moved out of active notifications
-- Displayed as a **rolling bar** on the main dashboard
 
----
-
-## 7. Complaint Management
-
-### 7.1 User Functionalities
-
-#### Add Complaint
-- Create new complaint records
-- Auto-generate complaint number
-
-#### Update Complaint
-- Update complaint details and status
-- **Visit Later Option**
-  - If selected:  
-    - A new complaint is automatically created
-    - Original complaint status updated accordingly
-
-#### Pending Report
-- View all pending complaints
-- Filter by date, technician, priority
-
-#### Daily Pending Report
-- Generate daily pending list
-- Send report to technician phone numbers
-- Print option available
 
 ---
 
-## 8. RAFR Module
+## Application Development
 
-### 8.1 Create RAFR
-- Generate RAFR entries linked to complaints
-
-### 8.2 RAFR Report
-- View and export RAFR reports
-- Filter by date and technician
-
----
-
-## 9. Enquiry Module
-- Log and track customer enquiries
-- Convert enquiry into complaint if required
-
----
-
-## 10. Stock & GRC Management
-
-### 10.1 Stock View (User)
-- Read-only stock availability view
-
-### 10.2 GRC View (User)
-- View GRC data uploaded by admin
+- [ ] **Authorization**
+- [ ] **Database Schema**
+- [ ] **Initial Deployment**
+- [ ] **Backup**
+- [ ] **Login**
+- [ ] **Menu**
+- [ ] **Wishes**
+- [ ] **Notification**
+- [ ] **User**
+- [ ] **Complaint Number**
+- [ ] **Stock**
+- [ ] **GRC**
+- [ ] **Final Deployment**
 
 ---
 
-## 11. Admin-Only Functionalities
 
-### 11.1 Fresh Complaint Upload
-Admin can upload a new complaint file with the following logic:
 
-1. **If complaint exists in both old and new file**
-   - No action taken
-2. **If complaint exists in new file but not in old**
-   - Insert as new complaint
-3. **If complaint exists in old file but not in new**
-   - Update complaint status to **Cancelled**
 
----
 
-### 11.2 Stock Update
-- If stock item exists → Update quantity
-- If stock item does not exist → Insert new record
-
----
-
-### 11.3 GRC Upload
-- Overwrite operation
-- Process:
-  1. Truncate existing GRC table
-  2. Insert fresh uploaded data
-
----
-
-## 12. Reports
-
-- Pending Complaint Report
-- Daily Pending Report
-- RAFR Report
-- Technician-wise Complaint Report
-- Status-wise Complaint Report
-
----
-
-## 13. Analysis & Dashboards
-
-### 13.1 Planned Analytics
-- Complaint trend analysis
-- Technician performance
-- Product / division-wise complaints
-- Pending vs resolved ratio
-- Replacement and spare usage insights
-
-*(Charts and dashboards to be implemented in later phase)*
-
----
-
-## 14. Non-Functional Requirements
-
-- Secure authentication
-- Role-based access control
-- Audit tracking (created by / updated by)
-- Scalable design for future enhancements
-- Responsive UI
-
----
-
-## 15. Future Enhancements (Optional)
-- SLA tracking
-- Mobile app integration
-- WhatsApp/SMS alerts
-- Cost and warranty analytics
-- Customer portal access
-
----
-
-**Document Version:** 1.0  
-**Client:** Unique Services  
-**Application:** Complaint Management System
