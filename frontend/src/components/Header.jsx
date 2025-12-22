@@ -57,13 +57,13 @@ const Header = () => {
             className="text-white text-2xl sm:text-4xl font-semibold tracking-wide leading-tight mt-1"
             style={{ fontFamily: "Times New Roman, Times, serif" }}
           >
-            Smart Enterprise
+            Unique Services
           </span>
           <span
             className="text-blue-50 text-sm sm:text-lg font-medium mb-1"
             style={{ fontFamily: "Montserrat, sans-serif" }}
           >
-            3A Gangaram Palit Lane, Kolkata - 700013
+            12, Sakharitola Street, Kolkata - 700014
           </span>
         </div>
       </div>

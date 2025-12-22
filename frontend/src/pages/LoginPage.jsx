@@ -66,7 +66,7 @@ function LoginPage() {
           style={{ marginLeft: "60%" }}
         >
           <h2 className="text-2xl font-bold mb-6 text-gray-800 tracking-wide text-center">
-            Smart Enteprise Management App
+            Complaint Management Application
           </h2>
           <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex items-center gap-2">

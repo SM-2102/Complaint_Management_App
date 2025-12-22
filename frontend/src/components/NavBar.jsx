@@ -6,34 +6,6 @@ import { useAuth } from "../context/AuthContext";
 
 // Define desired submenu order for each menu key
 const submenuOrder = {
-  warranty: [
-    "Create SRF Record",
-    "Update SRF Record",
-    "Print SRF Record",
-    "Enquiry",
-  ],
-  out_of_warranty: [
-    "Create SRF Record",
-    "Update SRF Record",
-    "Print SRF Record",
-    "Settle SRF Record",
-    "Settle Final SRF",
-    "Enquiry",
-  ],
-  retail: [
-    "Add Record",
-    "Update Record",
-    "Print Receipt",
-    "Settle Record",
-    "Final Settlement",
-    "Enquiry",
-  ],
-  challan: [
-    "Create Smart Challan",
-    "Print Smart Challan",
-    "Create Unique Challan",
-    "Print Unique Challan",
-  ],
 };
 
 // Helper to sort actions by submenuOrder
@@ -52,14 +24,7 @@ function filterActionsForRole(actions, isAdmin) {
       !(
         a.path === "/CreateUser" ||
         a.path === "/DeleteUser" ||
-        a.path === "/ShowAllUsers" ||
-        a.path === "/FinalSettlementRetailRecord" ||
-        a.path === "/FinalSettlementOutOfWarrantySRF" ||
-        a.path === "/FinalSettlementWarrantySRF" ||
-        a.path === "/FinalSettlementVendor" ||
-        a.path === "/UploadComplaintNumber" ||
-        a.path === "/CreateASCName" ||
-        a.path === "/UploadCGSRFNumber"
+        a.path === "/ShowAllUsers"
       ),
   );
 }

@@ -89,6 +89,14 @@
 | replacement_remark | VARCHAR(40) | `CUSTOMER IS NOT ALLOWING TO REPAIR` |
 | indentso_number | VARCHAR(20) | `2564125` |
 | indentso_date | DATE | `18-12-2025` |
+Spare_pending	char(1)	
+payment_collected	char(1)	
+payment_sc	char(1)	Service Charge / Material
+payment_spare	char(1)	
+Payment_mode	varchar(10)	cash / cheuqe / online
+Payment_details	varchar(40)	service charge and Capacitor sale
+amount_sc	float	
+amount_spare	float
 | created_by | VARCHAR(20) | `D Manna` |
 | updated_by | VARCHAR(20) | `Milan Majhi` |
 | updated_time | VARCHAR(20) | `21-12-25 14:25PM` |			
