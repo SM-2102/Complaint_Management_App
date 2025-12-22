@@ -6,7 +6,14 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+from src.employee.models import Employee
 from src.auth.models import User
+from src.notification.models import Notification
+from src.holiday.models import Holiday
+from src.complaints.models import Complaint
+from src.grc.models import GRC
+from src.spare_cgcel.models import SpareCGCEL
+from src.spare_cgpisl.models import SpareCGPISL
 from sqlmodel import SQLModel
 from src.config import Config
 

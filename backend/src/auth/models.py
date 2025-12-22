@@ -1,6 +1,6 @@
 import sqlalchemy.dialects.postgresql as pg
 from sqlalchemy import Identity
-from sqlmodel import Column, Field, SQLModel
+from sqlmodel import Column, Field, SQLModel, ForeignKey
 
 
 class User(SQLModel, table=True):
@@ -12,7 +12,9 @@ class User(SQLModel, table=True):
             primary_key=True,
         )
     )
-    username: str = Field(unique=True)
+    username: str = Field(
+        sa_column=Column(pg.VARCHAR(30), ForeignKey("employees.name"), nullable=False, unique=True)
+    )
     password: str = Field(exclude=True)
     role: str = Field(sa_column=Column(pg.VARCHAR, nullable=False, default="USER"))
     phone_number: str = Field(sa_column=Column(pg.VARCHAR, nullable=False))

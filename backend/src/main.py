@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 from auth.routes import auth_router
 from exceptions import register_exceptions
 from middleware.middleware import register_middleware
-from user.routes import user_router
+# from employee.routes import user_router
 
 version = "v1"
 
@@ -53,4 +53,4 @@ register_exceptions(app)
 
 # Routes
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
-app.include_router(user_router, prefix="/user", tags=["User"])
+# app.include_router(user_router, prefix="/user", tags=["User"])

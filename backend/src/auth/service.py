@@ -4,8 +4,8 @@ from sqlalchemy.future import select
 from exceptions import InvalidCredentials, UserNotFound
 
 from .models import User
-from .schemas import UserLogin
-from .utils import verify_password
+from .schemas import UserLogin, UserChangePassword
+from .utils import verify_password, generate_hash_password
 
 
 class AuthService:
@@ -27,3 +27,16 @@ class AuthService:
         )
         result = await session.execute(statement)
         return result.scalars().first()
+    
+    async def reset_password(
+        self, user_data: UserChangePassword, session: AsyncSession
+    ):
+        existing_user = await self.get_user_by_username(user_data.username, session)
+        if existing_user and verify_password(
+            user_data.old_password, existing_user.password
+        ):
+            existing_user.password = generate_hash_password(user_data.new_password)
+            session.add(existing_user)
+            await session.commit()
+            return existing_user
+        raise InvalidCredentials()

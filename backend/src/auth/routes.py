@@ -9,7 +9,7 @@ from auth.service import AuthService
 from db.db import get_session
 from exceptions import InvalidToken
 
-from .schemas import UserLogin, UserResponse
+from .schemas import UserLogin, UserResponse, UserChangePassword
 from .utils import create_user_token
 
 REFRESH_TOKEN_EXPIRY_DAYS = 1
@@ -122,3 +122,19 @@ async def refresh_token(token_data=Depends(refresh_token_bearer)):
         )
         return response
     raise InvalidToken()
+
+"""
+Check whether password matches and change to new password.
+"""
+
+
+@auth_router.post("/reset_password", status_code=status.HTTP_200_OK)
+async def reset_password(
+    user: UserChangePassword,
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    user = await auth_service.reset_password(user, session)
+    return JSONResponse(
+        content={"message": f"User {user.username} password changed successfully."}
+    )
