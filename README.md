@@ -28,6 +28,7 @@
 | pf_number | Provident Fund number |
 | joining_date | Date of joining |
 | leaving_date | Date of leaving |
+| role | If user, push to user table |
 | is_active | Active employment status |
 
 - [ ] **Notification**
