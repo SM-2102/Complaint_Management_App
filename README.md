@@ -1,7 +1,15 @@
 # Complaint Management System  
 ## Unique Services
 ---
+## To Do List
+- Make the create employee page
+- Make the show users
+- Make the show standard users
+- Make the delete employee page
+- Work on the backend notification 
+- Work on the backend holiday
 
+---
 ## Database Tables
 - [ ] **User**
 - [ ] **Employee**
@@ -56,6 +64,11 @@
 - [ ] **ComplaintNumberSendPage** - Send pending pdf to technician
 - Generate pdf, either download or send to e-mail
 
+### Stock Module
+- [ ] **StockUploadPage** - Upload stock file .xlxs [ADMIN]
+- If stock item exists → Update quantity
+- If stock item does not exist → Insert new record
+- [ ] **StockEnquiryPage** - Stock Enquiry and Print
 
 
 ### Stock Module
@@ -82,16 +95,16 @@
 ## Backend Routes
 
 ### Auth Module
-- [ ] **/auth/login**
-- [ ] **/auth/logout**
-- [ ] **/auth/me**
+- [ ] **/auth/login** - send birthday and notification
+- [x] **/auth/logout**
+- [x] **/auth/me**
+- [x] **/auth/reset_password**
 
-### User Module
-- [ ] **/user/all_users** - [ADMIN]
-- [ ] **/user/standard_users** 
-- [ ] **/user/create_user** - [ADMIN]
-- [ ] **/user/delete_user** - [ADMIN]
-- [ ] **/user/reset_password**
+### Employee Module
+- [ ] **/employee/all_employees** - [ADMIN]
+- [ ] **/employee/standard_employees** 
+- [ ] **/employee/create_employees** - [ADMIN]
+- [ ] **/employee/delete_employees** - [ADMIN]
 
 ### Notification Module
 - [ ] **/notification/add_notification** - [ADMIN]
@@ -108,6 +121,7 @@
 ### Pending Module
 
 ### Stock Module
+### Stock Module
 
 ### GRC Module
 
@@ -115,18 +129,20 @@
 
 ## Application Development
 
-- [ ] **Authorization**
-- [ ] **Database Schema**
-- [ ] **Initial Deployment**
+- [x] **Authorization**
+- [x] **Database Schema**
+- [x] **Initial Deployment**
 - [ ] **Backup**
 - [ ] **Login**
 - [ ] **Menu**
 - [ ] **Wishes**
 - [ ] **Notification**
+- [ ] **Employee**
 - [ ] **User**
 - [ ] **Email**
 - [ ] **Complaint Number**
-- [ ] **Stock**
+- [ ] **Spare_CGCEL**
+- [ ] **Spare_CGPISL**
 - [ ] **GRC**
 - [ ] **Final Deployment**
 

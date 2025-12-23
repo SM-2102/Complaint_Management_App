@@ -1,111 +1,94 @@
-# from fastapi import APIRouter, Depends, status
-# from fastapi.responses import JSONResponse
-# from sqlmodel.ext.asyncio.session import AsyncSession
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-# from auth.dependencies import AccessTokenBearer, RoleChecker
-# from db.db import get_session
-# from exceptions import UserAlreadyExists
-# from employee.schema import UserChangePassword, UserCreate, Username, UserResponse
-# from employee.service import UserService
+from auth.dependencies import AccessTokenBearer, RoleChecker
+from db.db import get_session
+from exceptions import EmployeeAlreadyExists
+from employee.schema import EmployeeCreate, EmployeeResponse, EmployeeLeave
+from employee.service import EmployeeService
 
-# user_router = APIRouter()
-# user_service = UserService()
-# access_token_bearer = AccessTokenBearer()
-# role_checker = Depends(RoleChecker(allowed_roles=["ADMIN"]))
-
-
-# """
-# Check if user exists, create new user if not.
-# """
+employee_router = APIRouter()
+employee_service = EmployeeService()
+access_token_bearer = AccessTokenBearer()
+role_checker = Depends(RoleChecker(allowed_roles=["ADMIN"]))
 
 
-# @user_router.post(
-#     "/create_user", status_code=status.HTTP_201_CREATED, dependencies=[role_checker]
-# )
-# async def create_user(
-#     user: UserCreate,
-#     session: AsyncSession = Depends(get_session),
-#     _=Depends(access_token_bearer),
-# ):
-#     user_exists = await user_service.user_exists(user.username, session)
-#     if user_exists:
-#         raise UserAlreadyExists()
-#     created_user = await user_service.create_user(session, user)
-#     return JSONResponse(
-#         content={"message": f"User {created_user.username} created successfully."}
-#     )
+"""
+Check if employee exists, create new employee if not.
+"""
 
 
-# """
-# List all users.
-# """
+@employee_router.post(
+    "/create_employee", status_code=status.HTTP_201_CREATED, dependencies=[role_checker]
+)
+async def create_employee(
+    employee: EmployeeCreate,
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    employee_exists = await employee_service.employee_exists(employee.name, session)
+    if employee_exists:
+        raise EmployeeAlreadyExists()
+    created_employee = await employee_service.create_employee(session, employee)
+    return JSONResponse(
+        content={"message": f"Employee {created_employee.name} created successfully."}
+    )
 
 
-# @user_router.get(
-#     "/users",
-#     status_code=status.HTTP_200_OK,
-#     response_model=list[UserResponse],
-#     dependencies=[role_checker],
-# )
-# async def list_users(
-#     session: AsyncSession = Depends(get_session),
-#     _=Depends(access_token_bearer),
-# ):
-#     users = await user_service.list_users(session)
-#     return users
+"""
+List all employees.
+"""
 
 
-# """
-# List all standard users.
-# """
+@employee_router.get(
+    "/employees",
+    status_code=status.HTTP_200_OK,
+    response_model=list[EmployeeResponse],
+    dependencies=[role_checker],
+)
+async def list_employees(
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    employees = await employee_service.list_employees(session)
+    return employees
 
 
-# @user_router.get(
-#     "/standard_users",
-#     status_code=status.HTTP_200_OK,
-#     response_model=list[UserResponse],
-# )
-# async def list_standard_users(
-#     session: AsyncSession = Depends(get_session),
-#     _=Depends(access_token_bearer),
-# ):
-#     users = await user_service.list_standard_users(session)
-#     return users
+"""
+List all standard employees.
+"""
 
 
-# """
-# Delete a user by username if the user isnt the current user.
-# """
+@employee_router.get(
+    "/standard_employees",
+    status_code=status.HTTP_200_OK,
+    response_model=list[EmployeeResponse],
+)
+async def list_standard_employees(
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    employees = await employee_service.list_standard_employees(session)
+    return employees
 
 
-# @user_router.delete(
-#     "/delete_user",
-#     status_code=status.HTTP_200_OK,
-#     dependencies=[role_checker],
-# )
-# async def delete_user(
-#     user: Username,
-#     session: AsyncSession = Depends(get_session),
-#     token=Depends(access_token_bearer),
-# ):
-#     await user_service.delete_user(user.username, session, token)
-#     return JSONResponse(
-#         content={"message": f"User {user.username} deleted successfully."}
-#     )
+"""
+Delete a employee by employeename if the employee isnt the current employee.
+"""
 
 
-# """
-# Check whether password matches and change to new password.
-# """
-
-
-# @user_router.post("/reset_password", status_code=status.HTTP_200_OK)
-# async def reset_password(
-#     user: UserChangePassword,
-#     session: AsyncSession = Depends(get_session),
-#     _=Depends(access_token_bearer),
-# ):
-#     user = await user_service.reset_password(user, session)
-#     return JSONResponse(
-#         content={"message": f"User {user.username} password changed successfully."}
-#     )
+@employee_router.delete(
+    "/delete_employee",
+    status_code=status.HTTP_200_OK,
+    dependencies=[role_checker],
+)
+async def delete_employee(
+    employee: EmployeeLeave,
+    session: AsyncSession = Depends(get_session),
+    token=Depends(access_token_bearer),
+):
+    await employee_service.delete_employee(employee.name, session, token)
+    return JSONResponse(
+        content={"message": f"Employee {employee.name} deleted successfully."}
+    )

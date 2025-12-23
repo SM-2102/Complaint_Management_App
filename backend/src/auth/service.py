@@ -1,11 +1,13 @@
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.future import select
 
 from exceptions import InvalidCredentials, UserNotFound
 
 from .models import User
-from .schemas import UserLogin, UserChangePassword
+from .schemas import UserLogin, UserChangePassword, UserCreate
 from .utils import verify_password, generate_hash_password
+from typing import Any
 
 
 class AuthService:
@@ -40,3 +42,21 @@ class AuthService:
             await session.commit()
             return existing_user
         raise InvalidCredentials()
+
+    async def create_user(self, session: AsyncSession, user: Any):
+        username = getattr(user, "name", None)
+        user_data = {
+            "username": username,
+            "role": getattr(user, "role", None),
+            "phone_number": getattr(user, "phone_number", None),
+            "password": "123456",
+        }
+        new_user = User(**user_data)
+        new_user.password = generate_hash_password(user_data["password"])
+        session.add(new_user)
+        try:
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        return new_user

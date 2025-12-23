@@ -14,8 +14,8 @@ class IncorrectCodeFormat(BaseException):
     """Incorrect Code Format"""
 
 
-class UserAlreadyExists(BaseException):
-    """User Already Exists"""
+class EmployeeAlreadyExists(BaseException):
+    """Employee Already Exists"""
 
 
 class InvalidCredentials(BaseException):
@@ -41,10 +41,11 @@ class InvalidToken(BaseException):
 class AccessDenied(BaseException):
     """Access Denied due to insufficient permissions"""
 
-
 class UserNotFound(BaseException):
     """User Not Found"""
 
+class EmployeeNotFound(BaseException):
+    """Employee Not Found"""
 
 class IncorrectCodeFormat(BaseException):
     """Incorrect Code Format"""
@@ -61,12 +62,12 @@ def create_exception_handler(
 def register_exceptions(app: FastAPI):
 
     app.add_exception_handler(
-        UserAlreadyExists,
+        EmployeeAlreadyExists,
         create_exception_handler(
             status_code=status.HTTP_409_CONFLICT,
             initial_detail={
-                "message": "User Already Exists",
-                "resolution": "Please choose a different username",
+                "message": "Employee Already Exists",
+                "resolution": "Please choose a different name",
                 "error_code": "user_already_exists",
             },
         ),
@@ -152,6 +153,18 @@ def register_exceptions(app: FastAPI):
                 "message": "User Not Found",
                 "resolution": "Please check the username",
                 "error_code": "user_not_found",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        EmployeeNotFound,
+        create_exception_handler(
+            status_code=status.HTTP_404_NOT_FOUND,
+            initial_detail={
+                "message": "Employee Not Found",
+                "resolution": "Please check the username",
+                "error_code": "employee_not_found",
             },
         ),
     )
