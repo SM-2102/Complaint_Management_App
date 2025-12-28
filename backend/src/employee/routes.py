@@ -21,12 +21,12 @@ Check if employee exists, create new employee if not.
 
 @employee_router.post(
     "/create_employee", status_code=status.HTTP_201_CREATED, 
-    dependencies=[role_checker]
+    # dependencies=[role_checker]
 )
 async def create_employee(
     employee: EmployeeCreate,
     session: AsyncSession = Depends(get_session),
-    _=Depends(access_token_bearer),
+    # _=Depends(access_token_bearer),
 ):
     employee_exists = await employee_service.employee_exists(employee.name, session)
     if employee_exists:

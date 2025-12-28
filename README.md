@@ -141,6 +141,14 @@
 - [x] **/stock_cgpisl/upload** - [ADMIN]
 - [x] **/stock_cgpisl/enquiry{params}**
 - [x] **/stock_cgcel/spare_list**
+- [x] **/stock_cgcel/spare_list_by_division/{division}**
+- [x] **/stock_cgcel/by_code**
+- [x] **/stock_cgcel/by_name**
+- [x] **/stock_cgcel/create_indent**
+- [x] **/stock_cgcel/indent_details/{division}**
+- [x] **/stock_cgcel/next_indent_code**
+- [x] **/stock_cgcel/generate_indent**
+- [x] **/stock_cgcel/indent_enquiry{params}**
 
 
 ### GRC Module

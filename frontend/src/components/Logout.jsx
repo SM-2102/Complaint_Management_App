@@ -13,12 +13,9 @@ const Logout = ({ className = "", ...props }) => {
     if (result.success) {
       try {
         handleUnauthorized();
-      } catch (e) {
-        console.warn("handleUnauthorized not available", e);
-      }
+      } catch (e) {}
       navigate("/");
     } else {
-      console.error("Logout failed:", result.message);
       try {
         handleUnauthorized();
       } catch {}

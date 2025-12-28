@@ -18,7 +18,13 @@ async function login(username, password) {
     });
 
     if (response.ok) {
-      return { success: true };
+      const data = await response.json().catch(() => ({}));
+      // Pass birthday_names if present
+      return {
+        success: true,
+        birthday_names: data.birthday_names || [],
+        holiday: data.holiday || null,
+      };
     } else {
       const data = await response.json().catch(() => ({}));
       // Prefer message and resolution from backend, fallback to detail

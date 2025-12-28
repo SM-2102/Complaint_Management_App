@@ -6,6 +6,37 @@ import { useAuth } from "../context/AuthContext";
 
 // Define desired submenu order for each menu key
 const submenuOrder = {
+  complaint: [
+    "Complaint Enquiry",
+    "Report Generation",
+    "Add New Complaint",
+    "Update Complaint",
+    "Create RFR Record",
+    "Upload Complaints",
+  ],
+  stock: [
+    "Upload CGCEL Stock",
+    "View CGCEL Stock",
+    "CGCEL Spare Indent",
+    "CGCEL Generate Indent",
+    "CGCEL Indent Details",
+    "Update CGCEL Stock",
+    "Upload Stock Records",
+    "View Stock Records",
+    "Raise Spare Indent",
+    "Generate Spare Indent",
+    "Indent Details",
+  ],
+  grc: [
+    "View CGCEL GRC",
+    "GRC CGCEL Spare Return",
+    "GRC CGCEL Enquiry",
+    "Upload CGCEL GRC",
+    "View GRC Records",
+    "GRC Spare Return",
+    "GRC Enquiry",
+    "Upload GRC Records",
+  ],
 };
 
 // Helper to sort actions by submenuOrder
@@ -22,29 +53,80 @@ function filterActionsForRole(actions, isAdmin) {
   return actions.filter(
     (a) =>
       !(
-        a.path === "/CreateUser" ||
-        a.path === "/DeleteUser" ||
-        a.path === "/ShowAllUsers"
+        a.path === "/CreateEmployee" ||
+        a.path === "/DeleteEmployee" ||
+        a.path === "/ShowAllEmployees" ||
+        a.path === "/CreateNotification" ||
+        a.path === "/UploadComplaints" ||
+        a.path === "/UploadCGCELStockRecords" ||
+        a.path === "/UploadCGPISLStockRecords" ||
+        a.path === "/UploadCGCELGRCRecords" ||
+        a.path === "/UploadCGPISLGRCRecords"
       ),
   );
 }
 
-const NavBar = ({ open, setOpen }) => {
+const NavBar = ({ open, setOpen, company = "ALL" }) => {
   const [submenuOpen, setSubmenuOpen] = useState([]);
   const overlayRef = useRef(null);
   const { user } = useAuth();
   const isAdmin = user && user.role === "ADMIN";
 
   // Convert menuConfig to menuItems for NavBar (submenus = actions, reordered, filtered)
-  const menuItems = menuConfig.map(({ key, title, actions }) => ({
-    title,
-    submenus: sortActions(key, filterActionsForRole(actions, isAdmin)).map(
-      ({ label, path }) => ({
-        title: label,
-        path,
-      }),
-    ),
-  }));
+  // Special handling: Render 'Complaint Enquiry' and 'Add Dealer Record' as top-level menu items
+  let menuItems = [];
+  menuConfig.forEach(({ key, title, actions }) => {
+    const filteredSubmenus = sortActions(
+      key,
+      filterActionsForRole(actions, isAdmin),
+    ).filter(({ company: actionCompany }) => {
+      if (!actionCompany) return true;
+      if (company === "ALL") {
+        return (
+          actionCompany === "ALL" ||
+          actionCompany === "CGCEL" ||
+          actionCompany === "CGPISL"
+        );
+      } else if (company === "CGCEL") {
+        return actionCompany === "ALL" || actionCompany === "CGCEL";
+      } else if (company === "CGPISL") {
+        return actionCompany === "ALL" || actionCompany === "CGPISL";
+      }
+      return false;
+    });
+
+    // Extract 'Complaint Enquiry' if present
+    if (key === "complaint") {
+      const enquiryIdx = filteredSubmenus.findIndex(
+        (a) => a.label === "Complaint Enquiry",
+      );
+      if (enquiryIdx !== -1) {
+        const enquiry = filteredSubmenus.splice(enquiryIdx, 1)[0];
+        menuItems.push({
+          title: enquiry.label,
+          path: enquiry.path,
+          isDirect: true,
+        });
+      }
+    }
+
+    if (filteredSubmenus.length > 0) {
+      menuItems.push({
+        title,
+        submenus: filteredSubmenus.map(({ label, path }) => ({
+          title: label,
+          path,
+        })),
+        isDirect: false,
+      });
+    }
+  });
+  // Add 'Add Dealer Record' as the last menu item
+  menuItems.push({
+    title: "Add Dealer Record",
+    path: "/DealerCreate",
+    isDirect: true,
+  });
 
   // Close on outside click
   useEffect(() => {
@@ -93,38 +175,51 @@ const NavBar = ({ open, setOpen }) => {
         </span>
       </div>
       <div className="flex-1 overflow-y-auto py-4">
-        {menuItems.map((item, idx) => (
-          <div
-            key={item.title}
-            className="mb-2"
-            onMouseEnter={() => handleSubmenuEnter(idx)}
-            onMouseLeave={() => handleSubmenuLeave(idx)}
-          >
-            <div className="flex items-center text-black text-base font-semibold px-6 py-3 rounded-md cursor-pointer hover:bg-blue-900/30 transition select-none">
-              <span>{item.title}</span>
-              {submenuOpen.includes(idx) ? (
-                <FaChevronUp className="ml-2 text-blue-700" />
-              ) : (
-                <FaChevronDown className="ml-2 text-blue-700" />
+        {menuItems.map((item, idx) =>
+          item.isDirect ? (
+            <div className="mb-2">
+              <Link
+                key={item.title}
+                to={item.path}
+                className="flex items-center text-black font-semibold px-6 py-3 rounded-md cursor-pointer hover:bg-blue-900/30 transition select-none"
+                onClick={() => setOpen(false)}
+              >
+                <span>{item.title}</span>
+              </Link>
+            </div>
+          ) : (
+            <div
+              key={item.title}
+              className="mb-2"
+              onMouseEnter={() => handleSubmenuEnter(idx)}
+              onMouseLeave={() => handleSubmenuLeave(idx)}
+            >
+              <div className="flex items-center text-black font-semibold px-6 py-3 rounded-md cursor-pointer hover:bg-blue-900/30 transition select-none">
+                <span>{item.title}</span>
+                {submenuOpen.includes(idx) ? (
+                  <FaChevronUp className="ml-2 text-blue-700" />
+                ) : (
+                  <FaChevronDown className="ml-2 text-blue-700" />
+                )}
+              </div>
+              {submenuOpen.includes(idx) && item.submenus.length > 0 && (
+                <div className="ml-4 mt-1 flex flex-col">
+                  {item.submenus.map((sub) => (
+                    <Link
+                      key={sub.title}
+                      to={sub.path}
+                      className="text-black no-underline text-sm px-6 py-2 rounded hover:bg-blue-700/30 hover:text-white transition font-normal"
+                      style={{ fontFamily: "Montserrat, Arial, sans-serif" }}
+                      onClick={() => setOpen(false)}
+                    >
+                      {sub.title}
+                    </Link>
+                  ))}
+                </div>
               )}
             </div>
-            {submenuOpen.includes(idx) && item.submenus.length > 0 && (
-              <div className="ml-4 mt-1 flex flex-col">
-                {item.submenus.map((sub) => (
-                  <Link
-                    key={sub.title}
-                    to={sub.path}
-                    className="text-black no-underline text-sm px-6 py-2 rounded hover:bg-blue-700/30 hover:text-white transition font-medium"
-                    style={{ fontFamily: "Montserrat, Arial, sans-serif" }}
-                    onClick={() => setOpen(false)}
-                  >
-                    {sub.title}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+          ),
+        )}
       </div>
     </div>
   );

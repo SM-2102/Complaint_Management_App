@@ -3,14 +3,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import NavBar from "./NavBar";
 import logo from "../assets/logo.png";
-import UserMenu from "./UserMenu";
 import Logout from "./Logout";
+import NotificationIconUser from "./NotificationIconUser";
+import NotificationIconAdmin from "./NotificationIconAdmin";
+import EmployeeMenu from "./EmployeeMenu";
 import DashboardButton from "./Dashboard";
 import GoBackIcon from "./GoBackIcon";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { FiRefreshCw } from "react-icons/fi";
+import { useAuth } from "../context/AuthContext";
 
-const Header = () => {
+const Header = ({ selectedCompany }) => {
   const location = useLocation();
   const isLoginPage = location.pathname === "/";
   const isMenuPage = location.pathname === "/MenuDashboard";
@@ -18,6 +21,9 @@ const Header = () => {
   const { refetch, loading } = useDashboardData();
 
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
+  const isUser = user?.role === "USER";
 
   // Only show NavBar icon on allowed pages
   const showNavIcon = !isLoginPage;
@@ -91,13 +97,16 @@ const Header = () => {
               </button>
             )}
           </div>
-
+          {isAdmin && <NotificationIconAdmin />}
+          {isUser && <NotificationIconUser />}
           <DashboardButton />
-          <UserMenu />
+          <EmployeeMenu />
           <Logout />
         </div>
       )}
-      {showNavIcon && <NavBar open={navOpen} setOpen={setNavOpen} />}
+      {showNavIcon && (
+        <NavBar open={navOpen} setOpen={setNavOpen} company={selectedCompany} />
+      )}
     </header>
   );
 };

@@ -30,7 +30,13 @@ function LoginPage() {
       await checkAuth();
       // Fetch dashboard data before navigating
       await fetchDashboardData();
-      navigate("/MenuDashboard");
+      // Pass birthday_names to MenuDashboard via navigation state
+      navigate("/MenuDashboard", {
+        state: {
+          birthday_names: result.birthday_names || [],
+          holiday: result.holiday || null,
+        },
+      });
     } else {
       setError({
         message: result.message || "Login failed",

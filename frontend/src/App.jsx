@@ -1,4 +1,4 @@
-import DeleteUserPage from "./pages/UserDeletePage.jsx";
+import DeleteEmployeePage from "./pages/EmployeeDeletePage.jsx";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -8,15 +8,28 @@ import PageNotFound from "./pages/PageNotFound";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { DashboardDataProvider } from "./context/DashboardDataContext.jsx";
-import ChangePasswordPage from "./pages/UserChangePasswordPage.jsx";
-import CreateUserPage from "./pages/UserCreatePage.jsx";
-import ShowStandardUsersPage from "./pages/UserShowStandardPage.jsx";
-import ShowAllUsersPage from "./pages/UserShowAllPage.jsx";
+import ChangePasswordPage from "./pages/ChangePasswordPage.jsx";
+import CreateEmployeePage from "./pages/EmployeeCreatePage.jsx";
+import ShowStandardEmployeesPage from "./pages/EmployeeShowStandardPage.jsx";
+import ShowAllEmployeesPage from "./pages/EmployeeShowAllPage.jsx";
+import NotificationCreatePage from "./pages/NotificationCreatePage.jsx";
+import StockCGCELUploadPage from "./pages/StockCGCELUploadPage.jsx";
+import React, { useState } from "react";
+import StockCGPISLUploadPage from "./pages/StockCGPISLUploadPage.jsx";
+import StockCGCELEnquiryPage from "./pages/StockCGCELEnquiryPage.jsx";
+import StockCGPISLEnquiryPage from "./pages/StockCGPISLEnquiryPage.jsx";
+import GRCCGCELUploadPage from "./pages/GRCCGCELUploadPage.jsx";
+import GRCCGPISLUploadPage from "./pages/GRCCGPISLUploadPage.jsx";
+import StockCGCELRaiseIndentPage from "./pages/StockCGCELRaiseIndentPage.jsx";
+import StockCGCELUpdatePage from "./pages/StockCGCELUpdatePage.jsx";
+import StockCGCELGenerateIndentPage from "./pages/StockCGCELGenerateIndentPage.jsx";
+import StockCGCELIndentEnquiryPage from "./pages/StockCGCELIndentEnquiryPage.jsx";
 
-function AppRoutesWithNav() {
+
+function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
     <>
-      <Header />
+      <Header selectedCompany={selectedCompany} />
       <div className="pt-[5.5rem] pb-[1.5rem] min-h-screen bg-white">
         <Routes>
           <Route path="/" element={<LoginPage />} />
@@ -32,23 +45,26 @@ function AppRoutesWithNav() {
             path="/MenuDashboard"
             element={
               <PrivateRoute>
-                <MenuDashboardPage />
+                <MenuDashboardPage
+                  selectedCompany={selectedCompany}
+                  setSelectedCompany={setSelectedCompany}
+                />
               </PrivateRoute>
             }
           />
           <Route
-            path="/CreateUser"
+            path="/CreateEmployee"
             element={
               <PrivateRoute requiredRole="ADMIN">
-                <CreateUserPage />
+                <CreateEmployeePage />
               </PrivateRoute>
             }
           />
           <Route
-            path="/DeleteUser"
+            path="/DeleteEmployee"
             element={
               <PrivateRoute requiredRole="ADMIN">
-                <DeleteUserPage />
+                <DeleteEmployeePage />
               </PrivateRoute>
             }
           />
@@ -61,18 +77,106 @@ function AppRoutesWithNav() {
             }
           />
           <Route
-            path="/ShowAllUsers"
+            path="/ShowAllEmployees"
             element={
               <PrivateRoute requiredRole="ADMIN">
-                <ShowAllUsersPage />
+                <ShowAllEmployeesPage />
               </PrivateRoute>
             }
           />
           <Route
-            path="/ShowStandardUsers"
+            path="/ShowStandardEmployees"
             element={
               <PrivateRoute>
-                <ShowStandardUsersPage />
+                <ShowStandardEmployeesPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/CreateNotification"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <NotificationCreatePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/UploadCGCELStockRecords"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <StockCGCELUploadPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/UploadCGPISLStockRecords"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <StockCGPISLUploadPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ViewCGCELStockRecords"
+            element={
+              <PrivateRoute>
+                <StockCGCELEnquiryPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ViewCGPISLStockRecords"
+            element={
+              <PrivateRoute>
+                <StockCGPISLEnquiryPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/UploadCGCELGRCRecords"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <GRCCGCELUploadPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/UploadCGPISLGRCRecords"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <GRCCGPISLUploadPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/RaiseCGCELSpareIndent"
+            element={
+              <PrivateRoute>
+                <StockCGCELRaiseIndentPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/UpdateCGCELStock"
+            element={
+              <PrivateRoute>
+                <StockCGCELUpdatePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/GenerateCGCELSpareIndent"
+            element={
+              <PrivateRoute>
+                <StockCGCELGenerateIndentPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/IndentDetailsCGCEL"
+            element={
+              <PrivateRoute>
+                <StockCGCELIndentEnquiryPage />
               </PrivateRoute>
             }
           />
@@ -84,11 +188,15 @@ function AppRoutesWithNav() {
 }
 
 function App() {
+  const [selectedCompany, setSelectedCompany] = useState("ALL");
   return (
     <BrowserRouter>
       <DashboardDataProvider>
         <AuthProvider>
-          <AppRoutesWithNav />
+          <AppRoutesWithNav
+            selectedCompany={selectedCompany}
+            setSelectedCompany={setSelectedCompany}
+          />
         </AuthProvider>
       </DashboardDataProvider>
     </BrowserRouter>
