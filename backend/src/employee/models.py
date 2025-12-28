@@ -27,7 +27,7 @@ class Employee(SQLModel, table=True):
         sa_column=Column(pg.TEXT, nullable=False)
     )
     email: str = Field(
-        sa_column=Column(pg.VARCHAR(50), nullable=False)
+        sa_column=Column(pg.VARCHAR(50), nullable=True)
     )
     aadhar: str = Field(
         sa_column=Column(pg.VARCHAR(12), nullable=True)

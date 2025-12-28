@@ -27,7 +27,10 @@ refresh_token_bearer = RefreshTokenBearer()
 
 @auth_router.post("/login", status_code=status.HTTP_200_OK)
 async def login(user: UserLogin, session: AsyncSession = Depends(get_session)):
-    valid_user = await auth_service.login(user, session)
+    login_result = await auth_service.login(user, session)
+    valid_user = login_result["user"]
+    birthday_names = login_result["birthday_names"]
+    holiday = login_result["holiday"]
     access_token = create_user_token(
         user_data={"username": valid_user.username, "role": valid_user.role}
     )
@@ -39,6 +42,8 @@ async def login(user: UserLogin, session: AsyncSession = Depends(get_session)):
     response = JSONResponse(
         content={
             "message": f"User {valid_user.username} logged in successfully.",
+            "birthday_names": birthday_names,
+            "holiday": holiday,
         }
     )
     # Set the access token as an HTTP-only cookie

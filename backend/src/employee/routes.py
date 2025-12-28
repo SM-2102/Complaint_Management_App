@@ -20,7 +20,8 @@ Check if employee exists, create new employee if not.
 
 
 @employee_router.post(
-    "/create_employee", status_code=status.HTTP_201_CREATED, dependencies=[role_checker]
+    "/create_employee", status_code=status.HTTP_201_CREATED, 
+    dependencies=[role_checker]
 )
 async def create_employee(
     employee: EmployeeCreate,
@@ -78,7 +79,7 @@ Delete a employee by employeename if the employee isnt the current employee.
 """
 
 
-@employee_router.delete(
+@employee_router.post(
     "/delete_employee",
     status_code=status.HTTP_200_OK,
     dependencies=[role_checker],
@@ -88,7 +89,7 @@ async def delete_employee(
     session: AsyncSession = Depends(get_session),
     token=Depends(access_token_bearer),
 ):
-    await employee_service.delete_employee(employee.name, session, token)
+    await employee_service.delete_employee(employee, session, token)
     return JSONResponse(
         content={"message": f"Employee {employee.name} deleted successfully."}
     )

@@ -22,6 +22,8 @@ class Holiday(SQLModel, table=True):
     )
     holiday_date: date = Field(
         sa_column=Column(pg.DATE, nullable=False))
+    is_holiday: str = Field(
+        sa_column=Column(pg.CHAR(1), nullable=False, default='Y'))
 
     def __repr__(self):
         return f"<Holiday {self.name}>"

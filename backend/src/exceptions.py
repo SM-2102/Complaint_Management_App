@@ -50,6 +50,12 @@ class EmployeeNotFound(BaseException):
 class IncorrectCodeFormat(BaseException):
     """Incorrect Code Format"""
 
+class SpareNotFound(BaseException):
+    """Spare Not Found"""
+
+class StockNotAvailable(BaseException):
+    """Stock Not Available"""
+
 def create_exception_handler(
     status_code: int, initial_detail: Any
 ) -> Callable[[Request, Exception], JSONResponse]:
@@ -90,7 +96,7 @@ def register_exceptions(app: FastAPI):
         create_exception_handler(
             status_code=status.HTTP_400_BAD_REQUEST,
             initial_detail={
-                "message": "Cannot Delete The Currently Logged In User",
+                "message": "Cannot Delete The Logged In User",
                 "resolution": "Please log in as a different user",
                 "error_code": "cannot_delete_current_user",
             },
@@ -177,6 +183,30 @@ def register_exceptions(app: FastAPI):
                 "message": "Incorrect Code Format",
                 "resolution": "Please provide code in correct format",
                 "error_code": "incorrect_code_format",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        SpareNotFound,
+        create_exception_handler(
+            status_code=status.HTTP_404_NOT_FOUND,
+            initial_detail={
+                "message": "Spare Not Found",
+                "resolution": "Check the spare code or name",
+                "error_code": "spare_not_found",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        StockNotAvailable,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "Stock Not Available",
+                "resolution": "Insufficient stock for the spare",
+                "error_code": "stock_not_available",
             },
         ),
     )

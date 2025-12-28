@@ -16,7 +16,8 @@ class EmployeeCreate(BaseModel):
     address: str = Field(
         min_length=5
     )
-    email: str = Field(
+    email: Optional[str] = Field(
+        default=None,
         max_length=35,
         pattern=r"^[\w\.-]+@[\w\.-]+\.\w+$"
     )

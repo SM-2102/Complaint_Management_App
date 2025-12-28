@@ -1,10 +1,14 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 
+from stock_cgcel.routes import stock_cgcel_router
+from stock_cgpisl.routes import stock_cgpisl_router
 from auth.routes import auth_router
 from exceptions import register_exceptions
 from middleware.middleware import register_middleware
 from employee.routes import employee_router
+from menu.routes import menu_router
+from notification.routes import notification_router
 
 version = "v1"
 
@@ -54,3 +58,7 @@ register_exceptions(app)
 # Routes
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(employee_router, prefix="/employee", tags=["Employee"])
+app.include_router(menu_router, prefix="/menu", tags=["Menu"])
+app.include_router(notification_router, prefix="/notification", tags=["Notification"])
+app.include_router(stock_cgcel_router, prefix="/stock_cgcel", tags=["Stock CGCEL"])
+app.include_router(stock_cgpisl_router, prefix="/stock_cgpisl", tags=["Stock CGPISL"])

@@ -12,8 +12,8 @@ from src.notification.models import Notification
 from src.holiday.models import Holiday
 from src.complaints.models import Complaint
 from src.grc.models import GRC
-from src.spare_cgcel.models import SpareCGCEL
-from src.spare_cgpisl.models import SpareCGPISL
+from src.stock_cgcel.models import StockCGCEL, StockCGCELMovement, StockCGCELIndent
+from src.stock_cgpisl.models import StockCGPISL, StockCGPISLIndent
 from sqlmodel import SQLModel
 from src.config import Config
 
