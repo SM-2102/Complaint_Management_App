@@ -38,6 +38,16 @@ const API_ENDPOINTS = {
   STOCK_CGPISL_UPLOAD: `${BASE_API_URL}stock_cgpisl/upload`,
   STOCK_CGPISL_ENQUIRY: `${BASE_API_URL}stock_cgpisl/enquiry`,
   STOCK_CGPISL_LIST: `${BASE_API_URL}stock_cgpisl/spare_list`,
+  STOCK_CGPISL_LIST_BY_DIVISION: `${BASE_API_URL}stock_cgpisl/spare_list_by_division`, // append division param
+  STOCK_CGPISL_SEARCH_CODE: `${BASE_API_URL}stock_cgpisl/by_code`,
+  STOCK_CGPISL_SEARCH_NAME: `${BASE_API_URL}stock_cgpisl/by_name`,
+  STOCK_CGPISL_CREATE_INDENT: `${BASE_API_URL}stock_cgpisl/create_indent`,
+  STOCK_CGPISL_PENDING_INDENT: `${BASE_API_URL}stock_cgpisl/indent_details`, //append division param
+  STOCK_CGPISL_NEXT_INDENT_CODE: `${BASE_API_URL}stock_cgpisl/next_indent_code`,
+  STOCK_CGPISL_LAST_INDENT_CODE: `${BASE_API_URL}stock_cgpisl/last_indent_code`,
+  STOCK_GENERATE_INDENT: `${BASE_API_URL}stock_cgpisl/generate_indent`,
+  STOCK_CGPISL_INDENT_ENQUIRY: `${BASE_API_URL}stock_cgpisl/indent_enquiry`, // append indent_number param
+  
 
   GRC_CGCEL_UPLOAD: `${BASE_API_URL}grc_cgcel/upload`,
   GRC_CGPISL_UPLOAD: `${BASE_API_URL}grc_cgpisl/upload`,

@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 
 import Toast from "../components/Toast";
-import { stockCGCELListByDivision } from "../services/stockCGCELStockListByDivisionService";
+import { stockCGPISLListByDivision } from "../services/stockCGPISLStockListByDivisionService";
 import { FiSearch } from "react-icons/fi";
-import { validateUpdate } from "../utils/stockCGCELUpdateValidation";
-import { searchCGCELByCode } from "../services/stockCGCELSearchByCodeService";
-import { searchCGCELByDescription } from "../services/stockCGCELSearchByDescriptionService";
-import { updateCGCELStock } from "../services/stockCGCELUpdateService";
+import { validateCreate } from "../utils/stockCreateIndentValidation";
+import { searchCGPISLByCode } from "../services/stockCGPISLSearchByCodeService";
+import { searchCGPISLByDescription } from "../services/stockCGPISLSearchByDescriptionService";
+import { createCGPISLIndent } from "../services/stockCGPISLIndentCreateService";
 
 const initialForm = {
   division: "",
@@ -15,14 +15,16 @@ const initialForm = {
   cnf_qty: "",
   grc_qty: "",
   own_qty: "",
-  qty: "",
-  movement_type: "",
+  indent_qty: "",
+  party_name: "",
+  order_number: "",
+  order_date: "",
   remark: "",
 };
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
 
-const StockCGCELUpdatePage = () => {
+const StockCGPISLRaiseIndentPage = () => {
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState({});
   const [showToast, setShowToast] = useState(false);
@@ -51,7 +53,7 @@ const StockCGCELUpdatePage = () => {
       setShowSpareDescriptionSuggestions(false);
       if (newValue) {
         try {
-          const data = await stockCGCELListByDivision(newValue);
+          const data = await stockCGPISLListByDivision(newValue);
           setSpareList(Array.isArray(data) ? data : []);
         } catch (err) {
           setSpareList([]);
@@ -91,9 +93,9 @@ const StockCGCELUpdatePage = () => {
     try {
       let data;
       if (type === "spare_code") {
-        data = await searchCGCELByCode(form.spare_code);
+        data = await searchCGPISLByCode(form.spare_code);
       } else if (type === "spare_description") {
-        data = await searchCGCELByDescription(form.spare_description);
+        data = await searchCGPISLByDescription(form.spare_description);
       } else {
         return;
       }
@@ -104,7 +106,12 @@ const StockCGCELUpdatePage = () => {
         spare_description: data.spare_description ?? "",
         cnf_qty: data.cnf_qty ?? "",
         grc_qty: data.grc_qty ?? "",
-        own_qty: data.own_qty ?? 0,
+        own_qty: data.own_qty ?? "",
+        indent_qty: data.indent_qty ?? "",
+        party_name: data.party_name ?? "",
+        order_number: data.order_number ?? "",
+        order_date: data.order_date ?? "",
+        remark: data.remark ?? "",
       }));
     } catch (err) {
       setError({
@@ -115,7 +122,7 @@ const StockCGCELUpdatePage = () => {
     }
   };
 
-  const [errs, errs_label] = validateUpdate(form);
+  const [errs, errs_label] = validateCreate(form);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -133,19 +140,18 @@ const StockCGCELUpdatePage = () => {
     try {
       // Prepare payload as per schema
       let payload = {
-        spare_code: form.spare_code,
-        division: form.division,
-        spare_description: form.spare_description,
-        movement_type: form.movement_type,
-        own_qty: form.qty,
+        indent_qty: form.indent_qty,
+        party_name: form.party_name,
+        order_number: form.order_number,
+        order_date: form.order_date,
         remark: form.remark,
       };
       payload = Object.fromEntries(
         Object.entries(payload).map(([k, v]) => [k, v === "" ? null : v]),
       );
-      await updateCGCELStock(payload);
+      await createCGPISLIndent(form.spare_code, payload);
       setError({
-        message: "Stock updated successfully!",
+        message: "Indent created successfully!",
         resolution: "Spare Code : " + form.spare_code,
         type: "success",
       });
@@ -153,7 +159,7 @@ const StockCGCELUpdatePage = () => {
       setForm(initialForm);
     } catch (err) {
       setError({
-        message: err?.message || "Failed to update stock.",
+        message: err?.message || "Failed to create indent.",
         resolution: err?.resolution || "",
         type: "error",
       });
@@ -175,8 +181,8 @@ const StockCGCELUpdatePage = () => {
         className="bg-[#f8fafc] shadow-lg rounded-lg p-6 w-full max-w-170 border border-gray-200"
         noValidate
       >
-        <h2 className="text-xl font-semibold text-blue-800 mb-4 pb-2 border-b border-blue-500 justify-center flex items-center gap-2">
-          Update CGCEL Stock
+        <h2 className="text-xl font-semibold text-green-800 mb-4 pb-2 border-b border-green-500 justify-center flex items-center gap-2">
+          Raise Spare Indent
         </h2>
         {/* City and PIN on same line, equal label/input width */}
         <div className="flex items-center w-full gap-7">
@@ -193,7 +199,7 @@ const StockCGCELUpdatePage = () => {
               required
               value={form.division}
               onChange={handleChange}
-              className={`w-full px-3 py-1 rounded-lg border ${errs_label.division ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+              className={`w-full px-3 py-1 rounded-lg border ${errs_label.division ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small`}
               disabled={submitting}
             >
               <option value="" disabled></option>
@@ -274,7 +280,7 @@ const StockCGCELUpdatePage = () => {
             <button
               type="button"
               title="Search by code"
-              className={`p-0 rounded-full bg-gradient-to-tr from-blue-200 to-blue-500 text-white shadow-md hover:scale-105 hover:from-blue-600 hover:to-blue-900 focus:outline-none transition-all duration-200 flex items-center justify-center`}
+              className={`p-0 rounded-full bg-gradient-to-tr from-green-200 to-green-500 text-white shadow-md hover:scale-105 hover:from-green-600 hover:to-green-900 focus:outline-none transition-all duration-200 flex items-center justify-center`}
               disabled={submitting || !form.spare_code}
               onClick={() => handleSearch("spare_code")}
               tabIndex={0}
@@ -306,7 +312,7 @@ const StockCGCELUpdatePage = () => {
                   type="text"
                   value={form.spare_description}
                   onChange={handleChange}
-                  className={`w-full px-3 py-1 rounded-lg border ${errs_label.spare_description ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                  className={`w-full px-3 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small`}
                   maxLength={40}
                   required
                   disabled={submitting}
@@ -365,7 +371,7 @@ const StockCGCELUpdatePage = () => {
               <button
                 type="button"
                 title="Search by Spare Description"
-                className="ml-3 p-0 rounded-full bg-gradient-to-tr from-blue-200 to-blue-500 text-white shadow-md hover:scale-105 hover:from-blue-600 hover:to-blue-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
+                className="ml-3 p-0 rounded-full bg-gradient-to-tr from-green-200 to-green-500 text-white shadow-md hover:scale-105 hover:from-green-600 hover:to-green-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
                 disabled={submitting || !form.spare_description}
                 onClick={() => handleSearch("spare_description")}
                 tabIndex={0}
@@ -390,7 +396,7 @@ const StockCGCELUpdatePage = () => {
                 readOnly
                 value={form.cnf_qty}
                 onChange={handleChange}
-                className="flex-1 w-full px-3 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small cursor-not-allowed"
+                className="flex-1 w-full px-3 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small cursor-not-allowed"
                 disabled={submitting}
               />
             </div>
@@ -407,7 +413,7 @@ const StockCGCELUpdatePage = () => {
                 type="number"
                 value={form.grc_qty}
                 onChange={handleChange}
-                className="flex-1 w-full px-3 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small cursor-not-allowed"
+                className="flex-1 w-full px-3 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small cursor-not-allowed"
                 readOnly
                 disabled={submitting}
               />
@@ -425,62 +431,99 @@ const StockCGCELUpdatePage = () => {
                 type="number"
                 value={form.own_qty}
                 onChange={handleChange}
-                className="flex-1 w-full px-3 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small cursor-not-allowed"
+                className="flex-1 w-full px-3 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small cursor-not-allowed"
                 readOnly
                 disabled={submitting}
               />
             </div>
           </div>
           <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-green-200 via-green-400 to-green-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-green-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               INDENT DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-green-200 via-green-400 to-green-200 opacity-80 shadow-sm"></div>
           </div>
           {/* Contact 1 and Contact 2/Button on same line, equal label/input width */}
           <div className="flex items-center w-full gap-3">
             <div className="flex items-center w-2/5 gap-2">
               <label
-                htmlFor="qty"
+                htmlFor="indent_qty"
                 className="w-23.5 text-md font-medium text-gray-700"
               >
-                Quantity<span className="text-red-500">*</span>
+                Indent Qty<span className="text-red-500">*</span>
               </label>
               <input
-                id="qty"
-                name="qty"
+                id="indent_qty"
+                name="indent_qty"
                 type="number"
-                value={form.qty}
+                value={form.indent_qty}
                 onChange={handleChange}
-                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.qty ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.indent_qty ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small`}
                 required
                 disabled={submitting}
               />
             </div>
             <div className="flex items-center w-3/5 gap-2">
               <label
-                htmlFor="movement_type"
+                htmlFor="order_number"
                 className="w-29 text-md font-medium text-gray-700 ml-2"
               >
-                Movement<span className="text-red-500">*</span>
+                Order Number<span className="text-red-500">*</span>
               </label>
-              <select
-                id="movement_type"
-                name="movement_type"
-                value={form.movement_type}
+              <input
+                id="order_number"
+                name="order_number"
+                type="text"
+                value={form.order_number}
                 onChange={handleChange}
-                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.movement_type ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.order_number ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small`}
                 required
                 disabled={submitting}
+              />
+            </div>
+          </div>
+          <div className="flex items-center w-full gap-5">
+            <div className="flex items-center w-2/5 gap-2">
+              <label
+                htmlFor="order_date"
+                className="w-23.5 text-md font-medium text-gray-700"
               >
-                <option value="" disabled></option>
-                <option value="SPARE IN">SPARE IN</option>
-                <option value="SPARE OUT">SPARE OUT</option>
-              </select>
+                Order Date<span className="text-red-500">*</span>
+              </label>
+              <input
+                id="order_date"
+                name="order_date"
+                type="date"
+                value={form.order_date}
+                onChange={handleChange}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.order_date ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small`}
+                required
+                disabled={submitting}
+                max={new Date().toLocaleDateString("en-CA")}
+              />
+            </div>
+            <div className="flex items-center w-3/5 gap-2">
+              <label
+                htmlFor="party_name"
+                className="w-28.5 text-md font-medium text-gray-700"
+              >
+                Order For<span className="text-red-500">*</span>
+              </label>
+              <input
+                id="party_name"
+                name="party_name"
+                type="text"
+                value={form.party_name}
+                onChange={handleChange}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.party_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small`}
+                required
+                maxLength={30}
+                disabled={submitting}
+              />
             </div>
           </div>
 
@@ -497,7 +540,7 @@ const StockCGCELUpdatePage = () => {
               name="remark"
               value={form.remark}
               onChange={handleChange}
-              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.remark ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.remark ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 font-small`}
               maxLength={40}
               rows={2}
               autoComplete="off"
@@ -508,7 +551,7 @@ const StockCGCELUpdatePage = () => {
         <div className="flex justify-center mt-6">
           <button
             type="submit"
-            className="py-1.5 px-6 rounded-lg bg-blue-600 text-white font-bold text-base shadow hover:bg-blue-900 transition-colors duration-200 w-fit disabled:opacity-60"
+            className="py-1.5 px-6 rounded-lg bg-green-600 text-white font-bold text-base shadow hover:bg-green-900 transition-colors duration-200 w-fit disabled:opacity-60"
             disabled={submitting}
           >
             {submitting ? "Adding..." : "Add to Cart"}
@@ -527,4 +570,4 @@ const StockCGCELUpdatePage = () => {
   );
 };
 
-export default StockCGCELUpdatePage;
+export default StockCGPISLRaiseIndentPage;

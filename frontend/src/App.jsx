@@ -20,10 +20,13 @@ import StockCGCELEnquiryPage from "./pages/StockCGCELEnquiryPage.jsx";
 import StockCGPISLEnquiryPage from "./pages/StockCGPISLEnquiryPage.jsx";
 import GRCCGCELUploadPage from "./pages/GRCCGCELUploadPage.jsx";
 import GRCCGPISLUploadPage from "./pages/GRCCGPISLUploadPage.jsx";
-import StockCGCELRaiseIndentPage from "./pages/StockCGCELRaiseIndentPage.jsx";
 import StockCGCELUpdatePage from "./pages/StockCGCELUpdatePage.jsx";
+import StockCGCELRaiseIndentPage from "./pages/StockCGCELRaiseIndentPage.jsx";
+import StockCGPISLRaiseIndentPage from "./pages/StockCGPISLRaiseIndentPage.jsx";
 import StockCGCELGenerateIndentPage from "./pages/StockCGCELGenerateIndentPage.jsx";
 import StockCGCELIndentEnquiryPage from "./pages/StockCGCELIndentEnquiryPage.jsx";
+import StockCGPISLGenerateIndentPage from "./pages/StockCGPISLGenerateIndentPage.jsx";
+import StockCGPISLIndentEnquiryPage from "./pages/StockCGPISLIndentEnquiryPage.jsx";
 
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
@@ -157,6 +160,14 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             }
           />
           <Route
+            path="/RaiseCGPISLSpareIndent"
+            element={
+              <PrivateRoute>
+                <StockCGPISLRaiseIndentPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/UpdateCGCELStock"
             element={
               <PrivateRoute>
@@ -177,6 +188,22 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             element={
               <PrivateRoute>
                 <StockCGCELIndentEnquiryPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/GenerateCGPISLSpareIndent"
+            element={
+              <PrivateRoute>
+                <StockCGPISLGenerateIndentPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/IndentDetailsCGPISL"
+            element={
+              <PrivateRoute>
+                <StockCGPISLIndentEnquiryPage />
               </PrivateRoute>
             }
           />

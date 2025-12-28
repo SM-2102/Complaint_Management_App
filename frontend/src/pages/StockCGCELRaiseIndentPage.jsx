@@ -3,9 +3,9 @@ import React, { useState, useRef } from "react";
 import Toast from "../components/Toast";
 import { stockCGCELListByDivision } from "../services/stockCGCELStockListByDivisionService";
 import { FiSearch } from "react-icons/fi";
-import { validateCreate } from "../utils/stockCGCELCreateIndentValidation";
-import { searchCGCELByCode } from "../services/serviceCGCELSearchByCodeService";
-import { searchCGCELByDescription } from "../services/serviceCGCELSearchByDescriptionService";
+import { validateCreate } from "../utils/stockCreateIndentValidation";
+import { searchCGCELByCode } from "../services/stockCGCELSearchByCodeService";
+import { searchCGCELByDescription } from "../services/stockCGCELSearchByDescriptionService";
 import { createCGCELIndent } from "../services/stockCGCELIndentCreateService";
 
 const initialForm = {

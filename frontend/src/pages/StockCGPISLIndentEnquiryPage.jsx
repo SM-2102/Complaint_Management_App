@@ -4,16 +4,17 @@ import { Container } from "@mui/material";
 import EnquiryTableCGPISL from "../components/EnquiryTableCGPISL.jsx";
 import ShowToast from "../components/Toast.jsx";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { stockCGPISLEnquiry } from "../services/stockCGPISLEnquiryService.js";
+import { stockCGPISLIndentEnquiry } from "../services/stockCGPISLIndentEnquiryService.js";
 import { fetchStockCGPISLList } from "../services/stockCGPISLStockListService.js";
 
 const columns = [
+  { key: "index", label: "Sl. No." },
+  { key: "indent_number", label: "Indent Number" },
+  { key: "indent_date", label: "Date" },
   { key: "spare_code", label: "Spare Code" },
   { key: "spare_description", label: "Spare Description" },
-  { key: "cnf_qty", label: "CNF Quantity" },
-  { key: "grc_qty", label: "GRC Quantity" },
-  { key: "own_qty", label: "Own Stock" },
-  { key: "sale_price", label: "ALP" },
+  { key: "indent_qty", label: "Quantity" },
+  { key: "party_name", label: "Party Name" },
 ];
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
@@ -25,14 +26,20 @@ const Filter = ({
   setSpareDescription,
   division,
   setDivision,
-  available,
-  setAvailable,
   spareCode,
   setSpareCode,
   spareCodes,
   spareDescriptions,
   onSearch,
   onClear,
+  fromIndentDate,
+  setFromIndentDate,
+  toIndentDate,
+  setToIndentDate,
+  fromIndentNumber,
+  setFromIndentNumber,
+  toIndentNumber,
+  setToIndentNumber,
 }) => {
   const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
   const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
@@ -95,7 +102,7 @@ const Filter = ({
               htmlFor="spareCode"
               style={{
                 fontWeight: 600,
-                color: "#1f8825ff",
+                color: "#2e7d32",
                 letterSpacing: 0.5,
                 fontSize: 13,
                 marginBottom: 4,
@@ -120,9 +127,8 @@ const Filter = ({
                 background: "#f7f9fc",
                 transition: "border 0.2s",
                 outline: "none",
-                boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
+                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
               }}
-              onFocus={(e) => (e.target.style.border = "1.5px solid #388e3c")}
               onBlur={(e) => {
                 if (!spareCodeSuggestionClickedRef.current) {
                   setShowSpareCodeSuggestions(false);
@@ -139,7 +145,7 @@ const Filter = ({
                   background: "#fff",
                   border: "0.5px solid #d1d5db",
                   borderRadius: "0.25rem",
-                  boxShadow: "0 2px 8px rgba(56,142,60,0.08)",
+                  boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
                   width: "100%",
                   maxHeight: 160,
                   overflowY: "auto",
@@ -155,7 +161,7 @@ const Filter = ({
                       padding: "6px 10px",
                       cursor: "pointer",
                       fontSize: 13,
-                      color: "#0c250aff",
+                      color: "#0a1825ff",
                       borderBottom: "1px solid #f0f0f0",
                     }}
                     onMouseDown={() => {
@@ -176,7 +182,7 @@ const Filter = ({
               htmlFor="spareDescription"
               style={{
                 fontWeight: 600,
-                color: "#1f8825ff",
+                color: "#2e7d32",
                 letterSpacing: 0.5,
                 fontSize: 13,
                 marginBottom: 4,
@@ -201,9 +207,8 @@ const Filter = ({
                 background: "#f7f9fc",
                 transition: "border 0.2s",
                 outline: "none",
-                boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
+                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
               }}
-              onFocus={(e) => (e.target.style.border = "1.5px solid #388e3c")}
               onBlur={(e) => {
                 if (!spareDescriptionSuggestionClickedRef.current) {
                   setShowSpareDescriptionSuggestions(false);
@@ -220,7 +225,7 @@ const Filter = ({
                   background: "#fff",
                   border: "0.5px solid #d1d5db",
                   borderRadius: "0.25rem",
-                  boxShadow: "0 2px 8px rgba(56,142,60,0.08)",
+                  boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
                   width: "100%",
                   maxHeight: 160,
                   overflowY: "auto",
@@ -236,7 +241,7 @@ const Filter = ({
                       padding: "6px 10px",
                       cursor: "pointer",
                       fontSize: 13,
-                      color: "#0a2510ff",
+                      color: "#0a1825ff",
                       borderBottom: "1px solid #f0f0f0",
                     }}
                     onMouseDown={() => {
@@ -258,7 +263,7 @@ const Filter = ({
                 htmlFor="division"
                 style={{
                   fontWeight: 600,
-                  color: "#1f8825ff",
+                  color: "#2e7d32",
                   letterSpacing: 0.5,
                   fontSize: 13,
                   width: 150,
@@ -278,7 +283,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
                   width: "100%",
                 }}
               >
@@ -292,42 +297,139 @@ const Filter = ({
             </div>
           </div>
           <div style={{ marginBottom: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <label
-                htmlFor="available"
+            <label
+              htmlFor="fromIndentNumber"
+              style={{
+                fontWeight: 600,
+                color: "#2e7d32",
+                letterSpacing: 0.5,
+                fontSize: 13,
+                marginBottom: 4,
+                display: "block",
+              }}
+            >
+              Indent Number
+            </label>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 6,
+              }}
+            >
+              <span style={{ minWidth: 60, fontSize: 13, color: "#333" }}>
+                From
+              </span>
+              <input
+                type="text"
+                id="fromIndentNumber"
+                name="fromIndentNumber"
+                value={fromIndentNumber}
+                onChange={(e) => setFromIndentNumber(e.target.value)}
+                placeholder="From Indent Number"
                 style={{
-                  fontWeight: 600,
-                  color: "#1f8825ff",
-                  letterSpacing: 0.5,
-                  fontSize: 13,
-                  width: 150,
-                }}
-              >
-                Available
-              </label>
-              <select
-                id="available"
-                name="available"
-                value={available}
-                onChange={(e) => setAvailable(e.target.value)}
-                style={{
+                  flex: 1,
                   padding: "4px 8px",
                   border: "1px solid #d1d5db",
                   borderRadius: 6,
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(25, 118, 210, 0.04)",
-                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
                 }}
-              >
-                <option value=""></option>
-                <option value="Y">Yes</option>
-                <option value="N">No</option>
-              </select>
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ minWidth: 60, fontSize: 13, color: "#333" }}>
+                To
+              </span>
+              <input
+                type="text"
+                id="toIndentNumber"
+                name="toIndentNumber"
+                value={toIndentNumber}
+                onChange={(e) => setToIndentNumber(e.target.value)}
+                placeholder="To Indent Number"
+                style={{
+                  flex: 1,
+                  padding: "4px 8px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  background: "#f7f9fc",
+                  outline: "none",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                }}
+              />
             </div>
           </div>
-          {/* Centered Search & Clear Buttons */}
+          <div style={{ marginBottom: 10 }}>
+            <label
+              htmlFor="fromIndentDate"
+              style={{
+                fontWeight: 600,
+                color: "#2e7d32",
+                letterSpacing: 0.5,
+                fontSize: 13,
+                marginBottom: 4,
+                display: "block",
+              }}
+            >
+              Indent Date
+            </label>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 6,
+              }}
+            >
+              <span style={{ minWidth: 60, fontSize: 13, color: "#333" }}>
+                From
+              </span>
+              <input
+                type="date"
+                id="fromIndentDate"
+                name="fromIndentDate"
+                value={fromIndentDate}
+                onChange={(e) => setFromIndentDate(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "4px 8px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  background: "#f7f9fc",
+                  outline: "none",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                }}
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ minWidth: 60, fontSize: 13, color: "#333" }}>
+                To
+              </span>
+              <input
+                type="date"
+                id="toIndentDate"
+                name="toIndentDate"
+                value={toIndentDate}
+                onChange={(e) => setToIndentDate(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "4px 8px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  background: "#f7f9fc",
+                  outline: "none",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                }}
+              />
+            </div>
+          </div>
           <div
             style={{
               display: "flex",
@@ -341,13 +443,13 @@ const Filter = ({
               onClick={onSearch}
               style={{
                 padding: "8px 16px",
-                background: "linear-gradient(90deg, #388e3c 60%, #2e7d32 100%)",
+                background: "linear-gradient(90deg, #2e7d32 60%, #1b5e20 100%)",
                 color: "#fff",
                 border: "none",
                 borderRadius: 10,
                 fontWeight: "bold",
                 fontSize: 15,
-                boxShadow: "0 2px 8px rgba(56,142,60,0.08)",
+                boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
                 cursor: "pointer",
                 letterSpacing: 1,
                 transition: "background 0.2s, box-shadow 0.2s",
@@ -359,13 +461,13 @@ const Filter = ({
               onClick={onClear}
               style={{
                 padding: "8px 16px",
-                background: "linear-gradient(90deg, #388e3c 60%, #2e7d32 100%)",
+                background: "linear-gradient(90deg, #2e7d32 60%, #1b5e20 100%)",
                 color: "#fff",
                 border: "none",
                 borderRadius: 10,
                 fontWeight: "bold",
                 fontSize: 15,
-                boxShadow: "0 2px 8px rgba(56,142,60,0.08)",
+                boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
                 cursor: "pointer",
                 letterSpacing: 1,
                 marginLeft: 8,
@@ -394,11 +496,13 @@ const Filter = ({
   );
 };
 
-const StockCGPISLEnquiryPage = () => {
+const StockCGPISLIndentEnquiryPage = () => {
   const [division, setDivision] = useState("");
   const [spareDescription, setSpareDescription] = useState("");
   const [spareCode, setSpareCode] = useState("");
   const [available, setAvailable] = useState("");
+  const [fromIndentDate, setFromIndentDate] = useState("");
+  const [toIndentDate, setToIndentDate] = useState("");
   // Data states
 
   const [data, setData] = useState([]);
@@ -408,12 +512,18 @@ const StockCGPISLEnquiryPage = () => {
   const [searched, setSearched] = useState(false);
   const [spareCodes, setSpareCodes] = useState([]);
   const [spareDescriptions, setSpareDescriptions] = useState([]);
+  const [fromIndentNumber, setFromIndentNumber] = useState("");
+  const [toIndentNumber, setToIndentNumber] = useState("");
 
   const handleClear = () => {
     setDivision("");
     setSpareDescription("");
     setSpareCode("");
     setAvailable("");
+    setFromIndentDate("");
+    setToIndentDate("");
+    setFromIndentNumber("");
+    setToIndentNumber("");
     setSearched(false);
     setData([]);
     setError(null);
@@ -444,14 +554,22 @@ const StockCGPISLEnquiryPage = () => {
     setSearched(true);
     setFilterOpen(false);
     try {
-      // Update fetchRetailEnquiry to accept params
+      // Update fetchIndentEnquiry to accept params
       const params = {};
       if (spareDescription) params.spare_description = spareDescription;
       if (spareCode) params.spare_code = spareCode;
       if (division) params.division = division;
       if (available) params.available = available;
-      const res = await stockCGPISLEnquiry(params);
-      setData(res);
+      if (fromIndentDate) params.from_indent_date = fromIndentDate;
+      if (toIndentDate) params.to_indent_date = toIndentDate;
+      if (fromIndentNumber) params.from_indent_number = fromIndentNumber;
+      if (toIndentNumber) params.to_indent_number = toIndentNumber;
+      const res = await stockCGPISLIndentEnquiry(params);
+      // Add index property to each row (for display)
+      const indexedRes = Array.isArray(res)
+        ? res.map((row, idx) => ({ ...row, index: idx + 1 }))
+        : [];
+      setData(indexedRes);
     } catch (err) {
       setError(err.message || "Failed to fetch data");
       setData([]);
@@ -477,6 +595,14 @@ const StockCGPISLEnquiryPage = () => {
         spareDescriptions={spareDescriptions}
         onSearch={handleSearch}
         onClear={handleClear}
+        fromIndentDate={fromIndentDate}
+        setFromIndentDate={setFromIndentDate}
+        toIndentDate={toIndentDate}
+        setToIndentDate={setToIndentDate}
+        fromIndentNumber={fromIndentNumber}
+        setFromIndentNumber={setFromIndentNumber}
+        toIndentNumber={toIndentNumber}
+        setToIndentNumber={setToIndentNumber}
       />
       {/* Results or placeholder */}
       {error ? (
@@ -488,9 +614,9 @@ const StockCGPISLEnquiryPage = () => {
       ) : (
         <>
           <EnquiryTableCGPISL
-            data={data}
+            data={data.map((row, idx) => ({ ...row, index: idx + 1 }))}
             columns={columns}
-            title="Stock CGPISL Enquiry List"
+            title="Stock CGPISL Indent Enquiry List"
             sum_column="amount"
             noDataMessage={
               searched && data.length === 0 ? (
@@ -516,4 +642,4 @@ const StockCGPISLEnquiryPage = () => {
   );
 };
 
-export default StockCGPISLEnquiryPage;
+export default StockCGPISLIndentEnquiryPage;

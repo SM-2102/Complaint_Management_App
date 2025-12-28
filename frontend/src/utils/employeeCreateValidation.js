@@ -42,6 +42,10 @@ function validateCreateEmployee(form) {
     errs.push("Joining date is required");
     errors_label.joining_date = true;
   }
+  if(form.joining_date && form.dob && new Date(form.joining_date) < new Date(form.dob)) {
+    errs.push("Invalid joining date");
+    errors_label.joining_date = true;
+  }
   if (!form.role) {
     errs.push("Role is required");
     errors_label.role = true;

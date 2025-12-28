@@ -11,9 +11,9 @@ import {
   Box,
 } from "@mui/material";
 import Toast from "../components/Toast";
-import { fetchNextCGCELIndentCode } from "../services/stockCGCELNextIndentCode";
-import { stockCGCELPendingIndentByDivision } from "../services/stockCGCELPendingIndentService";
-import { generateCGCELIndent } from "../services/stockCGCELGenerateIndentService";
+import { fetchNextCGPISLIndentCode } from "../services/stockCGPISLNextIndentCode";
+import { stockCGPISLPendingIndentByDivision } from "../services/stockCGPISLPendingIndentService";
+import { generateCGPISLIndent } from "../services/stockCGPISLGenerateIndentService";
 
 const columns = [
   { key: "spare_code", label: "Spare Code" },
@@ -39,7 +39,7 @@ const initialForm = {
 
 // Suggestions for Received By
 
-const StockCGCELGenerateIndentPage = () => {
+const StockCGPISLGenerateIndentPage = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -59,7 +59,7 @@ const StockCGCELGenerateIndentPage = () => {
 //   Fetch next Indent Code on mount
   useEffect(() => {
     let mounted = true;
-    fetchNextCGCELIndentCode()
+    fetchNextCGPISLIndentCode()
       .then((data) => {
         if (mounted && data) {
           setForm((prev) => ({
@@ -85,7 +85,7 @@ const StockCGCELGenerateIndentPage = () => {
     let mounted = true;
     if (!form.division) return;
     setLoading(true);
-    stockCGCELPendingIndentByDivision(form.division)
+    stockCGPISLPendingIndentByDivision(form.division)
       .then((result) => {
         if (mounted) {
           setData(Array.isArray(result) ? result : []);
@@ -148,7 +148,7 @@ const StockCGCELGenerateIndentPage = () => {
       spare_code: selectedRows.map((row) => row.spare_code),
     };
     try {
-      await generateCGCELIndent(payload);
+      await generateCGPISLIndent(payload);
       setError({
         message: "Indent created successfully!",
         type: "success",
@@ -195,7 +195,7 @@ const StockCGCELGenerateIndentPage = () => {
           overflowX: "auto",
         }}
       >
-        <h2 className="text-xl font-semibold text-blue-800 mb-4 pb-2 border-b border-blue-500 justify-center flex items-center gap-2">
+        <h2 className="text-xl font-semibold text-green-800 mb-4 pb-2 border-b border-green-500 justify-center flex items-center gap-2">
             Generate Spare Indent
         </h2>
 
@@ -204,7 +204,7 @@ const StockCGCELGenerateIndentPage = () => {
           <div className="flex items-center gap-3 justify-center mb-3">
             <label
               htmlFor="indent_code"
-              className="text-md font-medium text-blue-800"
+              className="text-md font-medium text-green-800"
             >
               Indent Code
             </label>
@@ -240,7 +240,7 @@ const StockCGCELGenerateIndentPage = () => {
                 value={form.division}
                 onChange={e => setForm(prev => ({ ...prev, division: e.target.value }))}
                 required
-                className="w-full px-2 py-1 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-2 py-1 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-green-400"
                 style={{ minWidth: 140 }}
               >
                 <option value="" disabled>
@@ -264,7 +264,7 @@ const StockCGCELGenerateIndentPage = () => {
           >
             <Table size="small">
               <TableHead>
-                <TableRow sx={{ background: "#e3eafc" }}>
+                <TableRow sx={{ background: "#e8f5e9" }}>
                   {columns.map((col) => (
                     <TableCell
                       key={col.key}
@@ -303,7 +303,7 @@ const StockCGCELGenerateIndentPage = () => {
                     <TableRow
                       key={idx}
                       sx={{
-                        background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
+                        background: idx % 2 === 0 ? "#f1f8f4" : "#fff",
                         height: 32,
                       }}
                     >
@@ -340,7 +340,7 @@ const StockCGCELGenerateIndentPage = () => {
                                 fontWeight: 700,
                                 fontSize: "15px",
                                 cursor: "pointer",
-                                boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
+                                boxShadow: "0 1px 4px rgba(46,125,50,0.12)",
                                 transition: "background 0.2s, color 0.2s",
                               }}
                               aria-label="Toggle Received"
@@ -371,19 +371,19 @@ const StockCGCELGenerateIndentPage = () => {
           <Typography
             variant="subtitle1"
             sx={{
-              color: "#1976d2",
+              color: "#2e7d32",
               fontWeight: 700,
               fontSize: 17,
-              background: "#e3eafc",
+              background: "#e8f5e9",
               px: 2,
               py: 0.5,
               borderRadius: 2,
-              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
+              boxShadow: "0 1px 4px rgba(46,125,50,0.12)",
               display: "inline-block",
             }}
           >
             <span style={{ letterSpacing: 0.5 }}>Selected Records:</span>{" "}
-            <span style={{ color: "#0d47a1", fontWeight: 600 }}>
+            <span style={{ color: "#1b5e20", fontWeight: 600 }}>
               {data.filter((row) => row.indent === "Y").length}
             </span>
           </Typography>
@@ -392,7 +392,7 @@ const StockCGCELGenerateIndentPage = () => {
             onClick={handleCreateIndent}
             disabled={updating || data.length === 0}
             style={{
-              background: "#1976d2",
+              background: "#2e7d32",
               color: "#fff",
               fontWeight: 700,
               fontSize: "16px",
@@ -400,7 +400,7 @@ const StockCGCELGenerateIndentPage = () => {
               borderRadius: "6px",
               padding: "8px 24px",
               cursor: updating ? "not-allowed" : "pointer",
-              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
+              boxShadow: "0 1px 4px rgba(46,125,50,0.12)",
               opacity: updating ? 0.7 : 1,
               transition: "background 0.2s, color 0.2s",
             }}
@@ -422,4 +422,4 @@ const StockCGCELGenerateIndentPage = () => {
   );
 };
 
-export default StockCGCELGenerateIndentPage;
+export default StockCGPISLGenerateIndentPage;
