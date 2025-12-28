@@ -28,7 +28,6 @@ import StockCGCELIndentEnquiryPage from "./pages/StockCGCELIndentEnquiryPage.jsx
 import StockCGPISLGenerateIndentPage from "./pages/StockCGPISLGenerateIndentPage.jsx";
 import StockCGPISLIndentEnquiryPage from "./pages/StockCGPISLIndentEnquiryPage.jsx";
 
-
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
     <>

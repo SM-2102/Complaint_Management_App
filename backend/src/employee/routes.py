@@ -4,9 +4,9 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
-from exceptions import EmployeeAlreadyExists
-from employee.schema import EmployeeCreate, EmployeeResponse, EmployeeLeave
+from employee.schema import EmployeeCreate, EmployeeLeave, EmployeeResponse
 from employee.service import EmployeeService
+from exceptions import EmployeeAlreadyExists
 
 employee_router = APIRouter()
 employee_service = EmployeeService()
@@ -20,13 +20,12 @@ Check if employee exists, create new employee if not.
 
 
 @employee_router.post(
-    "/create_employee", status_code=status.HTTP_201_CREATED, 
-    # dependencies=[role_checker]
+    "/create_employee", status_code=status.HTTP_201_CREATED, dependencies=[role_checker]
 )
 async def create_employee(
     employee: EmployeeCreate,
     session: AsyncSession = Depends(get_session),
-    # _=Depends(access_token_bearer),
+    _=Depends(access_token_bearer),
 ):
     employee_exists = await employee_service.employee_exists(employee.name, session)
     if employee_exists:

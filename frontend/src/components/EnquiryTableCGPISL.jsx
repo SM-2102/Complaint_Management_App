@@ -47,7 +47,9 @@ const EnquiryTableCGPISL = ({
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
-    printWindow.close();
+    setTimeout(() => {
+      printWindow.close();
+    }, 500);
   };
 
   return (

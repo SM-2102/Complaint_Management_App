@@ -7,8 +7,18 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
+from stock_cgpisl.schemas import (
+    StockCGPISLCode,
+    StockCGPISLCreateIndentResponse,
+    StockCGPISLDescription,
+    StockCGPISLEnquiry,
+    StockCGPISLEnquiryStockList,
+    StockCGPISLGenerateIndentRecord,
+    StockCGPISLGenerateIndentResponse,
+    StockCGPISLIndentCreate,
+    StockCGPISLIndentEnquiry,
+)
 from stock_cgpisl.service import StockCGPISLService
-from stock_cgpisl.schemas import StockCGPISLEnquiry, StockCGPISLEnquiryStockList, StockCGPISLCreateIndentResponse, StockCGPISLCode, StockCGPISLDescription, StockCGPISLIndentCreate, StockCGPISLGenerateIndentResponse, StockCGPISLGenerateIndentRecord, StockCGPISLIndentEnquiry
 
 stock_cgpisl_router = APIRouter()
 stock_cgpisl_service = StockCGPISLService()
@@ -84,7 +94,8 @@ async def enquiry_stock_cgpisl(
         return result
     except:
         return []
-    
+
+
 """
 List all spare records.
 """
@@ -101,6 +112,7 @@ async def list_spare_list(
     spare_list = await stock_cgpisl_service.list_cgpisl_stock(session)
     return spare_list
 
+
 """
 List all spare records by division.
 """
@@ -113,10 +125,14 @@ List all spare records by division.
 )
 async def list_spare_list(
     division: str,
-    session: AsyncSession = Depends(get_session), _=Depends(access_token_bearer), 
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
 ):
-    spare_list = await stock_cgpisl_service.list_cgpisl_stock_by_division(session, division)
+    spare_list = await stock_cgpisl_service.list_cgpisl_stock_by_division(
+        session, division
+    )
     return spare_list
+
 
 """
 Get cgpisl details by code.
@@ -124,14 +140,18 @@ Get cgpisl details by code.
 
 
 @stock_cgpisl_router.post(
-    "/by_code", response_model=StockCGPISLCreateIndentResponse, status_code=status.HTTP_200_OK
+    "/by_code",
+    response_model=StockCGPISLCreateIndentResponse,
+    status_code=status.HTTP_200_OK,
 )
 async def get_cgpisl_by_code(
     data: StockCGPISLCode,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    spare = await stock_cgpisl_service.get_stock_cgpisl_by_code(data.spare_code, session)
+    spare = await stock_cgpisl_service.get_stock_cgpisl_by_code(
+        data.spare_code, session
+    )
     return spare
 
 
@@ -141,35 +161,48 @@ Get cgpisl details by name.
 
 
 @stock_cgpisl_router.post(
-    "/by_name", response_model=StockCGPISLCreateIndentResponse, status_code=status.HTTP_200_OK
+    "/by_name",
+    response_model=StockCGPISLCreateIndentResponse,
+    status_code=status.HTTP_200_OK,
 )
 async def get_cgpisl_by_name(
     data: StockCGPISLDescription,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    spare = await stock_cgpisl_service.get_stock_cgpisl_by_name(data.spare_description, session)
+    spare = await stock_cgpisl_service.get_stock_cgpisl_by_name(
+        data.spare_description, session
+    )
     return spare
+
 
 """
 Create spare indent (adding to cart)
 """
 
 
-@stock_cgpisl_router.patch("/create_indent/{spare_code}", status_code=status.HTTP_202_ACCEPTED)
+@stock_cgpisl_router.patch(
+    "/create_indent/{spare_code}", status_code=status.HTTP_202_ACCEPTED
+)
 async def update_stock_cgpisl(
     spare_code: str,
     indentData: StockCGPISLIndentCreate,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    new_record = await stock_cgpisl_service.create_indent_cgpisl(spare_code, indentData, session)
-    return JSONResponse(content={"message": f"Indent Created : {new_record.spare_code}"})
+    new_record = await stock_cgpisl_service.create_indent_cgpisl(
+        spare_code, indentData, session
+    )
+    return JSONResponse(
+        content={"message": f"Indent Created : {new_record.spare_code}"}
+    )
 
 
 """
 Get CGPISL indent details by division
 """
+
+
 @stock_cgpisl_router.get(
     "/indent_details/{division}",
     response_model=List[StockCGPISLGenerateIndentResponse],
@@ -180,8 +213,11 @@ async def get_cgpisl_indent_details_by_division(
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    indent_details = await stock_cgpisl_service.get_cgpisl_indent_details_by_division(division, session)
+    indent_details = await stock_cgpisl_service.get_cgpisl_indent_details_by_division(
+        division, session
+    )
     return indent_details
+
 
 """
 Get the next available indent code.
@@ -199,9 +235,9 @@ async def next_cgpisl_indent_code(
 """
 Generate CGPISL Indent for a division.
 """
-@stock_cgpisl_router.post(
-    "/generate_indent",
-    status_code=status.HTTP_200_OK)
+
+
+@stock_cgpisl_router.post("/generate_indent", status_code=status.HTTP_200_OK)
 async def generate_cgpisl_indent(
     indentData: StockCGPISLGenerateIndentRecord,
     session: AsyncSession = Depends(get_session),
@@ -210,6 +246,7 @@ async def generate_cgpisl_indent(
     await stock_cgpisl_service.generate_cgpisl_indent(indentData, session, token)
     return JSONResponse(content={"message": "Indent Generated"})
 
+
 """
 Stock CGPISL Indent enquiry using query parameters.
 
@@ -217,7 +254,9 @@ Stock CGPISL Indent enquiry using query parameters.
 
 
 @stock_cgpisl_router.get(
-    "/indent_enquiry", response_model=List[StockCGPISLIndentEnquiry], status_code=status.HTTP_200_OK
+    "/indent_enquiry",
+    response_model=List[StockCGPISLIndentEnquiry],
+    status_code=status.HTTP_200_OK,
 )
 async def enquiry_indent_cgpisl(
     spare_description: Optional[str] = None,

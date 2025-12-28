@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 
+from auth.routes import auth_router
+from employee.routes import employee_router
+from exceptions import register_exceptions
+from menu.routes import menu_router
+from middleware.middleware import register_middleware
+from notification.routes import notification_router
 from stock_cgcel.routes import stock_cgcel_router
 from stock_cgpisl.routes import stock_cgpisl_router
-from auth.routes import auth_router
-from exceptions import register_exceptions
-from middleware.middleware import register_middleware
-from employee.routes import employee_router
-from menu.routes import menu_router
-from notification.routes import notification_router
 
 version = "v1"
 

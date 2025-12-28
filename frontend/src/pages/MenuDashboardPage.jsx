@@ -126,49 +126,49 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
           <div className="flex gap-2">
             {/* CGPISL Dot */}
             <button
-  key="CGPISL"
-  data-company-filter
-  className="relative h-5 w-5 rounded-full border transition-colors duration-150 focus:outline-none border-green-200"
-  style={{ backgroundColor: "#22c55e" }}
-  onClick={() => setSelectedCompany("CGPISL")}
-  aria-label="CGPISL"
->
-  {selectedCompany === "CGPISL" && (
-    <span className="absolute inset-0 flex items-center justify-center">
-      <span className="h-2 w-2 rounded-full bg-white" />
-    </span>
-  )}
-</button>
+              key="CGPISL"
+              data-company-filter
+              className="relative h-5 w-5 rounded-full border transition-colors duration-150 focus:outline-none border-green-200"
+              style={{ backgroundColor: "#22c55e" }}
+              onClick={() => setSelectedCompany("CGPISL")}
+              aria-label="CGPISL"
+            >
+              {selectedCompany === "CGPISL" && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <span className="h-2 w-2 rounded-full bg-white" />
+                </span>
+              )}
+            </button>
             {/* CGCEL Dot */}
             <button
-  key="CGCEL"
-  data-company-filter
-  className="relative h-5 w-5 rounded-full border transition-colors duration-150 focus:outline-none border-green-200"
-  style={{ backgroundColor: "#2563eb" }}
-  onClick={() => setSelectedCompany("CGCEL")}
-  aria-label="CGCEL"
->
-  {selectedCompany === "CGCEL" && (
-    <span className="absolute inset-0 flex items-center justify-center">
-      <span className="h-2 w-2 rounded-full bg-white" />
-    </span>
-  )}
-</button>
+              key="CGCEL"
+              data-company-filter
+              className="relative h-5 w-5 rounded-full border transition-colors duration-150 focus:outline-none border-green-200"
+              style={{ backgroundColor: "#2563eb" }}
+              onClick={() => setSelectedCompany("CGCEL")}
+              aria-label="CGCEL"
+            >
+              {selectedCompany === "CGCEL" && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <span className="h-2 w-2 rounded-full bg-white" />
+                </span>
+              )}
+            </button>
             {/* ALL Dot */}
             <button
-  key="ALL"
-  data-company-filter
-  className="relative h-5 w-5 rounded-full border transition-colors duration-150 focus:outline-none border-green-200"
-  style={{ backgroundColor: "purple" }}
-  onClick={() => setSelectedCompany("ALL")}
-  aria-label="ALL"
->
-  {selectedCompany === "ALL" && (
-    <span className="absolute inset-0 flex items-center justify-center">
-      <span className="h-2 w-2 rounded-full bg-white" />
-    </span>
-  )}
-</button>
+              key="ALL"
+              data-company-filter
+              className="relative h-5 w-5 rounded-full border transition-colors duration-150 focus:outline-none border-green-200"
+              style={{ backgroundColor: "purple" }}
+              onClick={() => setSelectedCompany("ALL")}
+              aria-label="ALL"
+            >
+              {selectedCompany === "ALL" && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <span className="h-2 w-2 rounded-full bg-white" />
+                </span>
+              )}
+            </button>
           </div>
         </div>
 

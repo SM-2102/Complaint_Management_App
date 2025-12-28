@@ -1,5 +1,7 @@
 import csv
 import io
+from datetime import date
+from typing import Optional
 
 from fastapi import UploadFile
 from pydantic import ValidationError
@@ -7,11 +9,19 @@ from sqlalchemy import case, insert, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from stock_cgpisl.models import StockCGPISL, StockCGPISLIndent
-from stock_cgpisl.schemas import StockCGPISLGenerateIndentResponse, StockCGPISLSchema, StockCGPISLEnquiry, StockCGPISLEnquiryStockList, StockCGPISLIndentCreate, StockCGPISLGenerateIndentRecord, StockCGPISLIndentEnquiry
-from typing import Optional
+
 from exceptions import SpareNotFound, StockNotAvailable
-from datetime import date
+from stock_cgpisl.models import StockCGPISL, StockCGPISLIndent
+from stock_cgpisl.schemas import (
+    StockCGPISLEnquiry,
+    StockCGPISLEnquiryStockList,
+    StockCGPISLGenerateIndentRecord,
+    StockCGPISLGenerateIndentResponse,
+    StockCGPISLIndentCreate,
+    StockCGPISLIndentEnquiry,
+    StockCGPISLSchema,
+)
+
 
 class StockCGPISLService:
 
@@ -34,13 +44,19 @@ class StockCGPISLService:
         records = []
         line_no = 1
 
-
         for raw_row in reader:
             line_no += 1
 
             # Define which fields are numeric
             int_fields = {"cnf_qty", "grc_qty", "own_qty", "msl_qty", "indent_qty"}
-            float_fields = {"alp", "purchase_price", "discount", "sale_price", "gst_price", "gst_rate"}
+            float_fields = {
+                "alp",
+                "purchase_price",
+                "discount",
+                "sale_price",
+                "gst_price",
+                "gst_rate",
+            }
             row = {}
             for k, v in raw_row.items():
                 key = (k or "").strip().lower()
@@ -61,19 +77,42 @@ class StockCGPISLService:
 
             # Optional fields
             optional_fields = [
-                "cnf_qty","grc_qty", "own_qty", "alp", "purchase_price", "discount", "sale_price", "gst_price", "gst_rate", "msl_qty", "indent_qty"
+                "cnf_qty",
+                "grc_qty",
+                "own_qty",
+                "alp",
+                "purchase_price",
+                "discount",
+                "sale_price",
+                "gst_price",
+                "gst_rate",
+                "msl_qty",
+                "indent_qty",
             ]
             extra_data = {}
             for field in optional_fields:
                 value = row.get(field)
                 if value is not None:
                     # Try to convert to int or float if appropriate
-                    if field in ["cnf_qty", "grc_qty", "own_qty", "msl_qty", "indent_qty"]:
+                    if field in [
+                        "cnf_qty",
+                        "grc_qty",
+                        "own_qty",
+                        "msl_qty",
+                        "indent_qty",
+                    ]:
                         try:
                             extra_data[field] = int(value)
                         except Exception:
                             extra_data[field] = None
-                    elif field in ["alp", "purchase_price", "discount", "sale_price", "gst_price", "gst_rate"]:
+                    elif field in [
+                        "alp",
+                        "purchase_price",
+                        "discount",
+                        "sale_price",
+                        "gst_price",
+                        "gst_rate",
+                    ]:
                         try:
                             extra_data[field] = float(value)
                         except Exception:
@@ -86,7 +125,7 @@ class StockCGPISLService:
                     spare_code=spare_code,
                     division=division,
                     spare_description=spare_description,
-                    **{k: v for k, v in extra_data.items() if v is not None}
+                    **{k: v for k, v in extra_data.items() if v is not None},
                 )
             except ValidationError as ve:
                 return {
@@ -114,7 +153,6 @@ class StockCGPISLService:
         to_insert = []
         to_update = {}
 
-
         # Determine which columns are present in the CSV (excluding spare_code)
         present_fields = set()
         for r in records:
@@ -123,7 +161,11 @@ class StockCGPISLService:
 
         for r in records:
             # Only include fields present in the CSV (plus spare_code)
-            data_dict = {k: v for k, v in r.dict(exclude_unset=False).items() if k == "spare_code" or k in present_fields}
+            data_dict = {
+                k: v
+                for k, v in r.dict(exclude_unset=False).items()
+                if k == "spare_code" or k in present_fields
+            }
             if r.spare_code in existing:
                 to_update[r.spare_code] = data_dict
             else:
@@ -134,16 +176,28 @@ class StockCGPISLService:
 
         table = StockCGPISL.__table__
 
-
         # Set only numeric columns being updated to 0 before insert/update
-        numeric_fields = {"cnf_qty", "grc_qty", "own_qty", "alp", "purchase_price", "discount", "sale_price", "gst_price", "gst_rate", "msl_qty", "indent_qty"}
+        numeric_fields = {
+            "cnf_qty",
+            "grc_qty",
+            "own_qty",
+            "alp",
+            "purchase_price",
+            "discount",
+            "sale_price",
+            "gst_price",
+            "gst_rate",
+            "msl_qty",
+            "indent_qty",
+        }
         zero_fields = set()
         for r in records:
             zero_fields.update(r.dict(exclude_unset=True).keys())
         zero_fields = zero_fields & numeric_fields
         if zero_fields:
-            await session.execute(update(table).values({field: 0 for field in zero_fields}))
-
+            await session.execute(
+                update(table).values({field: 0 for field in zero_fields})
+            )
 
         try:
             if to_insert:
@@ -195,7 +249,7 @@ class StockCGPISLService:
             "resolution": f"Inserted : {inserted}, Updated : {updated}",
             "type": "success",
         }
-    
+
     async def enquiry_stock_cgpisl(
         self,
         session: AsyncSession,
@@ -208,7 +262,9 @@ class StockCGPISLService:
         statement = select(StockCGPISL)
 
         if spare_description:
-            statement = statement.where(StockCGPISL.spare_description.ilike(f"{spare_description}"))
+            statement = statement.where(
+                StockCGPISL.spare_description.ilike(f"{spare_description}")
+            )
 
         if division:
             statement = statement.where(StockCGPISL.division == division)
@@ -218,14 +274,18 @@ class StockCGPISLService:
 
         if available:
             if available == "Y":
-                statement = statement.where((StockCGPISL.cnf_qty.isnot(None) & (StockCGPISL.cnf_qty > 0)) |
-                                            (StockCGPISL.grc_qty.isnot(None) & (StockCGPISL.grc_qty > 0)) |
-                                            (StockCGPISL.own_qty.isnot(None) & (StockCGPISL.own_qty > 0)) )
+                statement = statement.where(
+                    (StockCGPISL.cnf_qty.isnot(None) & (StockCGPISL.cnf_qty > 0))
+                    | (StockCGPISL.grc_qty.isnot(None) & (StockCGPISL.grc_qty > 0))
+                    | (StockCGPISL.own_qty.isnot(None) & (StockCGPISL.own_qty > 0))
+                )
             else:
-                statement = statement.where((StockCGPISL.cnf_qty.is_(None) | (StockCGPISL.cnf_qty == 0)) &
-                                            (StockCGPISL.grc_qty.is_(None) | (StockCGPISL.grc_qty == 0)) &
-                                            (StockCGPISL.own_qty.is_(None) | (StockCGPISL.own_qty == 0)) )
-       
+                statement = statement.where(
+                    (StockCGPISL.cnf_qty.is_(None) | (StockCGPISL.cnf_qty == 0))
+                    & (StockCGPISL.grc_qty.is_(None) | (StockCGPISL.grc_qty == 0))
+                    & (StockCGPISL.own_qty.is_(None) | (StockCGPISL.own_qty == 0))
+                )
+
         statement = statement.order_by(StockCGPISL.spare_code)
 
         result = await session.execute(statement)
@@ -245,10 +305,9 @@ class StockCGPISLService:
         ]
 
     async def list_cgpisl_stock(self, session: AsyncSession):
-        statement = (
-            select(StockCGPISL.spare_code, StockCGPISL.spare_description)
-            .order_by(StockCGPISL.spare_code)
-        )
+        statement = select(
+            StockCGPISL.spare_code, StockCGPISL.spare_description
+        ).order_by(StockCGPISL.spare_code)
         result = await session.execute(statement)
         rows = result.all()
         return [
@@ -273,7 +332,7 @@ class StockCGPISLService:
                 spare_description=row.spare_description,
             )
             for row in rows
-        ]  
+        ]
 
     async def get_stock_cgpisl_by_code(self, spare_code: str, session: AsyncSession):
         statement = select(StockCGPISL).where(StockCGPISL.spare_code == spare_code)
@@ -284,17 +343,24 @@ class StockCGPISLService:
         else:
             raise SpareNotFound()
 
-    async def get_stock_cgpisl_by_name(self, spare_description: str, session: AsyncSession):
-        statement = select(StockCGPISL).where(StockCGPISL.spare_description == spare_description)
+    async def get_stock_cgpisl_by_name(
+        self, spare_description: str, session: AsyncSession
+    ):
+        statement = select(StockCGPISL).where(
+            StockCGPISL.spare_description == spare_description
+        )
         result = await session.execute(statement)
         spare = result.scalars().first()
         if spare:
             return spare
         else:
-            raise SpareNotFound() 
-        
+            raise SpareNotFound()
+
     async def create_indent_cgpisl(
-        self, spare_code: str, indentData: StockCGPISLIndentCreate, session: AsyncSession
+        self,
+        spare_code: str,
+        indentData: StockCGPISLIndentCreate,
+        session: AsyncSession,
     ):
         existing_record = await self.get_stock_cgpisl_by_code(spare_code, session)
         for key, value in indentData.model_dump().items():
@@ -305,9 +371,15 @@ class StockCGPISLService:
             await session.rollback()
         await session.refresh(existing_record)
         return existing_record
-    
-    async def get_cgpisl_indent_details_by_division(self, division: str, session: AsyncSession):
-        statement = select(StockCGPISL).where(StockCGPISL.division == division, StockCGPISL.indent_qty.isnot(None), StockCGPISL.indent_qty > 0)
+
+    async def get_cgpisl_indent_details_by_division(
+        self, division: str, session: AsyncSession
+    ):
+        statement = select(StockCGPISL).where(
+            StockCGPISL.division == division,
+            StockCGPISL.indent_qty.isnot(None),
+            StockCGPISL.indent_qty > 0,
+        )
         result = await session.execute(statement)
         rows = result.all()
         indent_details = [
@@ -319,18 +391,26 @@ class StockCGPISLService:
             for row in rows
         ]
         return indent_details
-    
+
     async def next_cgpisl_indent_code(self, session: AsyncSession):
-        statement = select(StockCGPISLIndent.indent_number).order_by(StockCGPISLIndent.indent_number.desc()).limit(1)
+        statement = (
+            select(StockCGPISLIndent.indent_number)
+            .order_by(StockCGPISLIndent.indent_number.desc())
+            .limit(1)
+        )
         result = await session.execute(statement)
         last_code = result.scalar()
-        last_number = str(last_code)[1:] if last_code else '0'
+        last_number = str(last_code)[1:] if last_code else "0"
         next_number = int(last_number) + 1
         next_indent_number = "I" + str(next_number).zfill(5)
         return next_indent_number
-    
-    
-    async def generate_cgpisl_indent(self, indentData: StockCGPISLGenerateIndentRecord, session: AsyncSession, token: dict):
+
+    async def generate_cgpisl_indent(
+        self,
+        indentData: StockCGPISLGenerateIndentRecord,
+        session: AsyncSession,
+        token: dict,
+    ):
         indent_records = []
         for spare_code in indentData.spare_code:
             existing_record = await self.get_stock_cgpisl_by_code(spare_code, session)
@@ -346,7 +426,7 @@ class StockCGPISLService:
                 party_name=existing_record.party_name,
                 order_number=existing_record.order_number,
                 order_date=existing_record.order_date,
-                remark=existing_record.remark
+                remark=existing_record.remark,
             )
             indent_record.created_by = token["user"]["username"]
             indent_record.indent_date = date.today()
@@ -364,7 +444,7 @@ class StockCGPISLService:
         except Exception:
             await session.rollback()
         return indent_records
-    
+
     async def enquiry_indent_cgpisl(
         self,
         session: AsyncSession,
@@ -380,25 +460,35 @@ class StockCGPISLService:
         statement = select(StockCGPISLIndent)
 
         if spare_description:
-            statement = statement.where(StockCGPISLIndent.spare_description.ilike(f"{spare_description}"))
+            statement = statement.where(
+                StockCGPISLIndent.spare_description.ilike(f"{spare_description}")
+            )
 
         if division:
             statement = statement.where(StockCGPISLIndent.division == division)
 
         if spare_code:
-            statement = statement.where(StockCGPISLIndent.spare_code.ilike(f"{spare_code}"))
+            statement = statement.where(
+                StockCGPISLIndent.spare_code.ilike(f"{spare_code}")
+            )
 
         if from_indent_date:
-            statement = statement.where(StockCGPISLIndent.indent_date >= from_indent_date)
+            statement = statement.where(
+                StockCGPISLIndent.indent_date >= from_indent_date
+            )
 
         if to_indent_date:
             statement = statement.where(StockCGPISLIndent.indent_date <= to_indent_date)
 
         if from_indent_number:
-            statement = statement.where(StockCGPISLIndent.indent_number >= from_indent_number)
+            statement = statement.where(
+                StockCGPISLIndent.indent_number >= from_indent_number
+            )
 
         if to_indent_number:
-            statement = statement.where(StockCGPISLIndent.indent_number <= to_indent_number)
+            statement = statement.where(
+                StockCGPISLIndent.indent_number <= to_indent_number
+            )
 
         statement = statement.order_by(StockCGPISLIndent.spare_code)
 

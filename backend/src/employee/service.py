@@ -3,13 +3,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.future import select
 
+from auth.service import AuthService
 from employee.models import Employee
 from employee.schema import EmployeeCreate, EmployeeLeave
-from auth.service import AuthService
-from exceptions import EmployeeNotFound, CannotDeleteCurrentUser
-from sqlalchemy import case
+from exceptions import CannotDeleteCurrentUser, EmployeeNotFound
 
 user_service = AuthService()
+
 
 class EmployeeService:
 
@@ -18,14 +18,23 @@ class EmployeeService:
             (Employee.role == "ADMIN", 1),
             (Employee.role == "USER", 2),
             (Employee.role == "TECHNICIAN", 3),
-            else_=4
+            else_=4,
         )
-        statement = select(Employee).where(Employee.is_active == "Y").order_by(role_order)
+        statement = (
+            select(Employee).where(Employee.is_active == "Y").order_by(role_order)
+        )
         result = await session.execute(statement)
         return result.scalars().all()
 
     async def list_standard_employees(self, session: AsyncSession):
-        statement = select(Employee).where((Employee.is_active == "Y") & ((Employee.role == "USER") | (Employee.role == "TECHNICIAN"))).order_by(Employee.role)
+        statement = (
+            select(Employee)
+            .where(
+                (Employee.is_active == "Y")
+                & ((Employee.role == "USER") | (Employee.role == "TECHNICIAN"))
+            )
+            .order_by(Employee.role)
+        )
         result = await session.execute(statement)
         return result.scalars().all()
 
@@ -47,9 +56,7 @@ class EmployeeService:
     async def employee_exists(self, name: str, session: AsyncSession) -> bool:
         name = name.strip()
         name = " ".join(name.split())
-        statement = select(Employee).where(
-            Employee.name.ilike(name)
-        )
+        statement = select(Employee).where(Employee.name.ilike(name))
         result = await session.execute(statement)
         return result.scalars().first()
 
@@ -62,7 +69,9 @@ class EmployeeService:
         result = await session.execute(statement)
         return result.scalars().first()
 
-    async def delete_employee(self, employee: EmployeeLeave, session: AsyncSession, token: dict):
+    async def delete_employee(
+        self, employee: EmployeeLeave, session: AsyncSession, token: dict
+    ):
         employee_to_delete = await self.get_employee_by_name(employee.name, session)
         if not employee_to_delete:
             raise EmployeeNotFound()

@@ -1,18 +1,19 @@
-from sqlalchemy import extract
-from datetime import datetime, time, timedelta
 import asyncio
+from datetime import datetime, time, timedelta
+from typing import Any
+
+from sqlalchemy import extract
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.future import select
 
+from employee.models import Employee
 from exceptions import InvalidCredentials, UserNotFound
+from holiday.models import Holiday
 
 from .models import User
-from employee.models import Employee
-from holiday.models import Holiday
-from .schemas import UserLogin, UserChangePassword, UserCreate
-from .utils import verify_password, generate_hash_password
-from typing import Any
+from .schemas import UserChangePassword, UserCreate, UserLogin
+from .utils import generate_hash_password, verify_password
 
 
 class AuthService:
@@ -29,18 +30,21 @@ class AuthService:
         birthday_stmt = select(Employee.name).where(
             Employee.is_active == "Y",
             Employee.role != "ADMIN",
-            extract('day', Employee.dob) == today.day,
-            extract('month', Employee.dob) == today.month
+            extract("day", Employee.dob) == today.day,
+            extract("month", Employee.dob) == today.month,
         )
-        occasion_stmt = select(Holiday.name, Holiday.details).where(
-            Holiday.holiday_date == today.date(),
-            Holiday.is_holiday == 'N'
-        ).limit(1)
+        occasion_stmt = (
+            select(Holiday.name, Holiday.details)
+            .where(Holiday.holiday_date == today.date(), Holiday.is_holiday == "N")
+            .limit(1)
+        )
 
         # Run both queries concurrently
         birthday_task = session.execute(birthday_stmt)
         occasion_task = session.execute(occasion_stmt)
-        birthday_result, occasion_result = await asyncio.gather(birthday_task, occasion_task)
+        birthday_result, occasion_result = await asyncio.gather(
+            birthday_task, occasion_task
+        )
         birthday_names = birthday_result.scalars().all()
         occasion_row = occasion_result.first()
 
@@ -51,16 +55,21 @@ class AuthService:
             # After 3 PM, try holiday for tomorrow
             if today.time() >= time(15, 0):
                 tomorrow = today.date() + timedelta(days=1)
-                holiday_stmt = select(Holiday.name, Holiday.details).where(
-                    Holiday.holiday_date == tomorrow,
-                    Holiday.is_holiday == 'Y'
-                ).limit(1)
+                holiday_stmt = (
+                    select(Holiday.name, Holiday.details)
+                    .where(Holiday.holiday_date == tomorrow, Holiday.is_holiday == "Y")
+                    .limit(1)
+                )
                 holiday_result = await session.execute(holiday_stmt)
                 holiday_row = holiday_result.first()
                 if holiday_row:
                     holiday = {"name": holiday_row[0], "details": holiday_row[1]}
 
-        return {"user": existing_user, "birthday_names": birthday_names, "holiday": holiday}
+        return {
+            "user": existing_user,
+            "birthday_names": birthday_names,
+            "holiday": holiday,
+        }
 
     async def get_user_by_username(self, username: str, session: AsyncSession):
         # Normalize username spacing
@@ -71,7 +80,7 @@ class AuthService:
         )
         result = await session.execute(statement)
         return result.scalars().first()
-    
+
     async def reset_password(
         self, user_data: UserChangePassword, session: AsyncSession
     ):
@@ -102,7 +111,7 @@ class AuthService:
             await session.rollback()
             raise
         return new_user
-    
+
     async def delete_user(self, username: str, session: AsyncSession):
         user_to_delete = await self.get_user_by_username(username, session)
         user_to_delete.is_active = "N"

@@ -41,20 +41,26 @@ class InvalidToken(BaseException):
 class AccessDenied(BaseException):
     """Access Denied due to insufficient permissions"""
 
+
 class UserNotFound(BaseException):
     """User Not Found"""
+
 
 class EmployeeNotFound(BaseException):
     """Employee Not Found"""
 
+
 class IncorrectCodeFormat(BaseException):
     """Incorrect Code Format"""
+
 
 class SpareNotFound(BaseException):
     """Spare Not Found"""
 
+
 class StockNotAvailable(BaseException):
     """Stock Not Available"""
+
 
 def create_exception_handler(
     status_code: int, initial_detail: Any

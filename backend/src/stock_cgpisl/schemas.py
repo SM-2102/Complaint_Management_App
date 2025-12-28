@@ -1,7 +1,8 @@
-from typing import Optional
 from datetime import date
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
-from typing import List
+
 
 class StockCGPISLSchema(BaseModel):
     spare_code: str = Field(..., max_length=30)
@@ -18,7 +19,8 @@ class StockCGPISLSchema(BaseModel):
     gst_rate: Optional[float] = None
     msl_qty: Optional[int] = None
     indent_qty: Optional[int] = None
-    
+
+
 class StockCGPISLEnquiry(BaseModel):
     spare_code: str
     division: str
@@ -28,9 +30,11 @@ class StockCGPISLEnquiry(BaseModel):
     own_qty: Optional[int]
     sale_price: Optional[float]
 
+
 class StockCGPISLEnquiryStockList(BaseModel):
     spare_code: str
     spare_description: str
+
 
 class StockCGPISLCreateIndentResponse(BaseModel):
     spare_code: str
@@ -44,12 +48,14 @@ class StockCGPISLCreateIndentResponse(BaseModel):
     order_date: Optional[date]
     remark: Optional[str]
 
+
 class StockCGPISLCode(BaseModel):
     spare_code: str
 
 
 class StockCGPISLDescription(BaseModel):
     spare_description: str
+
 
 class StockCGPISLIndentCreate(BaseModel):
     indent_qty: int
@@ -64,10 +70,12 @@ class StockCGPISLGenerateIndentResponse(BaseModel):
     spare_description: str
     indent_qty: int
 
+
 class StockCGPISLGenerateIndentRecord(BaseModel):
     indent_number: str
     division: str
     spare_code: List[str]
+
 
 class StockCGPISLIndentEnquiry(BaseModel):
     spare_code: str
@@ -77,4 +85,3 @@ class StockCGPISLIndentEnquiry(BaseModel):
     indent_number: str
     indent_date: date
     party_name: Optional[str]
-   

@@ -1,34 +1,43 @@
 from sqlite3 import IntegrityError
+
 from sqlalchemy import case
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.future import select
-from notification.schema import NotificationCreate
 
 from notification.models import Notification
+from notification.schema import NotificationCreate
+
 
 class NotificationService:
 
     async def list_notifications(self, session: AsyncSession):
-        statement = select(Notification).where(Notification.resolved == 'N').order_by(Notification.id.asc())
+        statement = (
+            select(Notification)
+            .where(Notification.resolved == "N")
+            .order_by(Notification.id.asc())
+        )
         result = await session.execute(statement)
         return result.scalars().all()
-    
+
     async def count_notifications(self, session: AsyncSession):
-        statement = select(Notification).where(Notification.resolved == 'N')
+        statement = select(Notification).where(Notification.resolved == "N")
         result = await session.execute(statement)
         return len(result.scalars().all())
 
     async def list_user_notifications(self, session: AsyncSession, token: dict):
-        statement = select(Notification).where((Notification.assigned_to == token["user"]["username"]) & (Notification.resolved == 'N'))
+        statement = select(Notification).where(
+            (Notification.assigned_to == token["user"]["username"])
+            & (Notification.resolved == "N")
+        )
         result = await session.execute(statement)
         return result.scalars().all()
 
-    async def create_notification(self, session: AsyncSession, notification: NotificationCreate):
+    async def create_notification(
+        self, session: AsyncSession, notification: NotificationCreate
+    ):
         for name in notification.assigned_to:
             new_notification = Notification(
-                details=notification.details,
-                assigned_to=name,
-                resolved='N'
+                details=notification.details, assigned_to=name, resolved="N"
             )
             session.add(new_notification)
             try:
@@ -36,18 +45,19 @@ class NotificationService:
             except:
                 await session.rollback()
                 raise IntegrityError()
-            
+
     async def resolve_notification(self, session: AsyncSession, notification_id: int):
         statement = select(Notification).where(Notification.id == notification_id)
         result = await session.execute(statement)
         notification = result.scalars().first()
         if notification:
-            notification.resolved = 'Y'
+            notification.resolved = "Y"
             session.add(notification)
             await session.commit()
         else:
             raise Exception("Notification not found")
-           
+
+
 #     async def employee_exists(self, name: str, session: AsyncSession) -> bool:
 #         name = name.strip()
 #         name = " ".join(name.split())

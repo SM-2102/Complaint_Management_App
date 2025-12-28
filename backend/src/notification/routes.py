@@ -1,13 +1,18 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from notification.schema import NotificationResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
+from notification.schema import (
+    NotificationCreate,
+    NotificationDetails,
+    NotificationResponse,
+)
 from notification.service import NotificationService
-from notification.schema import NotificationCreate, NotificationDetails
-from typing import List
+
 notification_router = APIRouter()
 notification_service = NotificationService()
 access_token_bearer = AccessTokenBearer()
@@ -20,8 +25,9 @@ Create a new notification.
 
 
 @notification_router.post(
-    "/create_notification", status_code=status.HTTP_201_CREATED, 
-    dependencies=[role_checker]
+    "/create_notification",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[role_checker],
 )
 async def create_notification(
     notification: NotificationCreate,
@@ -29,9 +35,7 @@ async def create_notification(
     _=Depends(access_token_bearer),
 ):
     await notification_service.create_notification(session, notification)
-    return JSONResponse(
-        content={"message": "Task assigned successfully."}
-    )
+    return JSONResponse(content={"message": "Task assigned successfully."})
 
 
 """
@@ -93,17 +97,15 @@ async def list_user_notifications(
 Resolve a notification by id.
 """
 
+
 @notification_router.post(
     "/resolve_notification",
     status_code=status.HTTP_200_OK,
 )
 async def resolve_notification(
-    id : int,
+    id: int,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
     await notification_service.resolve_notification(session, id)
-    return JSONResponse(
-        content={"message": f"Notification resolved successfully."}
-    )
-
+    return JSONResponse(content={"message": f"Notification resolved successfully."})

@@ -7,8 +7,19 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
+from stock_cgcel.schemas import (
+    StockCGCELCode,
+    StockCGCELCreateIndentResponse,
+    StockCGCELDescription,
+    StockCGCELEnquiry,
+    StockCGCELEnquiryStockList,
+    StockCGCELGenerateIndentRecord,
+    StockCGCELGenerateIndentResponse,
+    StockCGCELIndentCreate,
+    StockCGCELIndentEnquiry,
+    StockCGCELUpdate,
+)
 from stock_cgcel.service import StockCGCELService
-from stock_cgcel.schemas import StockCGCELEnquiry, StockCGCELEnquiryStockList, StockCGCELCreateIndentResponse, StockCGCELCode, StockCGCELDescription, StockCGCELIndentCreate, StockCGCELUpdate, StockCGCELGenerateIndentResponse, StockCGCELGenerateIndentRecord, StockCGCELIndentEnquiry
 
 stock_cgcel_router = APIRouter()
 stock_cgcel_service = StockCGCELService()
@@ -84,7 +95,8 @@ async def enquiry_stock_cgcel(
         return result
     except:
         return []
-    
+
+
 """
 List all spare records.
 """
@@ -101,6 +113,7 @@ async def list_spare_list(
     spare_list = await stock_cgcel_service.list_cgcel_stock(session)
     return spare_list
 
+
 """
 List all spare records by division.
 """
@@ -113,10 +126,14 @@ List all spare records by division.
 )
 async def list_spare_list(
     division: str,
-    session: AsyncSession = Depends(get_session), _=Depends(access_token_bearer), 
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
 ):
-    spare_list = await stock_cgcel_service.list_cgcel_stock_by_division(session, division)
+    spare_list = await stock_cgcel_service.list_cgcel_stock_by_division(
+        session, division
+    )
     return spare_list
+
 
 """
 Get cgcel details by code.
@@ -124,7 +141,9 @@ Get cgcel details by code.
 
 
 @stock_cgcel_router.post(
-    "/by_code", response_model=StockCGCELCreateIndentResponse, status_code=status.HTTP_200_OK
+    "/by_code",
+    response_model=StockCGCELCreateIndentResponse,
+    status_code=status.HTTP_200_OK,
 )
 async def get_cgcel_by_code(
     data: StockCGCELCode,
@@ -141,34 +160,48 @@ Get cgcel details by name.
 
 
 @stock_cgcel_router.post(
-    "/by_name", response_model=StockCGCELCreateIndentResponse, status_code=status.HTTP_200_OK
+    "/by_name",
+    response_model=StockCGCELCreateIndentResponse,
+    status_code=status.HTTP_200_OK,
 )
 async def get_cgcel_by_name(
     data: StockCGCELDescription,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    spare = await stock_cgcel_service.get_stock_cgcel_by_name(data.spare_description, session)
+    spare = await stock_cgcel_service.get_stock_cgcel_by_name(
+        data.spare_description, session
+    )
     return spare
+
 
 """
 Create spare indent (adding to cart)
 """
 
 
-@stock_cgcel_router.patch("/create_indent/{spare_code}", status_code=status.HTTP_202_ACCEPTED)
+@stock_cgcel_router.patch(
+    "/create_indent/{spare_code}", status_code=status.HTTP_202_ACCEPTED
+)
 async def update_stock_cgcel(
     spare_code: str,
     indentData: StockCGCELIndentCreate,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    new_record = await stock_cgcel_service.create_indent_cgcel(spare_code, indentData, session)
-    return JSONResponse(content={"message": f"Indent Created : {new_record.spare_code}"})
+    new_record = await stock_cgcel_service.create_indent_cgcel(
+        spare_code, indentData, session
+    )
+    return JSONResponse(
+        content={"message": f"Indent Created : {new_record.spare_code}"}
+    )
+
 
 """
 Update CGCEL Update and add Movement
 """
+
+
 @stock_cgcel_router.post("/update", status_code=status.HTTP_202_ACCEPTED)
 async def update_cgcel_stock(
     data: StockCGCELUpdate,
@@ -176,11 +209,16 @@ async def update_cgcel_stock(
     token=Depends(access_token_bearer),
 ):
     updated_record = await stock_cgcel_service.update_cgcel_stock(data, session, token)
-    return JSONResponse(content={"message": f"Stock Updated : {updated_record.spare_code}"})
+    return JSONResponse(
+        content={"message": f"Stock Updated : {updated_record.spare_code}"}
+    )
+
 
 """
 Get CGCEL indent details by division
 """
+
+
 @stock_cgcel_router.get(
     "/indent_details/{division}",
     response_model=List[StockCGCELGenerateIndentResponse],
@@ -191,8 +229,11 @@ async def get_cgcel_indent_details_by_division(
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    indent_details = await stock_cgcel_service.get_cgcel_indent_details_by_division(division, session)
+    indent_details = await stock_cgcel_service.get_cgcel_indent_details_by_division(
+        division, session
+    )
     return indent_details
+
 
 """
 Get the next available indent code.
@@ -210,9 +251,9 @@ async def next_cgcel_indent_code(
 """
 Generate CGCEL Indent for a division.
 """
-@stock_cgcel_router.post(
-    "/generate_indent",
-    status_code=status.HTTP_200_OK)
+
+
+@stock_cgcel_router.post("/generate_indent", status_code=status.HTTP_200_OK)
 async def generate_cgcel_indent(
     indentData: StockCGCELGenerateIndentRecord,
     session: AsyncSession = Depends(get_session),
@@ -221,6 +262,7 @@ async def generate_cgcel_indent(
     await stock_cgcel_service.generate_cgcel_indent(indentData, session, token)
     return JSONResponse(content={"message": "Indent Generated"})
 
+
 """
 Stock CGCEL Indent enquiry using query parameters.
 
@@ -228,7 +270,9 @@ Stock CGCEL Indent enquiry using query parameters.
 
 
 @stock_cgcel_router.get(
-    "/indent_enquiry", response_model=List[StockCGCELIndentEnquiry], status_code=status.HTTP_200_OK
+    "/indent_enquiry",
+    response_model=List[StockCGCELIndentEnquiry],
+    status_code=status.HTTP_200_OK,
 )
 async def enquiry_indent_cgcel(
     spare_description: Optional[str] = None,

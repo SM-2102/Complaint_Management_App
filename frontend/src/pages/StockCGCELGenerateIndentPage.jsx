@@ -22,14 +22,7 @@ const columns = [
   { key: "indent", label: "Generate" },
 ];
 
-const divisionOptions = [
-  "FANS",
-  "PUMP",
-  "LIGHT",
-  "SDA",
-  "WHC",
-  "LAPP",
-];
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
 
 const initialForm = {
   indent_code: "",
@@ -52,11 +45,11 @@ const StockCGCELGenerateIndentPage = () => {
   const handleIndent = (idx, newValue) => {
     setData((prevData) =>
       prevData.map((row, i) =>
-        i === idx ? { ...row, indent: newValue } : row
-      )
+        i === idx ? { ...row, indent: newValue } : row,
+      ),
     );
   };
-//   Fetch next Indent Code on mount
+  //   Fetch next Indent Code on mount
   useEffect(() => {
     let mounted = true;
     fetchNextCGCELIndentCode()
@@ -79,8 +72,7 @@ const StockCGCELGenerateIndentPage = () => {
     };
   }, []);
 
-
-//   Fetch data on mount
+  //   Fetch data on mount
   useEffect(() => {
     let mounted = true;
     if (!form.division) return;
@@ -196,7 +188,7 @@ const StockCGCELGenerateIndentPage = () => {
         }}
       >
         <h2 className="text-xl font-semibold text-blue-800 mb-4 pb-2 border-b border-blue-500 justify-center flex items-center gap-2">
-            Generate Spare Indent
+          Generate Spare Indent
         </h2>
 
         <form style={{ marginBottom: 24 }} autoComplete="off">
@@ -221,24 +213,21 @@ const StockCGCELGenerateIndentPage = () => {
             />
           </div>
           {/* Division Dropdown Row */}
-          <div
-            className="flex items-center justify-center mb-2 mt-3 gap-5"
-          >
+          <div className="flex items-center justify-center mb-2 mt-3 gap-5">
             <label
               htmlFor="division"
               className="text-md font-medium text-gray-700"
             >
               Division<span className="text-red-500">*</span>
             </label>
-            <div
-              className="w-20"
-              style={{ minWidth: 120 }}
-            >
+            <div className="w-20" style={{ minWidth: 120 }}>
               <select
                 id="division"
                 name="division"
                 value={form.division}
-                onChange={e => setForm(prev => ({ ...prev, division: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, division: e.target.value }))
+                }
                 required
                 className="w-full px-2 py-1 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-blue-400"
                 style={{ minWidth: 140 }}
@@ -246,7 +235,7 @@ const StockCGCELGenerateIndentPage = () => {
                 <option value="" disabled>
                   Select Division
                 </option>
-                {divisionOptions.map(opt => (
+                {divisionOptions.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
@@ -258,109 +247,105 @@ const StockCGCELGenerateIndentPage = () => {
 
         {/* Table Section */}
         {/* <div ref={tableRef}> */}
-          <TableContainer
-            component={Paper}
-            sx={{ borderRadius: 3, boxShadow: 2 }}
-          >
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ background: "#e3eafc" }}>
-                  {columns.map((col) => (
-                    <TableCell
-                      key={col.key}
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: 16,
-                        textAlign: "center",
-                        py: 1,
-                        ...(col.label.toLowerCase().includes("date") && {
-                          whiteSpace: "nowrap",
-                        }),
-                      }}
-                    >
-                      {col.label}
-                    </TableCell>
-                  ))}
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 3, boxShadow: 2 }}
+        >
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ background: "#e3eafc" }}>
+                {columns.map((col) => (
+                  <TableCell
+                    key={col.key}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: 16,
+                      textAlign: "center",
+                      py: 1,
+                      ...(col.label.toLowerCase().includes("date") && {
+                        whiteSpace: "nowrap",
+                      }),
+                    }}
+                  >
+                    {col.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    style={{
+                      textAlign: "center",
+                      color: "#888",
+                      fontStyle: "italic",
+                      padding: "24px 0",
+                    }}
+                  >
+                    No Records Found
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {data.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      style={{
-                        textAlign: "center",
-                        color: "#888",
-                        fontStyle: "italic",
-                        padding: "24px 0",
-                      }}
-                    >
-                      No Records Found
-                    </TableCell>
+              ) : (
+                data.map((row, idx) => (
+                  <TableRow
+                    key={idx}
+                    sx={{
+                      background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
+                      height: 32,
+                    }}
+                  >
+                    {columns.map((col) => (
+                      <TableCell
+                        key={col.key}
+                        sx={{
+                          fontWeight: 500,
+                          textAlign: "center",
+                          py: 0.5,
+                          ...(col.label.toLowerCase().includes("date") && {
+                            whiteSpace: "nowrap",
+                          }),
+                        }}
+                      >
+                        {col.key === "indent" ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleIndent(idx, row.indent === "Y" ? "N" : "Y")
+                            }
+                            style={{
+                              width: "60px",
+                              padding: "4px 0",
+                              borderRadius: "6px",
+                              border: "none",
+                              background:
+                                row.indent === "Y" ? "#e3fcec" : "#ffe3e3",
+                              color: row.indent === "Y" ? "#388e3c" : "#d32f2f",
+                              fontWeight: 700,
+                              fontSize: "15px",
+                              cursor: "pointer",
+                              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
+                              transition: "background 0.2s, color 0.2s",
+                            }}
+                            aria-label="Toggle Received"
+                          >
+                            {row.indent === "Y" ? "Yes" : "No"}
+                          </button>
+                        ) : row[col.key] !== null &&
+                          row[col.key] !== undefined ? (
+                          row[col.key]
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ) : (
-                  data.map((row, idx) => (
-                    <TableRow
-                      key={idx}
-                      sx={{
-                        background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
-                        height: 32,
-                      }}
-                    >
-                      {columns.map((col) => (
-                        <TableCell
-                          key={col.key}
-                          sx={{
-                            fontWeight: 500,
-                            textAlign: "center",
-                            py: 0.5,
-                            ...(col.label.toLowerCase().includes("date") && {
-                              whiteSpace: "nowrap",
-                            }),
-                          }}
-                        >
-                          {col.key === "indent" ? (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleIndent(
-                                  idx,
-                                  row.indent === "Y" ? "N" : "Y",
-                                )
-                              }
-                              style={{
-                                width: "60px",
-                                padding: "4px 0",
-                                borderRadius: "6px",
-                                border: "none",
-                                background:
-                                  row.indent === "Y" ? "#e3fcec" : "#ffe3e3",
-                                color:
-                                  row.indent === "Y" ? "#388e3c" : "#d32f2f",
-                                fontWeight: 700,
-                                fontSize: "15px",
-                                cursor: "pointer",
-                                boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
-                                transition: "background 0.2s, color 0.2s",
-                              }}
-                              aria-label="Toggle Received"
-                            >
-                              {row.indent === "Y" ? "Yes" : "No"}
-                            </button>
-                          ) : row[col.key] !== null &&
-                            row[col.key] !== undefined ? (
-                            row[col.key]
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
         {/* </div> */}
         <Box
           display="flex"

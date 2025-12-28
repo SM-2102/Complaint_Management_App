@@ -11,13 +11,15 @@ class UserLogin(BaseModel):
     username: str = Field(..., min_length=1)
     password: str = Field(..., min_length=1)
 
+
 class UserChangePassword(BaseModel):
     username: str = Field(..., min_length=3)
     old_password: str = Field(..., min_length=6)
     new_password: str = Field(..., min_length=6)
 
+
 class UserCreate(BaseModel):
-    username: str 
+    username: str
     password: str
     role: str = Field(default="USER")
     phone_number: str
