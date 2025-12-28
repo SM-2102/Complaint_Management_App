@@ -54,7 +54,7 @@ function BirthdayWish({ names = [], onDone }) {
         setVisible(false);
         if (onDone) onDone();
       }, 700); // match transition duration
-    }, 4000);
+    }, 5000);
     return () => clearTimeout(timer);
   }, [names, onDone]);
 

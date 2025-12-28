@@ -62,6 +62,9 @@ export const DashboardDataProvider = ({ children }) => {
           final_status_bar_graph: [],
           out_of_warranty_count: 0,
         },
+        stock: {
+          division_wise_donut: [],
+        },
       });
     } finally {
       setLoading(false);

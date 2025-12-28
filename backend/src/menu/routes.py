@@ -97,5 +97,17 @@ async def get_dashboard_data(
         #     "final_status_bar_graph": ow_pending_completed_per_division,
         #     "out_of_warranty_count": ((ow_count // 10) * 10),
         # },
+        "stock": {
+            "division_wise_donut" : {
+                "CGCEL" : [
+                    {"division" : "FH", "count" : 50},
+                    {"division" : "sbjkd", "count" : 50}
+                ],
+                "CGPISL" : [
+                    {"division" : "FH", "count" : 50},
+                    {"division" : "skjd", "count" : 50}
+                ],
+            }
+        }
     }
     return JSONResponse(content=dashboard_data)

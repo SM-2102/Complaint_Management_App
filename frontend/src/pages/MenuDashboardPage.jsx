@@ -17,6 +17,7 @@ import SpinnerLoading from "../components/SpinnerLoading";
 import { menuConfig } from "../config/menuConfig";
 import { fetchUserNotifications } from "../services/notificationUserService";
 import { useAuth } from "../context/AuthContext";
+import StockDivisionDonutChart from "../charts/StockDivisionDonutChart";
 
 // Helper to filter actions by company
 const filterActionsByCompany = (actions, company) => {
@@ -203,14 +204,36 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
                 {key === "stock" &&
                   (loading ? (
                     <div className="w-full flex justify-center items-center">
-                      <SpinnerLoading text="Loading Challan Data ..." />
+                      <SpinnerLoading text="Loading Stock Data ..." />
                     </div>
                   ) : error ? (
                     <div className="w-full flex justify-center items-center">
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
-                    <ChallanChart data={data} />
+                    <StockDivisionDonutChart
+                      data={(() => {
+                        if (!data?.stock?.division_wise_donut) return [];
+                        if (selectedCompany === "ALL") {
+                          const cgcel =
+                            data.stock.division_wise_donut.CGCEL || [];
+                          const cgpisl =
+                            data.stock.division_wise_donut.CGPISL || [];
+                          const merged = {};
+                          [...cgcel, ...cgpisl].forEach(({ division, count }) => {
+                            if (!merged[division]) merged[division] = 0;
+                            merged[division] += count;
+                          });
+                          return Object.entries(merged).map(([division, count]) => ({
+                            division,
+                            count,
+                          }));
+                        }
+                        return (
+                          data.stock.division_wise_donut[selectedCompany] || []
+                        );
+                      })()}
+                    />
                   ))}
                 {key === "grc" &&
                   (loading ? (
