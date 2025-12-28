@@ -108,7 +108,7 @@ const MenuCard = ({
         )
           handleCardClick(e);
       }}
-      className={`relative rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200 ease-in-out p-6 flex flex-col justify-between focus:outline-none h-[380px] w-full max-w-xl`}
+      className={`relative rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200 ease-in-out p-6 flex flex-col justify-between focus:outline-none h-[360px] w-full max-w-xl`}
       style={{ background: bgColor || "#fff" }}
     >
       {/* animated bluish left-to-right bar */}

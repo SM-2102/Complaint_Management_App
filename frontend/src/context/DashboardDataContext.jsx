@@ -64,6 +64,10 @@ export const DashboardDataProvider = ({ children }) => {
         },
         stock: {
           division_wise_donut: [],
+          number_of_items_in_stock: {},
+          number_of_items_in_godown: {},
+          number_of_items_issued_in_advance: {},
+          number_of_items_under_process: {},
         },
       });
     } finally {

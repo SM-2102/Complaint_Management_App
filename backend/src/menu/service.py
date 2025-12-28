@@ -1,18 +1,94 @@
-# from datetime import date, timedelta
+from datetime import date, timedelta
 
-# from sqlalchemy import case, func, literal, select, union_all
-# from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy import case, func, literal, select, union_all
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
-# from challan.models_smart import ChallanSmart
-# from challan.models_unique import ChallanUnique
-# from master.models import Master
-# from out_of_warranty.models import OutOfWarranty
-# from retail.models import Retail
-# from service_center.models import ServiceCentre
-# from warranty.models import Warranty
+from stock_cgcel.models import StockCGCEL
+from stock_cgpisl.models import StockCGPISL
 
 
-# class MenuService:
+class MenuService:
+
+	async def stock_overview(self, session: AsyncSession):
+		"""
+		Returns:
+		{
+			"stock": {
+				"division_wise_donut": {
+					"CGCEL": [{"division": ..., "count": ...}, ...],
+					"CGPISL": [{"division": ..., "count": ...}, ...],
+				},
+				"number_of_items_in_stock": {"CGCEL": int, "CGPISL": int},
+				"number_of_items_in_godown": {"CGCEL": int, "CGPISL": int},
+				"number_of_items_issued_in_advance": {"CGCEL": int, "CGPISL": int},
+				"number_of_items_under_process": {"CGCEL": int, "CGPISL": int},
+			}
+		}
+		"""
+		# CGCEL aggregation
+		cgcel_stmt = (
+			select(
+				StockCGCEL.division,
+				func.sum(StockCGCEL.own_qty).label("own_qty"),
+				func.sum(StockCGCEL.cnf_qty).label("cnf_qty"),
+				func.sum(StockCGCEL.grc_qty).label("grc_qty"),
+				func.sum(StockCGCEL.indent_qty).label("indent_qty"),
+			)
+			.group_by(StockCGCEL.division)
+		)
+		cgcel_rows = (await session.execute(cgcel_stmt)).all()
+		cgcel_division_donut = [
+			{"division": row.division, "count": row.own_qty or 0} for row in cgcel_rows
+		]
+		cgcel_total_own = sum(row.own_qty or 0 for row in cgcel_rows)
+		cgcel_total_cnf = sum(row.cnf_qty or 0 for row in cgcel_rows)
+		cgcel_total_grc = sum(row.grc_qty or 0 for row in cgcel_rows)
+		cgcel_total_indent = sum(row.indent_qty or 0 for row in cgcel_rows)
+
+		# CGPISL aggregation
+		cgpisl_stmt = (
+			select(
+				StockCGPISL.division,
+				func.sum(StockCGPISL.own_qty).label("own_qty"),
+				func.sum(StockCGPISL.cnf_qty).label("cnf_qty"),
+				func.sum(StockCGPISL.grc_qty).label("grc_qty"),
+				func.sum(StockCGPISL.indent_qty).label("indent_qty"),
+			)
+			.group_by(StockCGPISL.division)
+		)
+		cgpisl_rows = (await session.execute(cgpisl_stmt)).all()
+		cgpisl_division_donut = [
+			{"division": row.division, "count": row.own_qty or 0} for row in cgpisl_rows
+		]
+		cgpisl_total_own = sum(row.own_qty or 0 for row in cgpisl_rows)
+		cgpisl_total_cnf = sum(row.cnf_qty or 0 for row in cgpisl_rows)
+		cgpisl_total_grc = sum(row.grc_qty or 0 for row in cgpisl_rows)
+		cgpisl_total_indent = sum(row.indent_qty or 0 for row in cgpisl_rows)
+
+		return {
+			"stock": {
+				"division_wise_donut": {
+					"CGCEL": cgcel_division_donut,
+					"CGPISL": cgpisl_division_donut,
+				},
+				"number_of_items_in_stock": {
+					"CGCEL": cgcel_total_own,
+					"CGPISL": cgpisl_total_own,
+				},
+				"number_of_items_in_godown": {
+					"CGCEL": cgcel_total_cnf,
+					"CGPISL": cgpisl_total_cnf,
+				},
+				"number_of_items_issued_in_advance": {
+					"CGCEL": cgcel_total_grc,
+					"CGPISL": cgpisl_total_grc,
+				},
+				"number_of_items_under_process": {
+					"CGCEL": cgcel_total_indent,
+					"CGPISL": cgpisl_total_indent,
+				},
+			}
+		}
 
 #     # ---------------------------
 #     # GROUP 1 — MASTER + ASC + TOP CUSTOMERS
