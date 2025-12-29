@@ -9,86 +9,101 @@ from stock_cgpisl.models import StockCGPISL
 
 class MenuService:
 
-	async def stock_overview(self, session: AsyncSession):
-		"""
-		Returns:
-		{
-			"stock": {
-				"division_wise_donut": {
-					"CGCEL": [{"division": ..., "count": ...}, ...],
-					"CGPISL": [{"division": ..., "count": ...}, ...],
-				},
-				"number_of_items_in_stock": {"CGCEL": int, "CGPISL": int},
-				"number_of_items_in_godown": {"CGCEL": int, "CGPISL": int},
-				"number_of_items_issued_in_advance": {"CGCEL": int, "CGPISL": int},
-				"number_of_items_under_process": {"CGCEL": int, "CGPISL": int},
-			}
-		}
-		"""
-		# CGCEL aggregation
-		cgcel_stmt = (
-			select(
-				StockCGCEL.division,
-				func.sum(StockCGCEL.own_qty).label("own_qty"),
-				func.sum(StockCGCEL.cnf_qty).label("cnf_qty"),
-				func.sum(StockCGCEL.grc_qty).label("grc_qty"),
-				func.sum(StockCGCEL.indent_qty).label("indent_qty"),
-			)
-			.group_by(StockCGCEL.division)
-		)
-		cgcel_rows = (await session.execute(cgcel_stmt)).all()
-		cgcel_division_donut = [
-			{"division": row.division, "count": row.own_qty or 0} for row in cgcel_rows
-		]
-		cgcel_total_own = sum(row.own_qty or 0 for row in cgcel_rows)
-		cgcel_total_cnf = sum(row.cnf_qty or 0 for row in cgcel_rows)
-		cgcel_total_grc = sum(row.grc_qty or 0 for row in cgcel_rows)
-		cgcel_total_indent = sum(row.indent_qty or 0 for row in cgcel_rows)
+    @staticmethod
+    async def _aggregate_stock(
+        session: AsyncSession,
+        model,
+    ) -> dict:
+        """
+        Aggregate stock data for a given stock model.
 
-		# CGPISL aggregation
-		cgpisl_stmt = (
-			select(
-				StockCGPISL.division,
-				func.sum(StockCGPISL.own_qty).label("own_qty"),
-				func.sum(StockCGPISL.cnf_qty).label("cnf_qty"),
-				func.sum(StockCGPISL.grc_qty).label("grc_qty"),
-				func.sum(StockCGPISL.indent_qty).label("indent_qty"),
-			)
-			.group_by(StockCGPISL.division)
-		)
-		cgpisl_rows = (await session.execute(cgpisl_stmt)).all()
-		cgpisl_division_donut = [
-			{"division": row.division, "count": row.own_qty or 0} for row in cgpisl_rows
-		]
-		cgpisl_total_own = sum(row.own_qty or 0 for row in cgpisl_rows)
-		cgpisl_total_cnf = sum(row.cnf_qty or 0 for row in cgpisl_rows)
-		cgpisl_total_grc = sum(row.grc_qty or 0 for row in cgpisl_rows)
-		cgpisl_total_indent = sum(row.indent_qty or 0 for row in cgpisl_rows)
+        Returns:
+            {
+                "division_donut": [
+                    {"division": "A", "count": 100},
+                    ...
+                ],
+                "total_own": 150,
+                "total_cnf": 30,
+                "total_grc": 20,
+                "total_indent": 10,
+            }
+        """
 
-		return {
-			"stock": {
-				"division_wise_donut": {
-					"CGCEL": cgcel_division_donut,
-					"CGPISL": cgpisl_division_donut,
-				},
-				"number_of_items_in_stock": {
-					"CGCEL": cgcel_total_own,
-					"CGPISL": cgpisl_total_own,
-				},
-				"number_of_items_in_godown": {
-					"CGCEL": cgcel_total_cnf,
-					"CGPISL": cgpisl_total_cnf,
-				},
-				"number_of_items_issued_in_advance": {
-					"CGCEL": cgcel_total_grc,
-					"CGPISL": cgpisl_total_grc,
-				},
-				"number_of_items_under_process": {
-					"CGCEL": cgcel_total_indent,
-					"CGPISL": cgpisl_total_indent,
-				},
+        # -------------------------------
+        # Division-wise aggregation (donut)
+        # -------------------------------
+        division_stmt = (select(model.division,func.count().label("count"),)
+			.where(model.division.isnot(None))
+			.group_by(model.division)
+			.order_by(model.division)
+		)
+        division_rows = (await session.execute(division_stmt)).all()
+        division_donut = [
+			{
+				"division": row.division,
+				"count": row.count,
 			}
-		}
+			for row in division_rows
+		]
+
+        # -------------------------------
+        # Overall totals (single row)
+        # -------------------------------
+        totals_stmt = select(
+            func.coalesce(func.sum(model.own_qty), 0).label("own"),
+            func.coalesce(func.sum(model.cnf_qty), 0).label("cnf"),
+            func.coalesce(func.sum(model.grc_qty), 0).label("grc"),
+            func.coalesce(func.sum(model.indent_qty), 0).label("indent"),
+        )
+
+        totals_row = (await session.execute(totals_stmt)).one()
+
+        return {
+            "division_donut": division_donut,
+            "total_own": totals_row.own,
+            "total_cnf": totals_row.cnf,
+            "total_grc": totals_row.grc,
+            "total_indent": totals_row.indent,
+        }
+
+    # -----------------------------------
+    # Public dashboard API
+    # -----------------------------------
+    @classmethod
+    async def stock_overview(
+        cls,
+        session: AsyncSession,
+    ) -> dict:
+
+        cgcel = await cls._aggregate_stock(session, StockCGCEL)
+        cgpisl = await cls._aggregate_stock(session, StockCGPISL)
+
+        return {
+            "stock": {
+                "division_wise_donut": {
+                    "CGCEL": cgcel["division_donut"],
+                    "CGPISL": cgpisl["division_donut"],
+                },
+                "number_of_items_in_stock": {
+                    "CGCEL": cgcel["total_own"],
+                    "CGPISL": cgpisl["total_own"],
+                },
+                "number_of_items_in_godown": {
+                    "CGCEL": cgcel["total_cnf"],
+                    "CGPISL": cgpisl["total_cnf"],
+                },
+                "number_of_items_issued_in_advance": {
+                    "CGCEL": cgcel["total_grc"],
+                    "CGPISL": cgpisl["total_grc"],
+                },
+                "number_of_items_under_process": {
+                    "CGCEL": cgcel["total_indent"],
+                    "CGPISL": cgpisl["total_indent"],
+                },
+            }
+        }
+
 
 #     # ---------------------------
 #     # GROUP 1 — MASTER + ASC + TOP CUSTOMERS
@@ -112,7 +127,7 @@ class MenuService:
 #         ).cte("combined_cte")
 
 #         # top customers aggregation
-#         top_stmt = (
+#         top_statement = (
 #             select(Master.name, func.count().label("total_count"))
 #             .join(combined_cte, Master.code == combined_cte.c.code)
 #             .group_by(Master.name)
@@ -121,13 +136,13 @@ class MenuService:
 #         )
 
 #         # scalar counts
-#         master_count_stmt = select(func.count(Master.code))
-#         asc_count_stmt = select(func.count(ServiceCentre.asc_name))
+#         master_count_statement = select(func.count(Master.code))
+#         asc_count_statement = select(func.count(ServiceCentre.asc_name))
 
 #         # Execute: note these are executed sequentially on the same session
-#         master_count = (await session.execute(master_count_stmt)).scalar()
-#         asc_count = (await session.execute(asc_count_stmt)).scalar()
-#         top_rows = (await session.execute(top_stmt)).all()
+#         master_count = (await session.execute(master_count_statement)).scalar()
+#         asc_count = (await session.execute(asc_count_statement)).scalar()
+#         top_rows = (await session.execute(top_statement)).all()
 
 #         top_customers = {row.name: row.total_count for row in top_rows}
 
@@ -153,9 +168,9 @@ class MenuService:
 #             }
 #         }
 #         """
-#         division_stmt = select(Retail.division, func.count()).group_by(Retail.division)
+#         division_statement = select(Retail.division, func.count()).group_by(Retail.division)
 
-#         pie_stmt = select(
+#         pie_statement = select(
 #             func.count(
 #                 case(((Retail.received == "N") & (Retail.settlement_date.is_(None)), 1))
 #             ).label("not_received"),
@@ -174,8 +189,8 @@ class MenuService:
 #             func.count(case((Retail.final_status == "Y", 1))).label("settled"),
 #         )
 
-#         div_rows = (await session.execute(division_stmt)).all()
-#         pie_row = (await session.execute(pie_stmt)).mappings().first() or {}
+#         div_rows = (await session.execute(division_statement)).all()
+#         pie_row = (await session.execute(pie_statement)).mappings().first() or {}
 
 #         return {
 #             "division_counts": [
@@ -242,10 +257,10 @@ class MenuService:
 #         # ---- 2) Aggregation queries on the union ----
 
 #         # Total challan count
-#         challan_count_stmt = select(func.count(union_subq.c.challan_number))
+#         challan_count_statement = select(func.count(union_subq.c.challan_number))
 
 #         # Total quantity across all rows
-#         items_stmt = select(func.coalesce(func.sum(union_subq.c.qty), 0))
+#         items_statement = select(func.coalesce(func.sum(union_subq.c.qty), 0))
 
 #         # Rolling monthly totals
 #         cutoff_date = date.today().replace(day=1) - timedelta(days=150)
@@ -253,7 +268,7 @@ class MenuService:
 #             func.date_trunc("month", union_subq.c.challan_date), "YYYY-MM"
 #         )
 
-#         rolling_stmt = (
+#         rolling_statement = (
 #             select(
 #                 month_expr.label("month"),
 #                 func.count().label("total_challans"),
@@ -266,9 +281,9 @@ class MenuService:
 
 #         # ---- 3) Execute (only 3 total DB hits) ----
 
-#         challan_count = (await session.execute(challan_count_stmt)).scalar() or 0
-#         items_count = (await session.execute(items_stmt)).scalar() or 0
-#         rolling_rows = (await session.execute(rolling_stmt)).all()
+#         challan_count = (await session.execute(challan_count_statement)).scalar() or 0
+#         items_count = (await session.execute(items_statement)).scalar() or 0
+#         rolling_rows = (await session.execute(rolling_statement)).all()
 
 #         return {
 #             "challan_count": challan_count,
@@ -312,20 +327,20 @@ class MenuService:
 #             (Warranty.division.in_(appl_divisions), "OTHERS"), else_=Warranty.division
 #         ).label("division")
 
-#         pending_stmt = (
+#         pending_statement = (
 #             select(division_label, Warranty.final_status, func.count().label("count"))
 #             .group_by(division_label, Warranty.final_status)
 #             .order_by(division_label)
 #         )
 
-#         heads_stmt = select(
+#         heads_statement = select(
 #             func.count(case((Warranty.head == "REPLACE", 1))).label("replace_count"),
 #             func.count(case((Warranty.head == "REPAIR", 1))).label("repair_count"),
 #         )
 
 #         today = date.today()
 #         sixty_days_ago = today - timedelta(days=60)
-#         srf_stmt = (
+#         srf_statement = (
 #             select(
 #                 Warranty.srf_number,
 #                 Warranty.srf_date,
@@ -341,9 +356,9 @@ class MenuService:
 #             .limit(25)
 #         )
 
-#         pending_rows = (await session.execute(pending_stmt)).all()
-#         heads_row = (await session.execute(heads_stmt)).mappings().first() or {}
-#         srf_rows = (await session.execute(srf_stmt)).all()
+#         pending_rows = (await session.execute(pending_statement)).all()
+#         heads_row = (await session.execute(heads_statement)).mappings().first() or {}
+#         srf_rows = (await session.execute(srf_statement)).all()
 
 #         return {
 #             "pending_completed": [
@@ -398,17 +413,17 @@ class MenuService:
 #             else_="PENDING",
 #         ).label("status")
 
-#         pending_stmt = (
+#         pending_statement = (
 #             select(division_label, status_case, func.count().label("count"))
 #             .group_by(division_label, status_case)
 #             .order_by(division_label)
 #         )
 
-#         count_stmt = select(func.count(OutOfWarranty.srf_number))
+#         count_statement = select(func.count(OutOfWarranty.srf_number))
 
 #         today = date.today()
 #         sixty_days_ago = today - timedelta(days=60)
-#         srf_stmt = (
+#         srf_statement = (
 #             select(
 #                 OutOfWarranty.srf_number,
 #                 OutOfWarranty.srf_date,
@@ -426,9 +441,9 @@ class MenuService:
 #             .limit(25)
 #         )
 
-#         pending_rows = (await session.execute(pending_stmt)).all()
-#         count_value = (await session.execute(count_stmt)).scalar() or 0
-#         srf_rows = (await session.execute(srf_stmt)).all()
+#         pending_rows = (await session.execute(pending_statement)).all()
+#         count_value = (await session.execute(count_statement)).scalar() or 0
+#         srf_rows = (await session.execute(srf_statement)).all()
 
 #         return {
 #             "pending_completed": [
@@ -482,7 +497,7 @@ class MenuService:
 #         total_vendors = warranty_count + outwarranty_count
 
 #         # Warranty
-#         warranty_stmt = (
+#         warranty_statement = (
 #             select(
 #                 Warranty.division.label("division"),
 #                 literal("WARRANTY").label("source"),
@@ -494,7 +509,7 @@ class MenuService:
 #         )
 
 #         # Out of Warranty
-#         outwarranty_stmt = (
+#         outwarranty_statement = (
 #             select(
 #                 OutOfWarranty.division.label("division"),
 #                 literal("OUT_OF_WARRANTY").label("source"),
@@ -505,7 +520,7 @@ class MenuService:
 #             .group_by(OutOfWarranty.division, OutOfWarranty.vendor_settled)
 #         )
 
-#         rows = (await session.execute(warranty_stmt.union_all(outwarranty_stmt))).all()
+#         rows = (await session.execute(warranty_statement.union_all(outwarranty_statement))).all()
 
 #         # Division mapping (same as before)
 #         def map_division(d):

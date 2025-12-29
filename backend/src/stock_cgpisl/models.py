@@ -13,9 +13,9 @@ class StockCGPISL(SQLModel, table=True):
     )
     division: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=False))
     spare_description: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=False))
-    cnf_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    grc_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    own_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
+    cnf_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True, index=True))
+    grc_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True, index=True))
+    own_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True, index=True))
     alp: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     purchase_price: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     discount: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
@@ -23,7 +23,11 @@ class StockCGPISL(SQLModel, table=True):
     gst_price: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     gst_rate: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     msl_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    indent_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
+    indent_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True, index=True))
+    party_name: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
+    order_number: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
+    order_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
+    remark: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
 
     def __repr__(self):
         return f"<SpareCGPISL {self.spare_code}>"

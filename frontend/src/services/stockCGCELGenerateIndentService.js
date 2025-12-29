@@ -6,7 +6,7 @@ import { authFetch } from "./authFetchService";
  * @returns {Promise<object>} Response data
  */
 async function generateCGCELIndent(indentData) {
-  const url = `${API_ENDPOINTS.STOCK_GENERATE_INDENT}`;
+  const url = `${API_ENDPOINTS.STOCK_CGCEL_GENERATE_INDENT}`;
   const response = await authFetch(url, {
     method: "POST",
     headers: {

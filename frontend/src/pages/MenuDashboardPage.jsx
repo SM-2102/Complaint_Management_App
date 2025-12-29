@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BirthdayWish from "../components/BirthdayWish";
 import HolidayWish from "../components/HolidayWish";
@@ -24,6 +24,36 @@ const filterActionsByCompany = (actions, company) => {
   if (company === "ALL") return actions;
   return actions.filter((a) => a.company === company || a.company === "ALL");
 };
+
+const normalizeDivisionData = (arr = []) =>
+  arr.map(({ division, count }) => ({
+    division,
+    count: count || 0,
+  }));
+
+const mergeDivisionData = (...arrays) => {
+  const merged = {};
+  arrays.flat().forEach(({ division, count }) => {
+    if (!merged[division]) {
+      merged[division] = { division, count: 0 };
+    }
+    merged[division].count += count || 0;
+  });
+  return Object.values(merged);
+};
+
+const getTotals = (totalsObj = {}, company) => {
+  if (company === "ALL") {
+    return {
+      CGCEL: totalsObj.CGCEL || 0,
+      CGPISL: totalsObj.CGPISL || 0,
+    };
+  }
+  return {
+    [company]: totalsObj[company] || 0,
+  };
+};
+
 
 const getFilteredCards = (company) =>
   menuConfig
@@ -102,6 +132,39 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     }
     navigate({ search: params.toString() }, { replace: true });
   };
+  const divisionData = useMemo(() => {
+  const donut = data?.stock?.division_wise_donut;
+  if (!donut) return [];
+
+  if (selectedCompany === "ALL") {
+    return mergeDivisionData(
+      normalizeDivisionData(donut.CGCEL),
+      normalizeDivisionData(donut.CGPISL)
+    );
+  }
+
+  return normalizeDivisionData(donut[selectedCompany]);
+}, [data, selectedCompany]);
+
+const meta = useMemo(() => {
+  const stock = data?.stock;
+  if (!stock) return null;
+
+  const calc = (key) => {
+    const values = stock[key] || {};
+    if (selectedCompany === "ALL") {
+      return (values.CGCEL || 0) + (values.CGPISL || 0);
+    }
+    return values[selectedCompany] || 0;
+  };
+
+  return {
+    totalStock: calc("number_of_items_in_stock"),
+    totalGodown: calc("number_of_items_in_godown"),
+    totalIssuedInAdvance: calc("number_of_items_issued_in_advance"),
+    totalUnderProcess: calc("number_of_items_under_process"),
+  };
+}, [data, selectedCompany]);
 
   // Get filtered cards based on selected company
   const filteredCards = getFilteredCards(selectedCompany);
@@ -212,52 +275,8 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
                     </div>
                   ) : (
                     <StockDivisionDonutChart
-                      data={(() => {
-                        if (!data?.stock?.division_wise_donut) return [];
-                        // Helper to normalize division data with count only
-                        const normalize = (arr) =>
-                          arr.map((item) => ({
-                            division: item.division,
-                            count: item.count || 0,
-                          }));
-                        // Get total stock/godown/issued_in_advance/under_process for each company
-                        const stockTotals = data.stock.number_of_items_in_stock || {};
-                        const godownTotals = data.stock.number_of_items_in_godown || {};
-                        const issuedInAdvanceTotals = data.stock.number_of_items_issued_in_advance || {};
-                        const underProcessTotals = data.stock.number_of_items_under_process || {};
-                        if (selectedCompany === "ALL") {
-                          const cgcel = normalize(data.stock.division_wise_donut.CGCEL || []);
-                          const cgpisl = normalize(data.stock.division_wise_donut.CGPISL || []);
-                          const merged = {};
-                          [...cgcel, ...cgpisl].forEach(({ division, count }) => {
-                            if (!merged[division]) merged[division] = { division, count: 0 };
-                            merged[division].count += count;
-                          });
-                          return Object.values(merged);
-                        }
-                        // Single company
-                        return normalize(data.stock.division_wise_donut[selectedCompany] || []);
-                      })()}
-                      meta={(() => {
-                        const stockTotals = data.stock.number_of_items_in_stock || {};
-                        const godownTotals = data.stock.number_of_items_in_godown || {};
-                        const issuedInAdvanceTotals = data.stock.number_of_items_issued_in_advance || {};
-                        const underProcessTotals = data.stock.number_of_items_under_process || {};
-                        if (selectedCompany === "ALL") {
-                          return {
-                            totalStock: (stockTotals.CGCEL || 0) + (stockTotals.CGPISL || 0),
-                            totalGodown: (godownTotals.CGCEL || 0) + (godownTotals.CGPISL || 0),
-                            totalIssuedInAdvance: (issuedInAdvanceTotals.CGCEL || 0) + (issuedInAdvanceTotals.CGPISL || 0),
-                            totalUnderProcess: (underProcessTotals.CGCEL || 0) + (underProcessTotals.CGPISL || 0),
-                          };
-                        }
-                        return {
-                          totalStock: stockTotals[selectedCompany] || 0,
-                          totalGodown: godownTotals[selectedCompany] || 0,
-                          totalIssuedInAdvance: issuedInAdvanceTotals[selectedCompany] || 0,
-                          totalUnderProcess: underProcessTotals[selectedCompany] || 0,
-                        };
-                      })()}
+                      data={divisionData}
+                      meta={meta}
                     />
                   ))}
                 {key === "grc" &&

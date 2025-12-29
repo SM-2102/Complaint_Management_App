@@ -257,7 +257,9 @@ class StockCGCELService:
         spare_description: Optional[str] = None,
         spare_code: Optional[str] = None,
         division: Optional[str] = None,
-        available: Optional[str] = None,
+        cnf: Optional[str] = None,
+        grc: Optional[str] = None,
+        own: Optional[str] = None,
     ):
 
         statement = select(StockCGCEL)
@@ -273,18 +275,34 @@ class StockCGCELService:
         if spare_code:
             statement = statement.where(StockCGCEL.spare_code.ilike(f"{spare_code}"))
 
-        if available:
-            if available == "Y":
+        if cnf:
+            if cnf == "Y":
                 statement = statement.where(
                     (StockCGCEL.cnf_qty.isnot(None) & (StockCGCEL.cnf_qty > 0))
-                    | (StockCGCEL.grc_qty.isnot(None) & (StockCGCEL.grc_qty > 0))
-                    | (StockCGCEL.own_qty.isnot(None) & (StockCGCEL.own_qty > 0))
                 )
             else:
                 statement = statement.where(
                     (StockCGCEL.cnf_qty.is_(None) | (StockCGCEL.cnf_qty == 0))
-                    & (StockCGCEL.grc_qty.is_(None) | (StockCGCEL.grc_qty == 0))
-                    & (StockCGCEL.own_qty.is_(None) | (StockCGCEL.own_qty == 0))
+                )
+
+        if grc:
+            if grc == "Y":
+                statement = statement.where(
+                    (StockCGCEL.grc_qty.isnot(None) & (StockCGCEL.grc_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (StockCGCEL.grc_qty.is_(None) | (StockCGCEL.grc_qty == 0))
+                )
+
+        if own:
+            if own == "Y":
+                statement = statement.where(
+                    (StockCGCEL.own_qty.isnot(None) & (StockCGCEL.own_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (StockCGCEL.own_qty.is_(None) | (StockCGCEL.own_qty == 0))
                 )
 
         statement = statement.order_by(StockCGCEL.spare_code)

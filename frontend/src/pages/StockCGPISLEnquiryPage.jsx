@@ -10,6 +10,7 @@ import { fetchStockCGPISLList } from "../services/stockCGPISLStockListService.js
 const columns = [
   { key: "spare_code", label: "Spare Code" },
   { key: "spare_description", label: "Spare Description" },
+  { key: "division", label: "Division" },
   { key: "cnf_qty", label: "CNF Quantity" },
   { key: "grc_qty", label: "GRC Quantity" },
   { key: "own_qty", label: "Own Stock" },
@@ -25,8 +26,12 @@ const Filter = ({
   setSpareDescription,
   division,
   setDivision,
-  available,
-  setAvailable,
+  cnf,
+  setCnf,
+  grc,
+  setGrc,
+  own,
+  setOwn,
   spareCode,
   setSpareCode,
   spareCodes,
@@ -294,7 +299,7 @@ const Filter = ({
           <div style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <label
-                htmlFor="available"
+                htmlFor="cnf"
                 style={{
                   fontWeight: 600,
                   color: "#1f8825ff",
@@ -303,13 +308,13 @@ const Filter = ({
                   width: 150,
                 }}
               >
-                Available
+                CNF Stock
               </label>
               <select
-                id="available"
-                name="available"
-                value={available}
-                onChange={(e) => setAvailable(e.target.value)}
+                id="cnf"
+                name="cnf"
+                value={cnf}
+                onChange={(e) => setCnf(e.target.value)}
                 style={{
                   padding: "4px 8px",
                   border: "1px solid #d1d5db",
@@ -317,13 +322,85 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(25, 118, 210, 0.04)",
+                  boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
                   width: "100%",
                 }}
               >
                 <option value=""></option>
-                <option value="Y">Yes</option>
-                <option value="N">No</option>
+                <option value="Y">Available</option>
+                <option value="N">Not Available</option>
+              </select>
+            </div>
+          </div>
+           <div style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <label
+                htmlFor="grc"
+                style={{
+                  fontWeight: 600,
+                  color: "#1f8825ff",
+                  letterSpacing: 0.5,
+                  fontSize: 13,
+                  width: 150,
+                }}
+              >
+                GRC Stock
+              </label>
+              <select
+                id="grc"
+                name="grc"
+                value={grc}
+                onChange={(e) => setGrc(e.target.value)}
+                style={{
+                  padding: "4px 8px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  background: "#f7f9fc",
+                  outline: "none",
+                  boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
+                  width: "100%",
+                }}
+              >
+                <option value=""></option>
+                <option value="Y">Available</option>
+                <option value="N">Not Available</option>
+              </select>
+            </div>
+          </div>
+           <div style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <label
+                htmlFor="own"
+                style={{
+                  fontWeight: 600,
+                  color: "#1f8825ff",
+                  letterSpacing: 0.5,
+                  fontSize: 13,
+                  width: 150,
+                }}
+              >
+                Own Stock
+              </label>
+              <select
+                id="own"
+                name="own"
+                value={own}
+                onChange={(e) => setOwn(e.target.value)}
+                style={{
+                  padding: "4px 8px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  background: "#f7f9fc",
+                  outline: "none",
+                  boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
+                  width: "100%",
+                }}
+              >
+                <option value=""></option>
+                <option value="Y">Available</option>
+                <option value="N">Not Available</option>
               </select>
             </div>
           </div>
@@ -398,7 +475,9 @@ const StockCGPISLEnquiryPage = () => {
   const [division, setDivision] = useState("");
   const [spareDescription, setSpareDescription] = useState("");
   const [spareCode, setSpareCode] = useState("");
-  const [available, setAvailable] = useState("");
+  const [cnf, setCnf] = useState("");
+  const [grc, setGrc] = useState("");
+  const [own, setOwn] = useState("");
   // Data states
 
   const [data, setData] = useState([]);
@@ -413,7 +492,9 @@ const StockCGPISLEnquiryPage = () => {
     setDivision("");
     setSpareDescription("");
     setSpareCode("");
-    setAvailable("");
+    setCnf("");
+    setGrc("");
+    setOwn("");
     setSearched(false);
     setData([]);
     setError(null);
@@ -449,7 +530,9 @@ const StockCGPISLEnquiryPage = () => {
       if (spareDescription) params.spare_description = spareDescription;
       if (spareCode) params.spare_code = spareCode;
       if (division) params.division = division;
-      if (available) params.available = available;
+      if (cnf) params.cnf = cnf;
+      if (grc) params.grc = grc;
+      if (own) params.own = own;
       const res = await stockCGPISLEnquiry(params);
       setData(res);
     } catch (err) {
@@ -471,8 +554,12 @@ const StockCGPISLEnquiryPage = () => {
         setSpareDescription={setSpareDescription}
         spareCode={spareCode}
         setSpareCode={setSpareCode}
-        available={available}
-        setAvailable={setAvailable}
+        cnf={cnf}
+        setCnf={setCnf}
+        grc={grc}
+        setGrc={setGrc}
+        own={own}
+        setOwn={setOwn}
         spareCodes={spareCodes}
         spareDescriptions={spareDescriptions}
         onSearch={handleSearch}

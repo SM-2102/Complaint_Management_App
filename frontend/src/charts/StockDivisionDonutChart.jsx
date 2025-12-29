@@ -175,7 +175,7 @@ const StockDivisionDonutChart = ({ data, meta }) => {
             </span>
             {/* Subtext */}
             <span className="text-sm md:text-base font-medium text-gray-600 tracking-wider">
-              Records
+              Items
             </span>
           </div>
         )}
@@ -195,19 +195,19 @@ const StockDivisionDonutChart = ({ data, meta }) => {
       >
         <div style={{ ...cardStyle, minWidth: 150, marginBottom: 0 }}>
           <div style={numberStyle}>{totalStock}+</div>
-          <div style={labelStyle}>Items in Stock</div>
+          <div style={labelStyle}>Stock Owned</div>
         </div>
         <div style={{ ...cardStyle, minWidth: 150, marginBottom: 0 }}>
           <div style={numberStyle}>{totalGodown}+</div>
-          <div style={labelStyle}>Items in Godown</div>
+          <div style={labelStyle}>Stock in Godown</div>
         </div>
         <div style={{ ...cardStyle, minWidth: 150, marginBottom: 0 }}>
           <div style={numberStyle}>{totalIssuedInAdvance}+</div>
-          <div style={labelStyle}>Items Issued in Advance</div>
+          <div style={labelStyle}>Stock Issued in Advance</div>
         </div>
         <div style={{ ...cardStyle, minWidth: 150, marginBottom: 0 }}>
           <div style={numberStyle}>{totalUnderProcess}+</div>
-          <div style={labelStyle}>Items Under Process</div>
+          <div style={labelStyle}>Stock Under Process</div>
         </div>
       </div>
     </div>

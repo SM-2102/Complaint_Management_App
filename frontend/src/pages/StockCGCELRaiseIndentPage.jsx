@@ -16,10 +16,10 @@ const initialForm = {
   grc_qty: "",
   own_qty: "",
   indent_qty: "",
-  party_name: "",
-  order_number: "",
-  order_date: "",
-  remark: "",
+  party_name: "U/G Stock",
+  order_number: "NA",
+  order_date: new Date().toLocaleDateString("en-CA"),
+  remark: "NIL",
 };
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];

@@ -80,7 +80,9 @@ async def enquiry_stock_cgcel(
     spare_description: Optional[str] = None,
     spare_code: Optional[str] = None,
     division: Optional[str] = None,
-    available: Optional[str] = None,
+    cnf: Optional[str] = None,
+    grc: Optional[str] = None,
+    own: Optional[str] = None,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
@@ -90,7 +92,9 @@ async def enquiry_stock_cgcel(
             spare_description,
             spare_code,
             division,
-            available,
+            cnf,
+            grc,
+            own,
         )
         return result
     except:

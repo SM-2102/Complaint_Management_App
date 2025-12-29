@@ -78,9 +78,9 @@
 ### Stock CGPISL Module
 - [x] **StockCGPISLUploadPage** - Upload stock file .xlxs [ADMIN]
 - [x] **StockCGPSILEnquiryPage** - Stock Enquiry and Print
-- [ ] **StockCGPSILSpareIndentPage** - Raise Spare Indent
-- [ ] **StockCGPSILGenerateIndentPage** - Generate Spare Indent
-- [ ] **StockCGPSILIndentDetailsPage** - Indent Details
+- [x] **StockCGPSILSpareIndentPage** - Raise Spare Indent
+- [x] **StockCGPSILGenerateIndentPage** - Generate Spare Indent
+- [x] **StockCGPSILIndentDetailsPage** - Indent Details
 
 ### GRC CGCEL Module
 - [x] **GRCCGCELUploadPage** - Upload GRC file .xlxs [ADMIN]
@@ -137,7 +137,7 @@
 - [x] **/stock_cgcel/generate_indent**
 - [x] **/stock_cgcel/indent_enquiry{params}**
 
-### StockPISL Module
+### StockCGPISL Module
 - [x] **/stock_cgpisl/upload** - [ADMIN]
 - [x] **/stock_cgpisl/enquiry{params}**
 - [x] **/stock_cgcel/spare_list**
@@ -151,7 +151,12 @@
 - [x] **/stock_cgcel/indent_enquiry{params}**
 
 
-### GRC Module
+### GRCCGCEL Module
+- [x] **/grc_cgcel/upload** - [ADMIN]
+
+### GRCCGPISL Module
+- [x] **/grc_cgpisl/upload** - [ADMIN]
+
 
 ---
 
@@ -169,8 +174,8 @@
 - [x] **User**
 - [ ] **Email**
 - [ ] **Complaint Number**
-- [ ] **Spare_CGCEL**
-- [ ] **Spare_CGPISL**
+- [x] **Spare_CGCEL**
+- [x] **Spare_CGPISL**
 - [ ] **GRC_CGCEL**
 - [ ] **GRC_CGPISL**
 - [ ] **Final Deployment**

@@ -11,7 +11,8 @@ from src.auth.models import User
 from src.notification.models import Notification
 from src.holiday.models import Holiday
 from src.complaints.models import Complaint
-from src.grc.models import GRC
+from src.grc_cgcel.models import GRCCGCEL, GRCCGCELDispute, GRCCGCELReturnHistory
+from src.grc_cgpisl.models import GRCCGPISL, GRCCGPISLDispute, GRCCGPISLReturnHistory
 from src.stock_cgcel.models import StockCGCEL, StockCGCELMovement, StockCGCELIndent
 from src.stock_cgpisl.models import StockCGPISL, StockCGPISLIndent
 from sqlmodel import SQLModel

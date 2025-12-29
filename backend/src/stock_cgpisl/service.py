@@ -256,7 +256,9 @@ class StockCGPISLService:
         spare_description: Optional[str] = None,
         spare_code: Optional[str] = None,
         division: Optional[str] = None,
-        available: Optional[str] = None,
+        cnf: Optional[str] = None,
+        grc: Optional[str] = None,
+        own: Optional[str] = None,
     ):
 
         statement = select(StockCGPISL)
@@ -272,18 +274,34 @@ class StockCGPISLService:
         if spare_code:
             statement = statement.where(StockCGPISL.spare_code.ilike(f"{spare_code}"))
 
-        if available:
-            if available == "Y":
+        if cnf:
+            if cnf == "Y":
                 statement = statement.where(
                     (StockCGPISL.cnf_qty.isnot(None) & (StockCGPISL.cnf_qty > 0))
-                    | (StockCGPISL.grc_qty.isnot(None) & (StockCGPISL.grc_qty > 0))
-                    | (StockCGPISL.own_qty.isnot(None) & (StockCGPISL.own_qty > 0))
                 )
             else:
                 statement = statement.where(
                     (StockCGPISL.cnf_qty.is_(None) | (StockCGPISL.cnf_qty == 0))
-                    & (StockCGPISL.grc_qty.is_(None) | (StockCGPISL.grc_qty == 0))
-                    & (StockCGPISL.own_qty.is_(None) | (StockCGPISL.own_qty == 0))
+                )
+
+        if grc:
+            if grc == "Y":
+                statement = statement.where(
+                    (StockCGPISL.grc_qty.isnot(None) & (StockCGPISL.grc_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (StockCGPISL.grc_qty.is_(None) | (StockCGPISL.grc_qty == 0))
+                )
+
+        if own:
+            if own == "Y":
+                statement = statement.where(
+                    (StockCGPISL.own_qty.isnot(None) & (StockCGPISL.own_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (StockCGPISL.own_qty.is_(None) | (StockCGPISL.own_qty == 0))
                 )
 
         statement = statement.order_by(StockCGPISL.spare_code)

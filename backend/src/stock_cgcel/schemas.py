@@ -26,6 +26,7 @@ class StockCGCELEnquiry(BaseModel):
     spare_code: str
     division: str
     spare_description: str
+    division: str
     cnf_qty: Optional[int]
     grc_qty: Optional[int]
     own_qty: Optional[int]

@@ -43,16 +43,21 @@ const NotificationCreatePage = () => {
 
   // Fetch standard employees (role USER or TECHNICIAN)
   useEffect(() => {
-    setLoadingEmployees(true);
-    fetchStandardEmployees()
-      .then((data) => {
-        setEmployees(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {
-        setEmployees([]);
-      })
-      .finally(() => setLoadingEmployees(false));
-  }, []);
+  setLoadingEmployees(true);
+
+  fetchStandardEmployees()
+    .then((data) => {
+      const usersOnly = Array.isArray(data)
+        ? data.filter((emp) => emp.role === "USER")
+        : [];
+
+      setEmployees(usersOnly);
+    })
+    .catch(() => {
+      setEmployees([]);
+    })
+    .finally(() => setLoadingEmployees(false));
+}, []);
   const [showToast, setShowToast] = useState(false);
   const [error, setError] = useState(null);
 
@@ -154,16 +159,63 @@ const NotificationCreatePage = () => {
           onSubmit={handleSubmit}
           style={{
             display: "grid",
-            gridTemplateColumns: "50px 1fr 100px 200px",
+            gridTemplateColumns: "100px 200px 50px 1fr",
             gap: 16,
             alignItems: "start",
+            gridTemplateRows: "60px auto"
+
           }}
         >
+          <label
+            htmlFor="assigned_to"
+            style={{
+              fontWeight: 500,
+              gridColumn: 1,
+              gridRow: 1,
+              alignSelf: "center",
+            }}
+          >
+            Assigned To
+          </label>
+          <div
+  style={{
+    gridColumn: 2,
+    gridRow: 1,
+    alignSelf: "start",
+  }}
+>
+  <select
+    id="assigned_to"
+    name="assigned_to"
+    multiple
+    value={form.assigned_to}
+    onChange={handleInputChange}
+    style={{
+      width: "100%",
+      padding: 8,
+      borderRadius: 4,
+      border: "1px solid #abc",
+      height: 120,   // increase height here
+      fontSize: 16,
+      boxSizing: "border-box",
+    }}
+    disabled={loadingEmployees || submitting}
+  >
+    {employees.map((emp) => {
+      const value = emp.username || emp.employee_id || emp.id;
+      return (
+        <option key={value} value={value}>
+          {emp.name || emp.username || emp.employee_id}
+        </option>
+      );
+    })}
+  </select>
+</div>
           <label
             htmlFor="details"
             style={{
               fontWeight: 500,
-              gridColumn: 1,
+              gridColumn: 3,
               gridRow: 1,
               alignSelf: "center",
             }}
@@ -189,55 +241,9 @@ const NotificationCreatePage = () => {
             placeholder="Enter notification details"
             disabled={submitting}
             maxLength={150}
-            gridColumn={2}
-            gridRow={1}
-          />
-          <label
-            htmlFor="assigned_to"
-            style={{
-              fontWeight: 500,
-              gridColumn: 3,
-              gridRow: 1,
-              alignSelf: "center",
-            }}
-          >
-            Assigned To
-          </label>
-          <select
-            id="assigned_to"
-            name="assigned_to"
-            multiple
-            value={form.assigned_to}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: 8,
-              borderRadius: 4,
-              border: "1px solid #abc",
-              height: 60,
-              fontSize: 16,
-              boxSizing: "border-box",
-              lineHeight: 1.1,
-              verticalAlign: "top",
-              marginTop: 0,
-            }}
-            disabled={loadingEmployees || submitting}
             gridColumn={4}
             gridRow={1}
-          >
-            {employees.map((emp) => {
-              const value = emp.username || emp.employee_id || emp.id;
-              return (
-                <option
-                  key={value}
-                  value={value}
-                  style={{ paddingBottom: 2, height: 22 }}
-                >
-                  {emp.name || emp.username || emp.employee_id}
-                </option>
-              );
-            })}
-          </select>
+          />
           <div
             style={{
               gridColumn: "1 / -1",
@@ -330,7 +336,16 @@ const NotificationCreatePage = () => {
                 ) : notifications.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={2} align="center">
-                      No notifications found.
+                      <div
+                        style={{
+                          textAlign: "center",
+                          color: "#888",
+                          fontStyle: "italic",
+                          padding: "10px 0",
+                        }}
+                      >
+                        No Pending Tasks
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -339,7 +354,7 @@ const NotificationCreatePage = () => {
                       key={idx}
                       sx={{
                         background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
-                        height: 32,
+                        height: 40,
                       }}
                     >
                       <TableCell
