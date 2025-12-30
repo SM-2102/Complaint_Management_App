@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql import func
 
+from utils.date_utils import format_date_ddmmyyyy
 from exceptions import SpareNotFound, StockNotAvailable
 from stock_cgcel.models import StockCGCEL, StockCGCELIndent, StockCGCELMovement
 from stock_cgcel.schemas import (
@@ -521,11 +522,15 @@ class StockCGCELService:
             statement = statement.where(StockCGCELIndent.indent_date <= to_indent_date)
 
         if from_indent_number:
+            if len(from_indent_number) != 6:
+                from_indent_number = 'I' + str(from_indent_number).zfill(5)
             statement = statement.where(
                 StockCGCELIndent.indent_number >= from_indent_number
             )
 
         if to_indent_number:
+            if len(from_indent_number) != 6:
+                from_indent_number = 'I' + str(from_indent_number).zfill(5)
             statement = statement.where(
                 StockCGCELIndent.indent_number <= to_indent_number
             )
@@ -542,7 +547,7 @@ class StockCGCELService:
                     spare_description=row.spare_description,
                     indent_qty=row.indent_qty,
                     indent_number=row.indent_number,
-                    indent_date=row.indent_date,
+                    indent_date=format_date_ddmmyyyy(row.indent_date),
                     party_name=row.party_name,
                 )
                 for row in rows

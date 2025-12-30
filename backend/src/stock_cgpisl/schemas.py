@@ -84,5 +84,5 @@ class StockCGPISLIndentEnquiry(BaseModel):
     spare_description: str
     indent_qty: int
     indent_number: str
-    indent_date: date
+    indent_date: str
     party_name: Optional[str]
