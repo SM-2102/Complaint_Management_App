@@ -7,7 +7,7 @@ import API_ENDPOINTS from "../config/api";
  */
 async function stockCGCELListByDivision(division) {
   if (!division) throw new Error("Division is required");
-  const url = `${API_ENDPOINTS.STOCK_CGCEL_PENDING_INDENT}/${encodeURIComponent(division)}`;
+  const url = `${API_ENDPOINTS.STOCK_CGCEL_LIST_BY_DIVISION}/${encodeURIComponent(division)}`;
   const response = await fetch(url, {
     method: "GET",
     headers: {

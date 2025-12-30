@@ -59,7 +59,7 @@ const Filter = ({
     }
     if (spareCode && spareCodes && spareCodes.length > 0) {
       const filtered = spareCodes.filter((n) =>
-        n.toLowerCase().startsWith(spareCode.toLowerCase()),
+        n.toLowerCase().includes(spareCode.toLowerCase()),
       );
       setSpareCodeSuggestions(filtered);
       setShowSpareCodeSuggestions(filtered.length > 0);
@@ -77,7 +77,7 @@ const Filter = ({
     }
     if (spareDescription && spareDescriptions && spareDescriptions.length > 0) {
       const filtered = spareDescriptions.filter((n) =>
-        n.toLowerCase().startsWith(spareDescription.toLowerCase()),
+        n.toLowerCase().includes(spareDescription.toLowerCase()),
       );
       setSpareDescriptionSuggestions(filtered);
       setShowSpareDescriptionSuggestions(filtered.length > 0);

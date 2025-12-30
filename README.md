@@ -84,14 +84,17 @@
 
 ### GRC CGCEL Module
 - [x] **GRCCGCELUploadPage** - Upload GRC file .xlxs [ADMIN]
+- [ ] **GRCCGCELReceivePage** - GRC Receive Material
+- [ ] **GRCCGCELReturnPage** - GRC Return Material
 - [ ] **GRCCGCELEnquiryPage** - GRC Enquiry and Print
-- [ ] **GRCCGCELChallanCreatePage** - GRC Challan Creation
+- [ ] **GRCCGCELReportPage** - GRC Print
 
 ### GRC CGPISL Module
 - [x] **GRCCGPISLUploadPage** - Upload GRC file .xlxs [ADMIN]
+- [ ] **GRCCGPISLReceivePage** - GRC Receive Material
+- [ ] **GRCCGPISLReturnPage** - GRC Return Material
 - [ ] **GRCCGPISLEnquiryPage** - GRC Enquiry and Print
-- [ ] **GRCCGPISLChallanCreatePage** - GRC Challan Creation
-
+- [ ] **GRCCGPISLReportPage** - GRC Print
 
 ---
 

@@ -7,8 +7,8 @@ from sqlalchemy import Column
 
 class StockCGCELSchema(BaseModel):
     spare_code: str = Field(..., max_length=30)
-    division: str = Field(..., max_length=20)
-    spare_description: str = Field(..., max_length=40)
+    division: Optional[str] = Field(None, max_length=20)
+    spare_description: Optional[str] = Field(None, max_length=40)
     cnf_qty: Optional[int] = None
     grc_qty: Optional[int] = None
     own_qty: Optional[int] = None

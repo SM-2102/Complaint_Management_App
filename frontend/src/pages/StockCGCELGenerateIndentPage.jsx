@@ -11,7 +11,7 @@ import {
   Box,
 } from "@mui/material";
 import Toast from "../components/Toast";
-import { fetchNextCGCELIndentCode } from "../services/stockCGCELNextIndentCode";
+import { fetchNextCGCELIndentCode } from "../services/stockCGCELNextIndentCodeService";
 import { stockCGCELPendingIndentByDivision } from "../services/stockCGCELPendingIndentService";
 import { generateCGCELIndent } from "../services/stockCGCELGenerateIndentService";
 

@@ -104,13 +104,13 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "View CGCEL GRC",
-        path: "/ViewCGCELGRCRecords",
+        label: "Receive CGCEL GRC",
+        path: "/ReceiveCGCELGRCRecords",
         company: "CGCEL",
       },
       {
-        label: "View GRC Records",
-        path: "/ViewCGPISLGRCRecords",
+        label: "Receive GRC Records",
+        path: "/ReceiveCGPISLGRCRecords",
         company: "CGPISL",
       },
       {
@@ -123,6 +123,8 @@ export const menuConfig = [
         path: "/GRCCGPISLSpareReturn",
         company: "CGPISL",
       },
+      { label: "GRC CGCEL Report", path: "/GRCCGCELReport", company: "CGCEL" },
+      { label: "GRC Report", path: "/GRCCGPISLReport", company: "CGPISL" },
       {
         label: "GRC CGCEL Enquiry",
         path: "/GRCCGCELEnquiry",

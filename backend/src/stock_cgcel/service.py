@@ -28,6 +28,7 @@ from stock_cgcel.schemas import (
 class StockCGCELService:
     async def upload_stock_cgcel(self, session: AsyncSession, file: UploadFile):
         content = await file.read()
+
         try:
             text = content.decode("utf-8-sig")
         except Exception:
@@ -42,187 +43,182 @@ class StockCGCELService:
                 "type": "warning",
             }
 
-        records = []
+        raw_rows = []
         line_no = 1
 
+        # -------------------------
+        # Step 1: Normalize rows
+        # -------------------------
         for raw_row in reader:
             line_no += 1
 
-            # Define which fields are numeric
-            int_fields = {"cnf_qty", "grc_qty", "own_qty", "msl_qty", "indent_qty"}
-            float_fields = {
-                "alp",
-                "purchase_price",
-                "discount",
-                "sale_price",
-                "gst_price",
-                "gst_rate",
-            }
             row = {}
             for k, v in raw_row.items():
                 key = (k or "").strip().lower()
                 val = v.strip() if v else ""
-                if key in int_fields:
-                    row[key] = int(val) if val != "" else None
-                elif key in float_fields:
-                    try:
-                        row[key] = float(val) if val != "" else None
-                    except Exception:
-                        row[key] = None
-                else:
-                    row[key] = val.upper() if val != "" else None
+                row[key] = val if val != "" else None
 
-            spare_code = row.get("spare_code")
-            division = row.get("division")
-            spare_description = row.get("spare_description")
-
-            # Optional fields
-            optional_fields = [
-                "cnf_qty",
-                "grc_qty",
-                "own_qty",
-                "alp",
-                "purchase_price",
-                "discount",
-                "sale_price",
-                "gst_price",
-                "gst_rate",
-                "msl_qty",
-                "indent_qty",
-            ]
-            extra_data = {}
-            for field in optional_fields:
-                value = row.get(field)
-                if value is not None:
-                    # Try to convert to int or float if appropriate
-                    if field in [
-                        "cnf_qty",
-                        "grc_qty",
-                        "own_qty",
-                        "msl_qty",
-                        "indent_qty",
-                    ]:
-                        try:
-                            extra_data[field] = int(value)
-                        except Exception:
-                            extra_data[field] = None
-                    elif field in [
-                        "alp",
-                        "purchase_price",
-                        "discount",
-                        "sale_price",
-                        "gst_price",
-                        "gst_rate",
-                    ]:
-                        try:
-                            extra_data[field] = float(value)
-                        except Exception:
-                            extra_data[field] = None
-                    else:
-                        extra_data[field] = value
-
-            try:
-                validated = StockCGCELSchema(
-                    spare_code=spare_code,
-                    division=division,
-                    spare_description=spare_description,
-                    **{k: v for k, v in extra_data.items() if v is not None},
-                )
-            except ValidationError as ve:
+            if not row.get("spare_code"):
                 return {
-                    "message": f"Validation failed for {spare_code}",
-                    "resolution": str(ve),
+                    "message": "Invalid CSV",
+                    "resolution": f"Missing spare_code at line {line_no}",
                     "type": "warning",
                 }
 
-            records.append(validated)
+            raw_rows.append(row)
 
-        if not records:
+        if not raw_rows:
             return {
                 "message": "Uploaded Successfully",
                 "resolution": "No valid rows found",
+                "type": "success",
             }
 
-        keys = [r.spare_code for r in records]
+        # -------------------------
+        # Step 2: Fetch existing spare codes
+        # -------------------------
+        spare_codes = [r["spare_code"] for r in raw_rows]
 
         result = await session.execute(
-            select(StockCGCEL).where(StockCGCEL.spare_code.in_(keys))
+            select(StockCGCEL.spare_code).where(
+                StockCGCEL.spare_code.in_(spare_codes)
+            )
         )
+        existing_codes = set(result.scalars().all())
 
-        existing = {r.spare_code: r for r in result.scalars().all()}
+        # -------------------------
+        # Step 3: Parse + validate rows
+        # -------------------------
+        records = []
 
-        to_insert = []
-        to_update = {}
-
-        # Determine which columns are present in the CSV (excluding spare_code)
-        present_fields = set()
-        for r in records:
-            present_fields.update(r.dict(exclude_unset=True).keys())
-        present_fields.discard("spare_code")
-
-        for r in records:
-            # Only include fields present in the CSV (plus spare_code)
-            data_dict = {
-                k: v
-                for k, v in r.dict(exclude_unset=False).items()
-                if k == "spare_code" or k in present_fields
-            }
-            if r.spare_code in existing:
-                to_update[r.spare_code] = data_dict
-            else:
-                to_insert.append(data_dict)
-
-        inserted = 0
-        updated = 0
-
-        table = StockCGCEL.__table__
-
-        # Set only numeric columns being updated to 0 before insert/update
-        numeric_fields = {
-            "cnf_qty",
-            "grc_qty",
-            "own_qty",
+        int_fields = {"cnf_qty", "grc_qty", "own_qty", "msl_qty", "indent_qty"}
+        float_fields = {
             "alp",
             "purchase_price",
             "discount",
             "sale_price",
             "gst_price",
             "gst_rate",
-            "msl_qty",
-            "indent_qty",
         }
-        zero_fields = set()
-        for r in records:
-            zero_fields.update(r.dict(exclude_unset=True).keys())
-        zero_fields = zero_fields & numeric_fields
+
+        for row in raw_rows:
+            spare_code = row.get("spare_code")
+            is_new = spare_code not in existing_codes
+
+            division = row.get("division")
+            spare_description = row.get("spare_description")
+
+            # Enforce mandatory fields ONLY for inserts
+            if is_new:
+                if not division or not spare_description:
+                    return {
+                        "message": f"Missing mandatory fields for {spare_code}",
+                        "resolution": "Division and Description are required",
+                        "type": "warning",
+                    }
+
+            parsed = {
+                "spare_code": spare_code,
+                "division": division.upper() if division else None,
+                "spare_description": spare_description.upper() if spare_description else None,
+            }
+
+            for field in int_fields:
+                if field in row:
+                    try:
+                        parsed[field] = int(row[field]) if row[field] is not None else None
+                    except Exception:
+                        parsed[field] = None
+
+            for field in float_fields:
+                if field in row:
+                    try:
+                        parsed[field] = float(row[field]) if row[field] is not None else None
+                    except Exception:
+                        parsed[field] = None
+
+            try:
+                validated = StockCGCELSchema(**parsed)
+            except ValidationError as ve:
+                return {
+                    "message": f"Validation failed for spare_code {spare_code}",
+                    "resolution": str(ve),
+                    "type": "warning",
+                }
+
+            records.append((validated, is_new))
+
+        # -------------------------
+        # Step 4: Determine present fields
+        # -------------------------
+        present_fields = set()
+        for r, _ in records:
+            present_fields.update(r.dict(exclude_unset=True).keys())
+
+        present_fields.discard("spare_code")
+
+        # -------------------------
+        # Step 5: Split INSERT / UPDATE payloads
+        # -------------------------
+        to_insert = []
+        to_update = {}
+
+        for r, is_new in records:
+            data = {
+                k: v
+                for k, v in r.dict(exclude_unset=True).items()
+                if k == "spare_code" or k in present_fields
+            }
+
+            if is_new:
+                to_insert.append(data)
+            else:
+                # Strip master fields for UPDATE
+                data.pop("division", None)
+                data.pop("spare_description", None)
+                to_update[r.spare_code] = data
+
+        inserted = 0
+        updated = 0
+
+        table = StockCGCEL.__table__
+
+        # -------------------------
+        # Step 6: Zero numeric columns present in CSV
+        # -------------------------
+        numeric_fields = int_fields | float_fields
+        zero_fields = present_fields & numeric_fields
+
         if zero_fields:
             await session.execute(
-                update(table).values({field: 0 for field in zero_fields})
+                update(table).values({f: 0 for f in zero_fields})
             )
 
+        # -------------------------
+        # Step 7: Bulk INSERT / UPDATE
+        # -------------------------
         try:
             if to_insert:
                 await session.execute(insert(table).values(to_insert))
                 inserted = len(to_insert)
 
             if to_update:
-                # Only update fields present in the CSV (excluding spare_code)
-                update_fields = present_fields.copy()
+                update_fields = present_fields - {"division", "spare_description"}
 
                 values_dict = {}
                 for field in update_fields:
-                    # Only provide a mapping for keys that have this field
                     values_dict[field] = case(
                         {k: v.get(field) for k, v in to_update.items() if field in v},
                         value=table.c.spare_code,
                     )
 
-                statement = (
+                stmt = (
                     update(table)
                     .where(table.c.spare_code.in_(to_update.keys()))
                     .values(**values_dict)
                 )
-                await session.execute(statement)
+
+                await session.execute(stmt)
                 updated = len(to_update)
 
             await session.commit()
@@ -236,9 +232,6 @@ class StockCGCELService:
             }
         except Exception as e:
             await session.rollback()
-            import traceback
-
-            traceback.print_exc()
             return {
                 "message": "Unexpected server error",
                 "resolution": str(e),

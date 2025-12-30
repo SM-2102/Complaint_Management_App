@@ -14,7 +14,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ClearIcon from "@mui/icons-material/Clear";
 import Toast from "../components/Toast";
-import { UploadGRCCGCEL } from "../services/GRCCGCELUploadService";
+import { UploadGRCCGCEL } from "../services/grcCGCELUploadService";
 
 const GRCCGCELUploadPage = () => {
   const [showToast, setShowToast] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import Toast from "../components/Toast";
 import { stockCGCELListByDivision } from "../services/stockCGCELStockListByDivisionService";
@@ -38,55 +38,80 @@ const StockCGCELRaiseIndentPage = () => {
   const [showSpareDescriptionSuggestions, setShowSpareDescriptionSuggestions] =
     useState(false);
 
+  useEffect(() => {
+  if (!form.spare_code || spareList.length === 0) {
+    setShowSpareCodeSuggestions(false);
+    return;
+  }
+
+  const q = form.spare_code.toLowerCase();
+  if (q.length < 3) return;
+
+
+  const filtered = spareList.filter(
+  (item) =>
+    typeof item.spare_code === "string" &&
+    item.spare_code.toLowerCase().includes(q)
+);
+
+
+  setSpareCodeSuggestions(filtered);
+  setShowSpareCodeSuggestions(filtered.length > 0);
+}, [form.spare_code, spareList]);
+
+useEffect(() => {
+  if (!form.spare_description || spareList.length === 0) {
+    setShowSpareDescriptionSuggestions(false);
+    return;
+  }
+
+  const q = form.spare_description.toLowerCase();
+    if (q.length < 3) return;
+
+
+  const filtered = spareList.filter(
+  (item) =>
+    typeof item.spare_description === "string" &&
+    item.spare_description.toLowerCase().includes(q)
+);
+  setSpareDescriptionSuggestions(filtered);
+  setShowSpareDescriptionSuggestions(filtered.length > 0);
+}, [form.spare_description, spareList]);
+
+
   const handleChange = async (e) => {
-    const { name, value } = e.target;
-    let newValue = value;
-    setForm((prev) => ({ ...prev, [name]: newValue }));
-    setError((prev) => ({ ...prev, [name]: undefined }));
+  const { name, value } = e.target;
 
-    if (name === "division") {
-      setForm((prev) => ({ ...prev, spare_code: "", spare_description: "" }));
-      setSpareList([]);
-      setSpareCodeSuggestions([]);
-      setSpareDescriptionSuggestions([]);
-      setShowSpareCodeSuggestions(false);
-      setShowSpareDescriptionSuggestions(false);
-      if (newValue) {
-        try {
-          const data = await stockCGCELListByDivision(newValue);
-          setSpareList(Array.isArray(data) ? data : []);
-        } catch (err) {
-          setSpareList([]);
-        }
+  if (name === "division") {
+    setForm((prev) => ({
+      ...prev,
+      division: value,
+      spare_code: "",
+      spare_description: "",
+    }));
+
+    setError((prev) => ({ ...prev, division: undefined }));
+    setSpareList([]);
+    setSpareCodeSuggestions([]);
+    setSpareDescriptionSuggestions([]);
+    setShowSpareCodeSuggestions(false);
+    setShowSpareDescriptionSuggestions(false);
+
+    if (value) {
+      try {
+        const data = await stockCGCELListByDivision(value);
+        setSpareList(Array.isArray(data) ? data : []);
+      } catch {
+        setSpareList([]);
       }
     }
+    return;
+  }
 
-    if (name === "spare_code") {
-      if (newValue.length > 0 && spareList.length > 0) {
-        const filtered = spareList.filter((item) =>
-          item.spare_code.toLowerCase().startsWith(newValue.toLowerCase()),
-        );
-        setSpareCodeSuggestions(filtered);
-        setShowSpareCodeSuggestions(filtered.length > 0);
-      } else {
-        setShowSpareCodeSuggestions(false);
-      }
-    }
+  setForm((prev) => ({ ...prev, [name]: value }));
+  setError((prev) => ({ ...prev, [name]: undefined }));
+};
 
-    if (name === "spare_description") {
-      if (newValue.length > 0 && spareList.length > 0) {
-        const filtered = spareList.filter((item) =>
-          item.spare_description
-            .toLowerCase()
-            .startsWith(newValue.toLowerCase()),
-        );
-        setSpareDescriptionSuggestions(filtered);
-        setShowSpareDescriptionSuggestions(filtered.length > 0);
-      } else {
-        setShowSpareDescriptionSuggestions(false);
-      }
-    }
-  };
 
   const handleSearch = async (type) => {
     setError("");
@@ -229,16 +254,12 @@ const StockCGCELRaiseIndentPage = () => {
                 autoComplete="off"
                 className={`w-full px-3 py-1 ${errs_label.spare_code ? "border-red-300" : "border-gray-300"} rounded-lg border bg-gray-50 text-gray-900 font-medium`}
                 maxLength={30}
-                onFocus={() => {
-                  if (
-                    form.spare_code.length > 0 &&
-                    spareCodeSuggestions.length > 0
-                  )
-                    setShowSpareCodeSuggestions(true);
-                }}
-                onBlur={() =>
-                  setTimeout(() => setShowSpareCodeSuggestions(false), 150)
-                }
+                onBlur={(e) => {
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    setShowSpareCodeSuggestions(false);
+  }
+}}
+
               />
               {showSpareCodeSuggestions && (
                 <ul
@@ -264,12 +285,14 @@ const StockCGCELRaiseIndentPage = () => {
                       key={item.spare_code}
                       style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
                       onMouseDown={() => {
-                        setForm((prev) => ({
-                          ...prev,
-                          spare_code: item.spare_code,
-                        }));
-                        setShowSpareCodeSuggestions(false);
-                      }}
+  setForm((prev) => ({
+    ...prev,
+    spare_code: item.spare_code,
+    spare_description: item.spare_description,
+  }));
+  setShowSpareCodeSuggestions(false);
+}}
+
                     >
                       {item.spare_code}
                     </li>
@@ -317,19 +340,13 @@ const StockCGCELRaiseIndentPage = () => {
                   required
                   disabled={submitting}
                   autoComplete="Spare Description"
-                  onFocus={() => {
-                    if (
-                      form.spare_description.length > 0 &&
-                      spareDescriptionSuggestions.length > 0
-                    )
-                      setShowSpareDescriptionSuggestions(true);
-                  }}
-                  onBlur={() =>
-                    setTimeout(
-                      () => setShowSpareDescriptionSuggestions(false),
-                      150,
-                    )
-                  }
+        
+                  onBlur={(e) => {
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    setShowSpareDescriptionSuggestions(false);
+  }
+}}
+
                 />
                 {showSpareDescriptionSuggestions && (
                   <ul
@@ -355,12 +372,14 @@ const StockCGCELRaiseIndentPage = () => {
                         key={item.spare_code}
                         style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
                         onMouseDown={() => {
-                          setForm((prev) => ({
-                            ...prev,
-                            spare_description: item.spare_description,
-                          }));
-                          setShowSpareDescriptionSuggestions(false);
-                        }}
+  setForm((prev) => ({
+    ...prev,
+    spare_code: item.spare_code,
+    spare_description: item.spare_description,
+  }));
+  setShowSpareDescriptionSuggestions(false);
+}}
+
                       >
                         {item.spare_description}
                       </li>

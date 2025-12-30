@@ -437,7 +437,7 @@ const StockCGCELUpdatePage = () => {
               className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
-              INDENT DETAILS
+              SPARE DETAILS
             </span>
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
           </div>
@@ -511,7 +511,7 @@ const StockCGCELUpdatePage = () => {
             className="py-1.5 px-6 rounded-lg bg-blue-600 text-white font-bold text-base shadow hover:bg-blue-900 transition-colors duration-200 w-fit disabled:opacity-60"
             disabled={submitting}
           >
-            {submitting ? "Adding..." : "Add to Cart"}
+            {submitting ? "Updating..." : "Update Stock"}
           </button>
         </div>
       </form>

@@ -11,7 +11,7 @@ import {
   Box,
 } from "@mui/material";
 import Toast from "../components/Toast";
-import { fetchNextCGPISLIndentCode } from "../services/stockCGPISLNextIndentCode";
+import { fetchNextCGPISLIndentCode } from "../services/stockCGPISLNextIndentCodeService";
 import { stockCGPISLPendingIndentByDivision } from "../services/stockCGPISLPendingIndentService";
 import { generateCGPISLIndent } from "../services/stockCGPISLGenerateIndentService";
 
@@ -22,7 +22,7 @@ const columns = [
   { key: "indent", label: "Generate" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = ["FANS", "PUMP", "SDA", "WHC", "FHP", "LT", "HT", "OTHERS"];
 
 const initialForm = {
   indent_code: "",
@@ -57,7 +57,7 @@ const StockCGPISLGenerateIndentPage = () => {
         if (mounted && data) {
           setForm((prev) => ({
             ...prev,
-            indent_code: data.next_cgcel_indent_code || "",
+            indent_code: data.next_cgpisl_indent_code || "",
           }));
         }
       })
