@@ -24,7 +24,6 @@ from stock_cgpisl.schemas import (
 from utils.date_utils import format_date_ddmmyyyy
 
 
-
 class StockCGPISLService:
 
     async def upload_stock_cgpisl(self, session: AsyncSession, file: UploadFile):
@@ -121,20 +120,26 @@ class StockCGPISLService:
             parsed = {
                 "spare_code": spare_code,
                 "division": division.upper() if division else None,
-                "spare_description": spare_description.upper() if spare_description else None,
+                "spare_description": (
+                    spare_description.upper() if spare_description else None
+                ),
             }
 
             for field in int_fields:
                 if field in row:
                     try:
-                        parsed[field] = int(row[field]) if row[field] is not None else None
+                        parsed[field] = (
+                            int(row[field]) if row[field] is not None else None
+                        )
                     except Exception:
                         parsed[field] = None
 
             for field in float_fields:
                 if field in row:
                     try:
-                        parsed[field] = float(row[field]) if row[field] is not None else None
+                        parsed[field] = (
+                            float(row[field]) if row[field] is not None else None
+                        )
                     except Exception:
                         parsed[field] = None
 
@@ -191,9 +196,7 @@ class StockCGPISLService:
         zero_fields = present_fields & numeric_fields
 
         if zero_fields:
-            await session.execute(
-                update(table).values({f: 0 for f in zero_fields})
-            )
+            await session.execute(update(table).values({f: 0 for f in zero_fields}))
 
         # -------------------------
         # Step 7: Bulk INSERT / UPDATE
@@ -495,14 +498,14 @@ class StockCGPISLService:
 
         if from_indent_number:
             if len(from_indent_number) != 6:
-                from_indent_number = 'I' + str(from_indent_number).zfill(5)
+                from_indent_number = "I" + str(from_indent_number).zfill(5)
             statement = statement.where(
                 StockCGPISLIndent.indent_number >= from_indent_number
             )
 
         if to_indent_number:
             if len(from_indent_number) != 6:
-                from_indent_number = 'I' + str(from_indent_number).zfill(5)
+                from_indent_number = "I" + str(from_indent_number).zfill(5)
             statement = statement.where(
                 StockCGPISLIndent.indent_number <= to_indent_number
             )

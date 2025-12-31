@@ -40,11 +40,10 @@ async function printGRCReturn(payload) {
   const blob = await response.blob();
   // Open PDF in a new tab
   const url = window.URL.createObjectURL(blob);
-  window.open(url, '_blank');
+  window.open(url, "_blank");
   // Optionally, revoke the object URL after some time
   setTimeout(() => window.URL.revokeObjectURL(url), 10000);
   return blob;
 }
 
 export { printGRCReturn };
- 

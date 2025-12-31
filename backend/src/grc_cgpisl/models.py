@@ -61,7 +61,6 @@ class GRCCGPISLDispute(SQLModel, table=True):
 
     def __repr__(self):
         return f"<GRCDispute {self.spare_code}>"
-	
 
 
 class GRCCGPISLReturnHistory(SQLModel, table=True):

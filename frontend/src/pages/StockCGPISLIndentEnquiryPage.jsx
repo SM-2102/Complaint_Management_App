@@ -17,7 +17,16 @@ const columns = [
   { key: "party_name", label: "Party Name" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "SDA", "WHC", "FHP", "LT", "HT", "OTHERS"];
+const divisionOptions = [
+  "FANS",
+  "PUMP",
+  "SDA",
+  "WHC",
+  "FHP",
+  "LT",
+  "HT",
+  "OTHERS",
+];
 
 const Filter = ({
   open = false,

@@ -17,7 +17,16 @@ const columns = [
   { key: "alp", label: "ALP" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "SDA", "WHC", "FHP", "LT", "HT", "OTHERS"];
+const divisionOptions = [
+  "FANS",
+  "PUMP",
+  "SDA",
+  "WHC",
+  "FHP",
+  "LT",
+  "HT",
+  "OTHERS",
+];
 
 const Filter = ({
   open = false,
@@ -332,7 +341,7 @@ const Filter = ({
               </select>
             </div>
           </div>
-           <div style={{ marginBottom: 10 }}>
+          <div style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <label
                 htmlFor="grc"
@@ -368,7 +377,7 @@ const Filter = ({
               </select>
             </div>
           </div>
-           <div style={{ marginBottom: 10 }}>
+          <div style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <label
                 htmlFor="own"

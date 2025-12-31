@@ -34,7 +34,6 @@ const mergeDivisionData = (...arrays) => {
   return Object.values(merged);
 };
 
-
 const getFilteredCards = (company) =>
   menuConfig
     .map(({ actions, ...rest }) => {
@@ -121,7 +120,7 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     if (selectedCompany === "ALL") {
       return mergeDivisionData(
         normalizeDivisionData(donut.CGCEL),
-        normalizeDivisionData(donut.CGPISL)
+        normalizeDivisionData(donut.CGPISL),
       );
     }
     return normalizeDivisionData(donut[selectedCompany]);
@@ -135,31 +134,31 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     if (selectedCompany === "ALL") {
       return mergeDivisionData(
         normalizeDivisionData(donut.CGCEL),
-        normalizeDivisionData(donut.CGPISL)
+        normalizeDivisionData(donut.CGPISL),
       );
     }
     return normalizeDivisionData(donut[selectedCompany]);
   }, [data, selectedCompany]);
 
-const meta = useMemo(() => {
-  const stock = data?.stock;
-  if (!stock) return null;
+  const meta = useMemo(() => {
+    const stock = data?.stock;
+    if (!stock) return null;
 
-  const calc = (key) => {
-    const values = stock[key] || {};
-    if (selectedCompany === "ALL") {
-      return (values.CGCEL || 0) + (values.CGPISL || 0);
-    }
-    return values[selectedCompany] || 0;
-  };
+    const calc = (key) => {
+      const values = stock[key] || {};
+      if (selectedCompany === "ALL") {
+        return (values.CGCEL || 0) + (values.CGPISL || 0);
+      }
+      return values[selectedCompany] || 0;
+    };
 
-  return {
-    totalStock: calc("number_of_items_in_stock"),
-    totalGodown: calc("number_of_items_in_godown"),
-    totalIssuedInAdvance: calc("number_of_items_issued_in_advance"),
-    totalUnderProcess: calc("number_of_items_under_process"),
-  };
-}, [data, selectedCompany]);
+    return {
+      totalStock: calc("number_of_items_in_stock"),
+      totalGodown: calc("number_of_items_in_godown"),
+      totalIssuedInAdvance: calc("number_of_items_issued_in_advance"),
+      totalUnderProcess: calc("number_of_items_under_process"),
+    };
+  }, [data, selectedCompany]);
 
   // Get filtered cards based on selected company
   const filteredCards = getFilteredCards(selectedCompany);
@@ -269,10 +268,7 @@ const meta = useMemo(() => {
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
-                    <StockDivisionDonutChart
-                      data={divisionData}
-                      meta={meta}
-                    />
+                    <StockDivisionDonutChart data={divisionData} meta={meta} />
                   ))}
                 {key === "grc" &&
                   (loading ? (
@@ -284,9 +280,7 @@ const meta = useMemo(() => {
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
-                    <GRCBarChart
-                      data={grcDivisionData}
-                    />
+                    <GRCBarChart data={grcDivisionData} />
                   ))}
               </MenuCard>
             ),

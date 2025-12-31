@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql import func
 
-from utils.date_utils import format_date_ddmmyyyy
 from exceptions import SpareNotFound, StockNotAvailable
 from stock_cgcel.models import StockCGCEL, StockCGCELIndent, StockCGCELMovement
 from stock_cgcel.schemas import (
@@ -24,6 +23,7 @@ from stock_cgcel.schemas import (
     StockCGCELSchema,
     StockCGCELUpdate,
 )
+from utils.date_utils import format_date_ddmmyyyy
 
 
 class StockCGCELService:
@@ -81,9 +81,7 @@ class StockCGCELService:
         spare_codes = [r["spare_code"] for r in raw_rows]
 
         result = await session.execute(
-            select(StockCGCEL.spare_code).where(
-                StockCGCEL.spare_code.in_(spare_codes)
-            )
+            select(StockCGCEL.spare_code).where(StockCGCEL.spare_code.in_(spare_codes))
         )
         existing_codes = set(result.scalars().all())
 
@@ -121,20 +119,26 @@ class StockCGCELService:
             parsed = {
                 "spare_code": spare_code,
                 "division": division.upper() if division else None,
-                "spare_description": spare_description.upper() if spare_description else None,
+                "spare_description": (
+                    spare_description.upper() if spare_description else None
+                ),
             }
 
             for field in int_fields:
                 if field in row:
                     try:
-                        parsed[field] = int(row[field]) if row[field] is not None else None
+                        parsed[field] = (
+                            int(row[field]) if row[field] is not None else None
+                        )
                     except Exception:
                         parsed[field] = None
 
             for field in float_fields:
                 if field in row:
                     try:
-                        parsed[field] = float(row[field]) if row[field] is not None else None
+                        parsed[field] = (
+                            float(row[field]) if row[field] is not None else None
+                        )
                     except Exception:
                         parsed[field] = None
 
@@ -191,9 +195,7 @@ class StockCGCELService:
         zero_fields = present_fields & numeric_fields
 
         if zero_fields:
-            await session.execute(
-                update(table).values({f: 0 for f in zero_fields})
-            )
+            await session.execute(update(table).values({f: 0 for f in zero_fields}))
 
         # -------------------------
         # Step 7: Bulk INSERT / UPDATE
@@ -244,7 +246,7 @@ class StockCGCELService:
             "resolution": f"Inserted : {inserted}, Updated : {updated}",
             "type": "success",
         }
-    
+
     def _apply_stock_cgcel_filters(
         self,
         statement,
@@ -266,7 +268,8 @@ class StockCGCELService:
             statement = statement.where(model.spare_code.ilike(f"{spare_code}"))
         if cnf:
             if cnf == "Y":
-                statement = statement.where((model.cnf_qty.isnot(None) & (model.cnf_qty > 0))
+                statement = statement.where(
+                    (model.cnf_qty.isnot(None) & (model.cnf_qty > 0))
                 )
             else:
                 statement = statement.where(
@@ -314,7 +317,14 @@ class StockCGCELService:
         if return_total:
             count_query = select(func.count()).select_from(StockCGCEL)
             count_query = self._apply_stock_cgcel_filters(
-                count_query, spare_description, spare_code, division, cnf, grc, own, StockCGCEL
+                count_query,
+                spare_description,
+                spare_code,
+                division,
+                cnf,
+                grc,
+                own,
+                StockCGCEL,
             )
             total_result = await session.execute(count_query)
             total_records = total_result.scalar() or 0
@@ -509,7 +519,7 @@ class StockCGCELService:
         except Exception:
             await session.rollback()
         return indent_records
-    
+
     def _apply_indent_cgcel_filters(
         self,
         statement,
@@ -545,18 +555,18 @@ class StockCGCELService:
 
         if from_indent_number:
             if len(from_indent_number) != 6:
-                from_indent_number = 'I' + str(from_indent_number).zfill(5)
+                from_indent_number = "I" + str(from_indent_number).zfill(5)
             statement = statement.where(
                 StockCGCELIndent.indent_number >= from_indent_number
             )
 
         if to_indent_number:
             if len(from_indent_number) != 6:
-                from_indent_number = 'I' + str(from_indent_number).zfill(5)
+                from_indent_number = "I" + str(from_indent_number).zfill(5)
             statement = statement.where(
                 StockCGCELIndent.indent_number <= to_indent_number
-            )        
-          
+            )
+
         return statement
 
     async def enquiry_indent_cgcel(
@@ -575,14 +585,29 @@ class StockCGCELService:
     ):
         statement = select(StockCGCELIndent)
         statement = self._apply_indent_cgcel_filters(
-            statement, spare_description, spare_code, division, from_indent_date, to_indent_date, from_indent_number, to_indent_number
+            statement,
+            spare_description,
+            spare_code,
+            division,
+            from_indent_date,
+            to_indent_date,
+            from_indent_number,
+            to_indent_number,
         )
 
         total_records = None
         if return_total:
             count_query = select(func.count()).select_from(StockCGCELIndent)
             count_query = self._apply_indent_cgcel_filters(
-                count_query, spare_description, spare_code, division, from_indent_date, to_indent_date, from_indent_number, to_indent_number, StockCGCELIndent  
+                count_query,
+                spare_description,
+                spare_code,
+                division,
+                from_indent_date,
+                to_indent_date,
+                from_indent_number,
+                to_indent_number,
+                StockCGCELIndent,
             )
             total_result = await session.execute(count_query)
             total_records = total_result.scalar() or 0
@@ -601,6 +626,7 @@ class StockCGCELService:
                 indent_number=row.StockCGCELIndent.indent_number,
                 indent_date=format_date_ddmmyyyy(row.StockCGCELIndent.indent_date),
                 party_name=row.StockCGCELIndent.party_name,
+                created_by=row.StockCGCELIndent.created_by,
             )
             for row in rows
         ]

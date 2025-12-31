@@ -36,44 +36,44 @@ const initialForm = {
 
 const GRCCGCELReceiveSparePage = () => {
   const [data, setData] = useState([]);
-    // Handler for GRC Number search
-    const handleGrcSearch = async () => {
-      if (!form.grc_number) return;
-      // Check if GRC number is in the suggestions list
-      if (!grcSuggestions.includes(form.grc_number)) {
+  // Handler for GRC Number search
+  const handleGrcSearch = async () => {
+    if (!form.grc_number) return;
+    // Check if GRC number is in the suggestions list
+    if (!grcSuggestions.includes(form.grc_number)) {
+      setError({
+        message: "Invalid GRC Number.",
+        resolution: "Select a GRC Number from suggestions.",
+        type: "warning",
+      });
+      setShowToast(true);
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const result = await fetchNotReceivedGRCDetails(form.grc_number);
+      setData(Array.isArray(result) ? result : []);
+      if (!result || (Array.isArray(result) && result.length === 0)) {
         setError({
-          message: "Invalid GRC Number.",
-          resolution: "Select a GRC Number from suggestions.",
+          message: "No details found for this GRC Number.",
           type: "warning",
+          resolution: "Check the GRC Number or try another.",
         });
         setShowToast(true);
-        return;
       }
-      setLoading(true);
-      setError("");
-      try {
-        const result = await fetchNotReceivedGRCDetails(form.grc_number);
-        setData(Array.isArray(result) ? result : []);
-        if (!result || (Array.isArray(result) && result.length === 0)) {
-          setError({
-            message: "No details found for this GRC Number.",
-            type: "warning",
-            resolution: "Check the GRC Number or try another.",
-          });
-          setShowToast(true);
-        }
-      } catch (err) {
-        setData([]);
-        setError({
-          message: err?.message || "Failed to fetch GRC details.",
-          type: "error",
-          resolution: "Please try again later.",
-        });
-        setShowToast(true);
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (err) {
+      setData([]);
+      setError({
+        message: err?.message || "Failed to fetch GRC details.",
+        type: "error",
+        resolution: "Please try again later.",
+      });
+      setShowToast(true);
+    } finally {
+      setLoading(false);
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -103,12 +103,11 @@ const GRCCGCELReceiveSparePage = () => {
     };
   }, []);
 
-
   // Handler for Receive GRC button
   const handleReceiveGRC = async () => {
     setUpdating(true);
     // Prepare payload: all rows (or filter if needed)
-    const payload = data.map(row => ({
+    const payload = data.map((row) => ({
       spare_code: row.spare_code,
       grc_number: Number(form.grc_number),
       receive_qty: Number(row.receive_qty) ?? 0,
@@ -130,13 +129,15 @@ const GRCCGCELReceiveSparePage = () => {
       return;
     }
     // Validation: issue_qty = receive_qty + defective_qty + short_qty + alt_spare_qty for all records
-    const invalidRows = payload.filter(row => {
+    const invalidRows = payload.filter((row) => {
       const issue_qty = Number(row.issue_qty ?? 0);
       const receive_qty = Number(row.receive_qty ?? 0);
       const defective_qty = Number(row.defective_qty ?? 0);
       const short_qty = Number(row.short_qty ?? 0);
       const alt_spare_qty = Number(row.alt_spare_qty ?? 0);
-      return issue_qty !== (receive_qty + defective_qty + short_qty + alt_spare_qty);
+      return (
+        issue_qty !== receive_qty + defective_qty + short_qty + alt_spare_qty
+      );
     });
     if (invalidRows.length > 0) {
       const failingSpareCode = invalidRows[0]?.spare_code || "Unknown";
@@ -151,8 +152,9 @@ const GRCCGCELReceiveSparePage = () => {
     }
 
     // Validation: if alt_spare_qty is entered (> 0), alt_spare_code and dispute_remark are mandatory
-    const altSpareMissingRows = payload.filter(row =>
-      row.alt_spare_qty > 0 && (!row.alt_spare_code || !row.dispute_remark)
+    const altSpareMissingRows = payload.filter(
+      (row) =>
+        row.alt_spare_qty > 0 && (!row.alt_spare_code || !row.dispute_remark),
     );
     if (altSpareMissingRows.length > 0) {
       const failingSpareCode = altSpareMissingRows[0]?.spare_code || "Unknown";
@@ -219,21 +221,30 @@ const GRCCGCELReceiveSparePage = () => {
 
         <form style={{ marginBottom: 24 }} autoComplete="off">
           {/* GRC Number Row */}
-          <div className="flex items-center gap-3 justify-center mb-3" style={{ position: "relative" }}>
+          <div
+            className="flex items-center gap-3 justify-center mb-3"
+            style={{ position: "relative" }}
+          >
             <label
               htmlFor="grc_number"
               className="text-md font-medium text-blue-800"
             >
               GRC Number
             </label>
-            <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                position: "relative",
+              }}
+            >
               <input
                 id="grc_number"
                 name="grc_number"
                 type="number"
                 value={form.grc_number}
-                onChange={e => {
-                  setForm(prev => ({ ...prev, grc_number: e.target.value }));
+                onChange={(e) => {
+                  setForm((prev) => ({ ...prev, grc_number: e.target.value }));
                   if (grcSuggestions.length > 0) {
                     setShowGrcSuggestions(true);
                   } else {
@@ -245,7 +256,9 @@ const GRCCGCELReceiveSparePage = () => {
                     setShowGrcSuggestions(true);
                   }
                 }}
-                onBlur={() => setTimeout(() => setShowGrcSuggestions(false), 150)}
+                onBlur={() =>
+                  setTimeout(() => setShowGrcSuggestions(false), 150)
+                }
                 autoComplete="off"
                 className="w-34 text-center px-2 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 font-medium"
                 style={{ minWidth: 100 }}
@@ -283,15 +296,15 @@ const GRCCGCELReceiveSparePage = () => {
                 >
                   {(form.grc_number.length === 0
                     ? grcSuggestions
-                    : grcSuggestions.filter(grc =>
-                        String(grc).includes(form.grc_number)
+                    : grcSuggestions.filter((grc) =>
+                        String(grc).includes(form.grc_number),
                       )
                   ).map((grc, idx) => (
                     <li
                       key={grc + idx}
                       style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
                       onMouseDown={() => {
-                        setForm(prev => ({ ...prev, grc_number: grc }));
+                        setForm((prev) => ({ ...prev, grc_number: grc }));
                         setShowGrcSuggestions(false);
                       }}
                     >
@@ -368,27 +381,45 @@ const GRCCGCELReceiveSparePage = () => {
                         }}
                       >
                         {/* Editable columns */}
-                        {['receive_qty', 'defective_qty', 'short_qty', 'alt_spare_code', 'dispute_remark', 'alt_spare_qty'].includes(col.key) ? (
+                        {[
+                          "receive_qty",
+                          "defective_qty",
+                          "short_qty",
+                          "alt_spare_code",
+                          "dispute_remark",
+                          "alt_spare_qty",
+                        ].includes(col.key) ? (
                           <input
-                            type={col.key.includes('qty') ? 'number' : 'text'}
-                            value={row[col.key] ?? ''}
-                            min={col.key.includes('qty') ? 0 : undefined}
+                            type={col.key.includes("qty") ? "number" : "text"}
+                            value={row[col.key] ?? ""}
+                            min={col.key.includes("qty") ? 0 : undefined}
                             maxLength={
-                              col.key === 'dispute_remark' ? 40 :
-                              col.key === 'alt_spare_code' ? 30 : undefined
+                              col.key === "dispute_remark"
+                                ? 40
+                                : col.key === "alt_spare_code"
+                                  ? 30
+                                  : undefined
                             }
                             style={{
-                              width: col.key.includes('qty') ? 70 : 180,
-                              textAlign: 'center',
-                              border: '1px solid #d1d5db',
+                              width: col.key.includes("qty") ? 70 : 180,
+                              textAlign: "center",
+                              border: "1px solid #d1d5db",
                               borderRadius: 6,
-                              padding: '4px 6px',
-                              background: '#f8fafc',
+                              padding: "4px 6px",
+                              background: "#f8fafc",
                               fontWeight: 500,
                             }}
-                            onChange={e => {
-                              const value = col.key.includes('qty') ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value;
-                              setData(prev => prev.map((r, i) => i === idx ? { ...r, [col.key]: value } : r));
+                            onChange={(e) => {
+                              const value = col.key.includes("qty")
+                                ? e.target.value === ""
+                                  ? ""
+                                  : Number(e.target.value)
+                                : e.target.value;
+                              setData((prev) =>
+                                prev.map((r, i) =>
+                                  i === idx ? { ...r, [col.key]: value } : r,
+                                ),
+                              );
                             }}
                           />
                         ) : row[col.key] !== null &&
@@ -406,12 +437,7 @@ const GRCCGCELReceiveSparePage = () => {
           </Table>
         </TableContainer>
         {/* </div> */}
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          mt={2}
-        >
+        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
           <button
             type="button"
             onClick={handleReceiveGRC}

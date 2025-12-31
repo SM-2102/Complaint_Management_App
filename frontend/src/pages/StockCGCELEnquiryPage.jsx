@@ -42,22 +42,21 @@ const Filter = ({
   const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
   const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
     useState(false);
-  const spareCodeSuggestionClickedRef = React.useRef(false);
+  const isTypingSpareCodeRef = React.useRef(false);
+  const isTypingSpareDescriptionRef = React.useRef(false);
 
   const [spareDescriptionSuggestions, setSpareDescriptionSuggestions] =
     useState([]);
   const [showSpareDescriptionSuggestions, setShowSpareDescriptionSuggestions] =
     useState(false);
-  const spareDescriptionSuggestionClickedRef = React.useRef(false);
 
   useEffect(() => {
-    if (spareCodeSuggestionClickedRef.current) {
+    if (!isTypingSpareCodeRef.current) {
       setShowSpareCodeSuggestions(false);
-      setSpareCodeSuggestions([]);
-      spareCodeSuggestionClickedRef.current = false;
       return;
     }
-    if (spareCode && spareCodes && spareCodes.length > 0) {
+
+    if (spareCode && spareCodes.length > 0) {
       const filtered = spareCodes.filter((n) =>
         n.toLowerCase().includes(spareCode.toLowerCase()),
       );
@@ -67,15 +66,13 @@ const Filter = ({
       setShowSpareCodeSuggestions(false);
     }
   }, [spareCode, spareCodes]);
-
   useEffect(() => {
-    if (spareDescriptionSuggestionClickedRef.current) {
+    if (!isTypingSpareDescriptionRef.current) {
       setShowSpareDescriptionSuggestions(false);
-      setSpareDescriptionSuggestions([]);
-      spareDescriptionSuggestionClickedRef.current = false;
       return;
     }
-    if (spareDescription && spareDescriptions && spareDescriptions.length > 0) {
+
+    if (spareDescription && spareDescriptions.length > 0) {
       const filtered = spareDescriptions.filter((n) =>
         n.toLowerCase().includes(spareDescription.toLowerCase()),
       );
@@ -85,6 +82,7 @@ const Filter = ({
       setShowSpareDescriptionSuggestions(false);
     }
   }, [spareDescription, spareDescriptions]);
+
   return (
     <>
       <div
@@ -114,7 +112,10 @@ const Filter = ({
               id="spareCode"
               name="spareCode"
               value={spareCode}
-              onChange={(e) => setSpareCode(e.target.value)}
+              onChange={(e) => {
+                isTypingSpareCodeRef.current = true;
+                setSpareCode(e.target.value);
+              }}
               placeholder="Spare Code"
               style={{
                 width: "100%",
@@ -128,10 +129,9 @@ const Filter = ({
                 boxShadow: "0 1px 2px rgba(25, 118, 210, 0.04)",
               }}
               onFocus={(e) => (e.target.style.border = "1.5px solid #1976d2")}
-              onBlur={(e) => {
-                if (!spareCodeSuggestionClickedRef.current) {
-                  setShowSpareCodeSuggestions(false);
-                }
+              onBlur={() => {
+                isTypingSpareCodeRef.current = false;
+                setShowSpareCodeSuggestions(false);
               }}
             />
             {showSpareCodeSuggestions && (
@@ -164,10 +164,9 @@ const Filter = ({
                       borderBottom: "1px solid #f0f0f0",
                     }}
                     onMouseDown={() => {
-                      spareCodeSuggestionClickedRef.current = true;
+                      isTypingSpareCodeRef.current = false;
                       setSpareCode(n);
                       setShowSpareCodeSuggestions(false);
-                      setSpareCodeSuggestions([]);
                     }}
                   >
                     {n}
@@ -195,8 +194,11 @@ const Filter = ({
               id="spareDescription"
               name="spareDescription"
               value={spareDescription}
-              onChange={(e) => setSpareDescription(e.target.value)}
-              placeholder="Spare Description"
+              onChange={(e) => {
+                isTypingSpareDescriptionRef.current = true;
+                setSpareDescription(e.target.value);
+              }}
+              placeholder="Spare Code"
               style={{
                 width: "100%",
                 padding: "6px 10px",
@@ -209,10 +211,9 @@ const Filter = ({
                 boxShadow: "0 1px 2px rgba(25, 118, 210, 0.04)",
               }}
               onFocus={(e) => (e.target.style.border = "1.5px solid #1976d2")}
-              onBlur={(e) => {
-                if (!spareDescriptionSuggestionClickedRef.current) {
-                  setShowSpareDescriptionSuggestions(false);
-                }
+              onBlur={() => {
+                isTypingSpareDescriptionRef.current = false;
+                setShowSpareDescriptionSuggestions(false);
               }}
             />
             {showSpareDescriptionSuggestions && (
@@ -245,10 +246,9 @@ const Filter = ({
                       borderBottom: "1px solid #f0f0f0",
                     }}
                     onMouseDown={() => {
-                      spareDescriptionSuggestionClickedRef.current = true;
+                      isTypingSpareDescriptionRef.current = false;
                       setSpareDescription(n);
                       setShowSpareDescriptionSuggestions(false);
-                      setSpareDescriptionSuggestions([]);
                     }}
                   >
                     {n}
@@ -332,7 +332,7 @@ const Filter = ({
               </select>
             </div>
           </div>
-           <div style={{ marginBottom: 10 }}>
+          <div style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <label
                 htmlFor="grc"
@@ -368,7 +368,7 @@ const Filter = ({
               </select>
             </div>
           </div>
-           <div style={{ marginBottom: 10 }}>
+          <div style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <label
                 htmlFor="own"
@@ -471,7 +471,6 @@ const Filter = ({
   );
 };
 
-
 const StockCGCELEnquiryPage = () => {
   const [division, setDivision] = useState("");
   const [spareDescription, setSpareDescription] = useState("");
@@ -480,7 +479,6 @@ const StockCGCELEnquiryPage = () => {
   const [grc, setGrc] = useState("");
   const [own, setOwn] = useState("");
   // Data states
-
 
   const [data, setData] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -534,7 +532,7 @@ const StockCGCELEnquiryPage = () => {
     try {
       const offset = (pageNum - 1) * pageLimit;
       const res = await stockCGCELEnquiry(params, pageLimit, offset);
-      if (res && typeof res === 'object' && Array.isArray(res.records)) {
+      if (res && typeof res === "object" && Array.isArray(res.records)) {
         setData(res.records);
         setTotalRecords(res.total_records || 0);
       } else if (Array.isArray(res)) {
@@ -656,31 +654,94 @@ const StockCGCELEnquiryPage = () => {
           />
           {/* Pagination Controls */}
           {searched && (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 24, gap: 8, width: "100%" }}>
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 16, width: "100%", position: "relative" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginTop: 24,
+                gap: 8,
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 16,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
                 {/* Centered Pagination Buttons */}
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 16, flex: 1 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 16,
+                    flex: 1,
+                  }}
+                >
                   <button
                     onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1 || loading}
-                    style={{ padding: "8px 16px", borderRadius: 6, background: "#1976d2", color: "#fff", border: "none", fontWeight: "bold", fontSize: 15, cursor: page === 1 ? "not-allowed" : "pointer", opacity: page === 1 ? 0.6 : 1 }}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 6,
+                      background: "#1976d2",
+                      color: "#fff",
+                      border: "none",
+                      fontWeight: "bold",
+                      fontSize: 15,
+                      cursor: page === 1 ? "not-allowed" : "pointer",
+                      opacity: page === 1 ? 0.6 : 1,
+                    }}
                   >
                     Previous
                   </button>
-                  <span style={{ fontWeight: 600, fontSize: 16 }}>Page {page}</span>
+                  <span style={{ fontWeight: 600, fontSize: 16 }}>
+                    Page {page}
+                  </span>
                   <button
                     onClick={() => handlePageChange(page + 1)}
                     disabled={data.length < limit || loading}
-                    style={{ padding: "8px 16px", borderRadius: 6, background: "#1976d2", color: "#fff", border: "none", fontWeight: "bold", fontSize: 15, cursor: data.length < limit ? "not-allowed" : "pointer", opacity: data.length < limit ? 0.6 : 1 }}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 6,
+                      background: "#1976d2",
+                      color: "#fff",
+                      border: "none",
+                      fontWeight: "bold",
+                      fontSize: 15,
+                      cursor: data.length < limit ? "not-allowed" : "pointer",
+                      opacity: data.length < limit ? 0.6 : 1,
+                    }}
                   >
                     Next
                   </button>
                 </div>
                 {/* Rows per page selector aligned right */}
-                <div style={{ position: "absolute", right: 0, display: "flex", alignItems: "center" }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
                   <label style={{ fontWeight: 500 }}>
                     Rows per page:
-                    <select value={limit} onChange={handleLimitChange} style={{ marginLeft: 8, padding: "4px 8px", borderRadius: 4 }}>
+                    <select
+                      value={limit}
+                      onChange={handleLimitChange}
+                      style={{
+                        marginLeft: 8,
+                        padding: "4px 8px",
+                        borderRadius: 4,
+                      }}
+                    >
                       <option value={25}>25</option>
                       <option value={50}>50</option>
                       <option value={100}>100</option>

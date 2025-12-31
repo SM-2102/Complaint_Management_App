@@ -1,5 +1,5 @@
-from datetime import date
 import token
+from datetime import date
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
@@ -8,9 +8,14 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
-
+from grc_cgcel.schemas import (
+    GRCCGCELReceiveSchema,
+    GRCCGCELReturnSave,
+    GRCCGCELReturnSchema,
+    GRCCGCELUpdateReceiveSchema,
+    GRCFullPayload,
+)
 from grc_cgcel.service import GRCCGCELService
-from grc_cgcel.schemas import GRCCGCELReceiveSchema, GRCCGCELUpdateReceiveSchema, GRCCGCELReturnSchema, GRCCGCELReturnSave, GRCFullPayload
 
 grc_cgcel_router = APIRouter()
 grc_cgcel_service = GRCCGCELService()
@@ -57,13 +62,17 @@ async def upload_grc_cgcel(
         status_code=status.HTTP_200_OK,
     )
 
+
 """
 GRC Numbers not received yet.
 """
+
+
 @grc_cgcel_router.get(
     "/not_received_grc",
     response_model=List[int],
-    status_code=status.HTTP_200_OK,)
+    status_code=status.HTTP_200_OK,
+)
 async def not_received_grc(
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
@@ -71,13 +80,17 @@ async def not_received_grc(
     result = await grc_cgcel_service.not_received_grc_numbers(session)
     return result
 
+
 """
 Not received details by grc number
 """
+
+
 @grc_cgcel_router.get(
     "/not_received_by_grc_number/{grc_number}",
     response_model=List[GRCCGCELReceiveSchema],
-    status_code=status.HTTP_200_OK,)
+    status_code=status.HTTP_200_OK,
+)
 async def not_received_by_grc_number(
     grc_number: int,
     session: AsyncSession = Depends(get_session),
@@ -91,6 +104,7 @@ async def not_received_by_grc_number(
 Update GRC CGCEL Receive Details
 """
 
+
 @grc_cgcel_router.post(
     "/update_receive",
     status_code=status.HTTP_202_ACCEPTED,
@@ -101,17 +115,19 @@ async def update_grc_cgcel_receive(
     _=Depends(access_token_bearer),
 ):
     await grc_cgcel_service.update_cgcel_grc_receive(data, session)
-    return JSONResponse(
-        content={"message": f"GRC Receive Details Updated"}
-    )
+    return JSONResponse(content={"message": f"GRC Receive Details Updated"})
+
 
 """
 Get GRC Return by Division
 """
+
+
 @grc_cgcel_router.get(
     "/grc_return_by_division/{division}",
     response_model=List[GRCCGCELReturnSchema],
-    status_code=status.HTTP_200_OK,)
+    status_code=status.HTTP_200_OK,
+)
 async def grc_return_by_division(
     division: str,
     session: AsyncSession = Depends(get_session),
@@ -120,9 +136,12 @@ async def grc_return_by_division(
     result = await grc_cgcel_service.grc_return_by_division(division, session)
     return result
 
+
 """
 GRC CGCEL Save GRC Return Details
 """
+
+
 @grc_cgcel_router.post(
     "/save_grc_return",
     status_code=status.HTTP_202_ACCEPTED,
@@ -133,13 +152,14 @@ async def save_grc_cgcel_return(
     _=Depends(access_token_bearer),
 ):
     await grc_cgcel_service.save_cgcel_grc_return(data, session)
-    return JSONResponse(
-        content={"message": f"GRC Return Details Saved"}
-    )
+    return JSONResponse(content={"message": f"GRC Return Details Saved"})
+
 
 """
 GRC CGCEL Finalize GRC Return Details
 """
+
+
 @grc_cgcel_router.post(
     "/finalize_grc_return",
     status_code=status.HTTP_202_ACCEPTED,
@@ -150,10 +170,7 @@ async def finalize_grc_cgcel_return(
     token=Depends(access_token_bearer),
 ):
     await grc_cgcel_service.finalize_cgcel_grc_return(data, session, token)
-    return JSONResponse(
-        content={"message": f"GRC Return Details Finalized"}
-    )
-
+    return JSONResponse(content={"message": f"GRC Return Details Finalized"})
 
 
 """
@@ -172,6 +189,8 @@ async def next_cgcel_challan_code(
 """
 GRC Print Report
 """
+
+
 @grc_cgcel_router.post(
     "/print_report/{report_type}",
     status_code=status.HTTP_200_OK,

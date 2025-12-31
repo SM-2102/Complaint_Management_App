@@ -22,7 +22,16 @@ const initialForm = {
   remark: "NIL",
 };
 
-const divisionOptions = ["FANS", "PUMP", "SDA", "WHC", "FHP", "LT", "HT", "OTHERS"];
+const divisionOptions = [
+  "FANS",
+  "PUMP",
+  "SDA",
+  "WHC",
+  "FHP",
+  "LT",
+  "HT",
+  "OTHERS",
+];
 
 const StockCGPISLRaiseIndentPage = () => {
   const [form, setForm] = useState(initialForm);
@@ -39,79 +48,74 @@ const StockCGPISLRaiseIndentPage = () => {
     useState(false);
 
   useEffect(() => {
-  if (!form.spare_code || spareList.length === 0) {
-    setShowSpareCodeSuggestions(false);
-    return;
-  }
+    if (!form.spare_code || spareList.length === 0) {
+      setShowSpareCodeSuggestions(false);
+      return;
+    }
 
-  const q = form.spare_code.toLowerCase();
-  if (q.length < 3) return;
-
-
-  const filtered = spareList.filter(
-  (item) =>
-    typeof item.spare_code === "string" &&
-    item.spare_code.toLowerCase().includes(q)
-);
-
-
-  setSpareCodeSuggestions(filtered);
-  setShowSpareCodeSuggestions(filtered.length > 0);
-}, [form.spare_code, spareList]);
-
-useEffect(() => {
-  if (!form.spare_description || spareList.length === 0) {
-    setShowSpareDescriptionSuggestions(false);
-    return;
-  }
-
-  const q = form.spare_description.toLowerCase();
+    const q = form.spare_code.toLowerCase();
     if (q.length < 3) return;
 
+    const filtered = spareList.filter(
+      (item) =>
+        typeof item.spare_code === "string" &&
+        item.spare_code.toLowerCase().includes(q),
+    );
 
-  const filtered = spareList.filter(
-  (item) =>
-    typeof item.spare_description === "string" &&
-    item.spare_description.toLowerCase().includes(q)
-);
-  setSpareDescriptionSuggestions(filtered);
-  setShowSpareDescriptionSuggestions(filtered.length > 0);
-}, [form.spare_description, spareList]);
+    setSpareCodeSuggestions(filtered);
+    setShowSpareCodeSuggestions(filtered.length > 0);
+  }, [form.spare_code, spareList]);
 
+  useEffect(() => {
+    if (!form.spare_description || spareList.length === 0) {
+      setShowSpareDescriptionSuggestions(false);
+      return;
+    }
+
+    const q = form.spare_description.toLowerCase();
+    if (q.length < 3) return;
+
+    const filtered = spareList.filter(
+      (item) =>
+        typeof item.spare_description === "string" &&
+        item.spare_description.toLowerCase().includes(q),
+    );
+    setSpareDescriptionSuggestions(filtered);
+    setShowSpareDescriptionSuggestions(filtered.length > 0);
+  }, [form.spare_description, spareList]);
 
   const handleChange = async (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === "division") {
-    setForm((prev) => ({
-      ...prev,
-      division: value,
-      spare_code: "",
-      spare_description: "",
-    }));
+    if (name === "division") {
+      setForm((prev) => ({
+        ...prev,
+        division: value,
+        spare_code: "",
+        spare_description: "",
+      }));
 
-    setError((prev) => ({ ...prev, division: undefined }));
-    setSpareList([]);
-    setSpareCodeSuggestions([]);
-    setSpareDescriptionSuggestions([]);
-    setShowSpareCodeSuggestions(false);
-    setShowSpareDescriptionSuggestions(false);
+      setError((prev) => ({ ...prev, division: undefined }));
+      setSpareList([]);
+      setSpareCodeSuggestions([]);
+      setSpareDescriptionSuggestions([]);
+      setShowSpareCodeSuggestions(false);
+      setShowSpareDescriptionSuggestions(false);
 
-    if (value) {
-      try {
-        const data = await stockCGPISLListByDivision(value);
-        setSpareList(Array.isArray(data) ? data : []);
-      } catch {
-        setSpareList([]);
+      if (value) {
+        try {
+          const data = await stockCGPISLListByDivision(value);
+          setSpareList(Array.isArray(data) ? data : []);
+        } catch {
+          setSpareList([]);
+        }
       }
+      return;
     }
-    return;
-  }
 
-  setForm((prev) => ({ ...prev, [name]: value }));
-  setError((prev) => ({ ...prev, [name]: undefined }));
-};
-
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setError((prev) => ({ ...prev, [name]: undefined }));
+  };
 
   const handleSearch = async (type) => {
     setError("");
@@ -255,11 +259,10 @@ useEffect(() => {
                 className={`w-full px-3 py-1 ${errs_label.spare_code ? "border-red-300" : "border-gray-300"} rounded-lg border bg-gray-50 text-gray-900 font-medium`}
                 maxLength={30}
                 onBlur={(e) => {
-  if (!e.currentTarget.contains(e.relatedTarget)) {
-    setShowSpareCodeSuggestions(false);
-  }
-}}
-
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setShowSpareCodeSuggestions(false);
+                  }
+                }}
               />
               {showSpareCodeSuggestions && (
                 <ul
@@ -285,14 +288,13 @@ useEffect(() => {
                       key={item.spare_code}
                       style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
                       onMouseDown={() => {
-  setForm((prev) => ({
-    ...prev,
-    spare_code: item.spare_code,
-    spare_description: item.spare_description,
-  }));
-  setShowSpareCodeSuggestions(false);
-}}
-
+                        setForm((prev) => ({
+                          ...prev,
+                          spare_code: item.spare_code,
+                          spare_description: item.spare_description,
+                        }));
+                        setShowSpareCodeSuggestions(false);
+                      }}
                     >
                       {item.spare_code}
                     </li>
@@ -340,13 +342,11 @@ useEffect(() => {
                   required
                   disabled={submitting}
                   autoComplete="Spare Description"
-        
                   onBlur={(e) => {
-  if (!e.currentTarget.contains(e.relatedTarget)) {
-    setShowSpareDescriptionSuggestions(false);
-  }
-}}
-
+                    if (!e.currentTarget.contains(e.relatedTarget)) {
+                      setShowSpareDescriptionSuggestions(false);
+                    }
+                  }}
                 />
                 {showSpareDescriptionSuggestions && (
                   <ul
@@ -372,14 +372,13 @@ useEffect(() => {
                         key={item.spare_code}
                         style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
                         onMouseDown={() => {
-  setForm((prev) => ({
-    ...prev,
-    spare_code: item.spare_code,
-    spare_description: item.spare_description,
-  }));
-  setShowSpareDescriptionSuggestions(false);
-}}
-
+                          setForm((prev) => ({
+                            ...prev,
+                            spare_code: item.spare_code,
+                            spare_description: item.spare_description,
+                          }));
+                          setShowSpareDescriptionSuggestions(false);
+                        }}
                       >
                         {item.spare_description}
                       </li>

@@ -3,10 +3,10 @@ from datetime import date, timedelta
 from sqlalchemy import case, func, literal, select, union_all
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from stock_cgcel.models import StockCGCEL
-from stock_cgpisl.models import StockCGPISL
 from grc_cgcel.models import GRCCGCEL
 from grc_cgpisl.models import GRCCGPISL
+from stock_cgcel.models import StockCGCEL
+from stock_cgpisl.models import StockCGPISL
 
 
 class MenuService:
@@ -30,11 +30,8 @@ class MenuService:
             .order_by(model.division)
         )
         division_rows = (await session.execute(division_stmt)).all()
-        return [
-            {"division": row.division, "count": row.count}
-            for row in division_rows
-        ]
-    
+        return [{"division": row.division, "count": row.count} for row in division_rows]
+
     @classmethod
     async def grc_overview(
         cls,
@@ -78,19 +75,23 @@ class MenuService:
         # -------------------------------
         # Division-wise aggregation (donut)
         # -------------------------------
-        division_stmt = (select(model.division,func.count().label("count"),)
-			.where(model.division.isnot(None))
-			.group_by(model.division)
-			.order_by(model.division)
-		)
+        division_stmt = (
+            select(
+                model.division,
+                func.count().label("count"),
+            )
+            .where(model.division.isnot(None))
+            .group_by(model.division)
+            .order_by(model.division)
+        )
         division_rows = (await session.execute(division_stmt)).all()
         division_donut = [
-			{
-				"division": row.division,
-				"count": row.count,
-			}
-			for row in division_rows
-		]
+            {
+                "division": row.division,
+                "count": row.count,
+            }
+            for row in division_rows
+        ]
 
         # -------------------------------
         # Overall totals (single row)
@@ -148,4 +149,3 @@ class MenuService:
                 },
             }
         }
-

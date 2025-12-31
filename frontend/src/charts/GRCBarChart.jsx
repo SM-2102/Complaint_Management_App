@@ -1,10 +1,16 @@
 // Division-wise Donut Chart for Retail Data
 import React, { useEffect, useState, useRef } from "react";
 import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, BarElement, Tooltip, Legend, CategoryScale, LinearScale } from "chart.js";
+import {
+  Chart as ChartJS,
+  BarElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+} from "chart.js";
 
 ChartJS.register(BarElement, Tooltip, Legend, CategoryScale, LinearScale);
-
 
 const GRCBarChart = ({ data }) => {
   // 'data' is expected to be an array of { division, count }
@@ -93,11 +99,19 @@ const GRCBarChart = ({ data }) => {
 
   return (
     <div className="p-1 md:p-1 rounded-lg flex flex-col items-center w-full min-w-0 overflow-hidden max-h-full">
-      <div className="relative w-full flex items-center justify-center overflow-hidden min-w-0 min-h-0" style={{ maxWidth: "100%", maxHeight: "100%" }}>
+      <div
+        className="relative w-full flex items-center justify-center overflow-hidden min-w-0 min-h-0"
+        style={{ maxWidth: "100%", maxHeight: "100%" }}
+      >
         <Bar
           data={chartDataObj}
           options={options}
-          style={{ width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%" }}
+          style={{
+            width: "100%",
+            height: "100%",
+            maxWidth: "100%",
+            maxHeight: "100%",
+          }}
         />
       </div>
     </div>

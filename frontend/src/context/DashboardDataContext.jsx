@@ -69,9 +69,9 @@ export const DashboardDataProvider = ({ children }) => {
           number_of_items_issued_in_advance: {},
           number_of_items_under_process: {},
         },
-        grc : {
+        grc: {
           division_wise_donut: [],
-        }
+        },
       });
     } finally {
       setLoading(false);

@@ -111,10 +111,15 @@ const StockDivisionDonutChart = ({ data, meta }) => {
   };
 
   // Read totals from meta prop (passed by MenuDashboardPage)
-  const totalStock = (typeof meta?.totalStock === 'number') ? meta.totalStock : 0;
-  const totalGodown = (typeof meta?.totalGodown === 'number') ? meta.totalGodown : 0;
-  const totalIssuedInAdvance = (typeof meta?.totalIssuedInAdvance === 'number') ? meta.totalIssuedInAdvance : 0;
-  const totalUnderProcess = (typeof meta?.totalUnderProcess === 'number') ? meta.totalUnderProcess : 0;
+  const totalStock = typeof meta?.totalStock === "number" ? meta.totalStock : 0;
+  const totalGodown =
+    typeof meta?.totalGodown === "number" ? meta.totalGodown : 0;
+  const totalIssuedInAdvance =
+    typeof meta?.totalIssuedInAdvance === "number"
+      ? meta.totalIssuedInAdvance
+      : 0;
+  const totalUnderProcess =
+    typeof meta?.totalUnderProcess === "number" ? meta.totalUnderProcess : 0;
 
   // Card styles (copied from ChallanChart)
   const stylishFont = {

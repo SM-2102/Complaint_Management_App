@@ -43,21 +43,21 @@ const NotificationCreatePage = () => {
 
   // Fetch standard employees (role USER or TECHNICIAN)
   useEffect(() => {
-  setLoadingEmployees(true);
+    setLoadingEmployees(true);
 
-  fetchStandardEmployees()
-    .then((data) => {
-      const usersOnly = Array.isArray(data)
-        ? data.filter((emp) => emp.role === "USER")
-        : [];
+    fetchStandardEmployees()
+      .then((data) => {
+        const usersOnly = Array.isArray(data)
+          ? data.filter((emp) => emp.role === "USER")
+          : [];
 
-      setEmployees(usersOnly);
-    })
-    .catch(() => {
-      setEmployees([]);
-    })
-    .finally(() => setLoadingEmployees(false));
-}, []);
+        setEmployees(usersOnly);
+      })
+      .catch(() => {
+        setEmployees([]);
+      })
+      .finally(() => setLoadingEmployees(false));
+  }, []);
   const [showToast, setShowToast] = useState(false);
   const [error, setError] = useState(null);
 
@@ -162,8 +162,7 @@ const NotificationCreatePage = () => {
             gridTemplateColumns: "100px 200px 50px 1fr",
             gap: 16,
             alignItems: "start",
-            gridTemplateRows: "60px auto"
-
+            gridTemplateRows: "60px auto",
           }}
         >
           <label
@@ -178,39 +177,39 @@ const NotificationCreatePage = () => {
             Assigned To
           </label>
           <div
-  style={{
-    gridColumn: 2,
-    gridRow: 1,
-    alignSelf: "start",
-  }}
->
-  <select
-    id="assigned_to"
-    name="assigned_to"
-    multiple
-    value={form.assigned_to}
-    onChange={handleInputChange}
-    style={{
-      width: "100%",
-      padding: 8,
-      borderRadius: 4,
-      border: "1px solid #abc",
-      height: 120,   // increase height here
-      fontSize: 16,
-      boxSizing: "border-box",
-    }}
-    disabled={loadingEmployees || submitting}
-  >
-    {employees.map((emp) => {
-      const value = emp.username || emp.employee_id || emp.id;
-      return (
-        <option key={value} value={value}>
-          {emp.name || emp.username || emp.employee_id}
-        </option>
-      );
-    })}
-  </select>
-</div>
+            style={{
+              gridColumn: 2,
+              gridRow: 1,
+              alignSelf: "start",
+            }}
+          >
+            <select
+              id="assigned_to"
+              name="assigned_to"
+              multiple
+              value={form.assigned_to}
+              onChange={handleInputChange}
+              style={{
+                width: "100%",
+                padding: 8,
+                borderRadius: 4,
+                border: "1px solid #abc",
+                height: 120, // increase height here
+                fontSize: 16,
+                boxSizing: "border-box",
+              }}
+              disabled={loadingEmployees || submitting}
+            >
+              {employees.map((emp) => {
+                const value = emp.username || emp.employee_id || emp.id;
+                return (
+                  <option key={value} value={value}>
+                    {emp.name || emp.username || emp.employee_id}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
           <label
             htmlFor="details"
             style={{

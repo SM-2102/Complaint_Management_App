@@ -19,15 +19,15 @@ import { updateCGCELReturnFinalize } from "../services/grcCGCELReturnFinalizeSer
 
 const columns = [
   { key: "grc_number", label: "GRC Number" },
-    { key: "grc_date", label: "GRC Date" },
-    { key: "spare_description", label: "Spare Description" },
-    { key: "issue_qty", label: "Issue Qty" },
-    { key: "grc_pending_qty", label: "GRC Pending Qty" },
-    { key: "actual_pending_qty", label: "Actual Pending Qty" },
-    { key: "returned_qty", label: "Returned Qty" },
-    { key: "good_qty", label: "Good Qty" }, 
-    { key: "defective_qty", label: "Defective Qty" },
-    { key: "invoice", label: "Invoice" },
+  { key: "grc_date", label: "GRC Date" },
+  { key: "spare_description", label: "Spare Description" },
+  { key: "issue_qty", label: "Issue Qty" },
+  { key: "grc_pending_qty", label: "GRC Pending Qty" },
+  { key: "actual_pending_qty", label: "Actual Pending Qty" },
+  { key: "returned_qty", label: "Returned Qty" },
+  { key: "good_qty", label: "Good Qty" },
+  { key: "defective_qty", label: "Defective Qty" },
+  { key: "invoice", label: "Invoice" },
 ];
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
@@ -48,7 +48,7 @@ const initialForm = {
 
 const GRCCGCELReturnSparePage = () => {
   const [data, setData] = useState([]);
-    // Handler for GRC Number search
+  // Handler for GRC Number search
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -65,7 +65,7 @@ const GRCCGCELReturnSparePage = () => {
     try {
       if (form.action_type === "Save as Draft") {
         // Save as Draft logic
-        const payload = data.map(row => ({
+        const payload = data.map((row) => ({
           spare_code: row.spare_code || "",
           grc_number: row.grc_number || 0,
           good_qty: row.good_qty || 0,
@@ -77,7 +77,9 @@ const GRCCGCELReturnSparePage = () => {
         await updateCGCELReturnSave(payload);
         setShowToast(true);
         setError({ message: "Saved as draft successfully!", type: "success" });
-        setTimeout(() => { window.location.reload(); }, 1500);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       } else if (form.action_type === "Report") {
         // Report logic: call print API with correct route and payload
         const reportType = form.report_type || "All";
@@ -87,8 +89,8 @@ const GRCCGCELReturnSparePage = () => {
           sent_through: form.sent_through,
           docket_number: form.docket_number,
           grc_rows: data
-            .filter(row => row.invoice !== "Y")
-            .map(row => ({
+            .filter((row) => row.invoice !== "Y")
+            .map((row) => ({
               grc_number: row.grc_number,
               grc_date: row.grc_date,
               spare_code: row.spare_code || "",
@@ -101,23 +103,29 @@ const GRCCGCELReturnSparePage = () => {
         // Call the print API (opens PDF in new tab, handled in service)
         await printGRCReturn({ ...payload, report_type: reportType });
         setShowToast(true);
-        setError({ message: "Report generated successfully!", type: "success" });
+        setError({
+          message: "Report generated successfully!",
+          type: "success",
+        });
       } else if (form.action_type === "Finalize") {
         // Save as Draft logic
-        if(data.length === 0){
+        if (data.length === 0) {
           return;
         }
-        if(!form.docket_number || form.docket_number.trim() === ""){
+        if (!form.docket_number || form.docket_number.trim() === "") {
           setShowToast(true);
           setError({ message: "Consignment No. is required", type: "warning" });
           return;
         }
-        if(!form.sent_through || form.sent_through.trim() === ""){
+        if (!form.sent_through || form.sent_through.trim() === "") {
           setShowToast(true);
-          setError({ message: "Returned Through is required", type: "warning" });
+          setError({
+            message: "Returned Through is required",
+            type: "warning",
+          });
           return;
         }
-        const payload = data.map(row => ({
+        const payload = data.map((row) => ({
           spare_code: row.spare_code || "",
           grc_number: row.grc_number || 0,
           good_qty: row.good_qty || 0,
@@ -129,13 +137,15 @@ const GRCCGCELReturnSparePage = () => {
         await updateCGCELReturnFinalize(payload);
         setShowToast(true);
         setError({ message: "Finalized successfully!", type: "success" });
-        setTimeout(() => { window.location.reload(); }, 1500);
-      } 
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
     } catch (err) {
       setError({
         message: err.message || "Failed to execute action.",
         type: "error",
-        resolution: err.resolution || "Please try again."
+        resolution: err.resolution || "Please try again.",
       });
       setShowToast(true);
     } finally {
@@ -251,20 +261,23 @@ const GRCCGCELReturnSparePage = () => {
           Return GRC Spare
         </h2>
 
-
-
         <form style={{ marginBottom: 24 }} autoComplete="off">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-1 ml-10 mr-10">
             {/* Division */}
             <div className="flex items-center gap-2">
-              <label htmlFor="division" className="text-md font-medium text-gray-700 min-w-[110px]">
+              <label
+                htmlFor="division"
+                className="text-md font-medium text-gray-700 min-w-[110px]"
+              >
                 Division<span className="text-red-500">*</span>
               </label>
               <select
                 id="division"
                 name="division"
                 value={form.division}
-                onChange={e => setForm(prev => ({ ...prev, division: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, division: e.target.value }))
+                }
                 required
                 className="w-full mr-40 px-2 py-1 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-blue-400"
                 style={{ minWidth: 140 }}
@@ -272,14 +285,19 @@ const GRCCGCELReturnSparePage = () => {
                 <option value="" disabled>
                   Select Division
                 </option>
-                {divisionOptions.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
+                {divisionOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
             {/* Challan Number */}
             <div className="flex items-center gap-2">
-              <label htmlFor="challan_number" className="text-md  ml-20 font-medium text-blue-800 min-w-[110px]">
+              <label
+                htmlFor="challan_number"
+                className="text-md  ml-20 font-medium text-blue-800 min-w-[110px]"
+              >
                 Challan Code
               </label>
               <input
@@ -296,7 +314,10 @@ const GRCCGCELReturnSparePage = () => {
             </div>
             {/* Returned Through */}
             <div className="flex items-center gap-2">
-              <label htmlFor="sent_through" className="text-md ml-20 font-medium text-gray-700 min-w-[140px]">
+              <label
+                htmlFor="sent_through"
+                className="text-md ml-20 font-medium text-gray-700 min-w-[140px]"
+              >
                 Returned Through
               </label>
               <input
@@ -304,7 +325,9 @@ const GRCCGCELReturnSparePage = () => {
                 name="sent_through"
                 type="text"
                 value={form.sent_through}
-                onChange={e => setForm(prev => ({ ...prev, sent_through: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, sent_through: e.target.value }))
+                }
                 className={`w-full px-2 py-1 rounded-lg border border-gray-300 font-small focus:outline-none focus:ring-2 focus:ring-blue-400 `}
                 style={{ minWidth: 140 }}
                 autoComplete="off"
@@ -313,48 +336,65 @@ const GRCCGCELReturnSparePage = () => {
             </div>
             {/* Report Type */}
             <div className="flex items-center gap-2">
-              <label htmlFor="report_type" className="text-md font-medium text-gray-700 min-w-[110px]">
+              <label
+                htmlFor="report_type"
+                className="text-md font-medium text-gray-700 min-w-[110px]"
+              >
                 Report Type
               </label>
               <select
                 id="report_type"
                 name="report_type"
                 value={isReportTypeEnabled ? form.report_type : ""}
-                onChange={e => setForm(prev => ({ ...prev, report_type: e.target.value }))}
-                className={`w-full mr-40 px-2 py-1 rounded-lg border border-gray-300 font-small focus:outline-none focus:ring-2 focus:ring-blue-400 ${!isReportTypeEnabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'text-gray-900'}`}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, report_type: e.target.value }))
+                }
+                className={`w-full mr-40 px-2 py-1 rounded-lg border border-gray-300 font-small focus:outline-none focus:ring-2 focus:ring-blue-400 ${!isReportTypeEnabled ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "text-gray-900"}`}
                 style={{ minWidth: 140 }}
                 disabled={!isReportTypeEnabled}
               >
                 {!isReportTypeEnabled ? (
                   <option value=""></option>
                 ) : (
-                  reportTypeOptions.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
+                  reportTypeOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
                   ))
                 )}
               </select>
             </div>
             {/* Action Type */}
             <div className="flex items-center gap-2">
-              <label htmlFor="action_type" className="text-md font-medium ml-20 text-gray-700 min-w-[110px]">
+              <label
+                htmlFor="action_type"
+                className="text-md font-medium ml-20 text-gray-700 min-w-[110px]"
+              >
                 Action Type
               </label>
               <select
                 id="action_type"
                 name="action_type"
                 value={form.action_type}
-                onChange={e => setForm(prev => ({ ...prev, action_type: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, action_type: e.target.value }))
+                }
                 className="w-full px-2 py-1 mr-20 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-blue-400"
                 style={{ minWidth: 140 }}
               >
-                {actionTypeOptions.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
+                {actionTypeOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
             {/* Consignment Note No. */}
             <div className="flex items-center gap-2">
-              <label htmlFor="docket_number" className="text-md font-medium ml-20 text-gray-700 min-w-[140px]">
+              <label
+                htmlFor="docket_number"
+                className="text-md font-medium ml-20 text-gray-700 min-w-[140px]"
+              >
                 Consignment No.
               </label>
               <input
@@ -362,7 +402,12 @@ const GRCCGCELReturnSparePage = () => {
                 name="docket_number"
                 type="text"
                 value={form.docket_number}
-                onChange={e => setForm(prev => ({ ...prev, docket_number: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    docket_number: e.target.value,
+                  }))
+                }
                 className={`w-full px-2 py-1 rounded-lg border border-gray-300 font-small focus:outline-none focus:ring-2 focus:ring-blue-400 `}
                 style={{ minWidth: 140 }}
                 autoComplete="off"
@@ -442,8 +487,10 @@ const GRCCGCELReturnSparePage = () => {
                             style={{
                               borderRadius: "6px",
                               border: "none",
-                              background: row.invoice === "Y" ? "#e3fcec" : "#ffe3e3",
-                              color: row.invoice === "Y" ? "#388e3c" : "#d32f2f",
+                              background:
+                                row.invoice === "Y" ? "#e3fcec" : "#ffe3e3",
+                              color:
+                                row.invoice === "Y" ? "#388e3c" : "#d32f2f",
                               fontWeight: 700,
                               fontSize: "15px",
                               padding: "4px 12px",
@@ -454,15 +501,23 @@ const GRCCGCELReturnSparePage = () => {
                             }}
                             aria-label="Toggle Invoice"
                             onClick={() => {
-                              setData(prev => prev.map((r, i) => {
-                                if (i !== idx) return r;
-                                const newInvoice = r.invoice === "Y" ? "N" : "Y";
-                                // If disabling, set good_qty and defective_qty to null
-                                if (newInvoice === "Y") {
-                                  return { ...r, invoice: newInvoice, good_qty: null, defective_qty: null };
-                                }
-                                return { ...r, invoice: newInvoice };
-                              }));
+                              setData((prev) =>
+                                prev.map((r, i) => {
+                                  if (i !== idx) return r;
+                                  const newInvoice =
+                                    r.invoice === "Y" ? "N" : "Y";
+                                  // If disabling, set good_qty and defective_qty to null
+                                  if (newInvoice === "Y") {
+                                    return {
+                                      ...r,
+                                      invoice: newInvoice,
+                                      good_qty: null,
+                                      defective_qty: null,
+                                    };
+                                  }
+                                  return { ...r, invoice: newInvoice };
+                                }),
+                              );
                             }}
                           >
                             {row.invoice === "Y" ? "Yes" : "No"}
@@ -478,28 +533,45 @@ const GRCCGCELReturnSparePage = () => {
                               border: "1px solid #d1d5db",
                               borderRadius: 6,
                               padding: "4px 6px",
-                              background: row.invoice === "Y" ? "#e5e7eb" : "#f8fafc",
+                              background:
+                                row.invoice === "Y" ? "#e5e7eb" : "#f8fafc",
                               fontWeight: 500,
-                              color: row.invoice === "Y" ? "#9ca3af" : undefined,
-                              cursor: row.invoice === "Y" ? "not-allowed" : undefined,
+                              color:
+                                row.invoice === "Y" ? "#9ca3af" : undefined,
+                              cursor:
+                                row.invoice === "Y" ? "not-allowed" : undefined,
                             }}
                             disabled={row.invoice === "Y"}
-                            onChange={e => {
-                              const value = col.key.includes("qty") ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value;
-                              setData(prev => prev.map((r, i) => {
-                                if (i !== idx) return r;
-                                // Calculate the other value
-                                const otherKey = col.key === "good_qty" ? "defective_qty" : "good_qty";
-                                const otherValue = Number(r[otherKey] ?? 0);
-                                const newValue = Number(value ?? 0);
-                                const total = (col.key === "good_qty" ? newValue + otherValue : otherValue + newValue);
-                                const maxAllowed = Number(r.actual_pending_qty ?? 0);
-                                if (total > maxAllowed) {
-                                  // Prevent update if sum exceeds actual_pending_qty
-                                  return r;
-                                }
-                                return { ...r, [col.key]: value };
-                              }));
+                            onChange={(e) => {
+                              const value = col.key.includes("qty")
+                                ? e.target.value === ""
+                                  ? ""
+                                  : Number(e.target.value)
+                                : e.target.value;
+                              setData((prev) =>
+                                prev.map((r, i) => {
+                                  if (i !== idx) return r;
+                                  // Calculate the other value
+                                  const otherKey =
+                                    col.key === "good_qty"
+                                      ? "defective_qty"
+                                      : "good_qty";
+                                  const otherValue = Number(r[otherKey] ?? 0);
+                                  const newValue = Number(value ?? 0);
+                                  const total =
+                                    col.key === "good_qty"
+                                      ? newValue + otherValue
+                                      : otherValue + newValue;
+                                  const maxAllowed = Number(
+                                    r.actual_pending_qty ?? 0,
+                                  );
+                                  if (total > maxAllowed) {
+                                    // Prevent update if sum exceeds actual_pending_qty
+                                    return r;
+                                  }
+                                  return { ...r, [col.key]: value };
+                                }),
+                              );
                             }}
                           />
                         ) : row[col.key] !== null &&
@@ -517,12 +589,7 @@ const GRCCGCELReturnSparePage = () => {
           </Table>
         </TableContainer>
         {/* </div> */}
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          mt={2}
-        >
+        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
           <button
             type="button"
             onClick={handleExecuteAction}

@@ -4,12 +4,13 @@ from fastapi.responses import FileResponse
 from auth.routes import auth_router
 from employee.routes import employee_router
 from exceptions import register_exceptions
+
+# from stock_cgpisl.routes import stock_cgpisl_router
+from grc_cgcel.routes import grc_cgcel_router
 from menu.routes import menu_router
 from middleware.middleware import register_middleware
 from notification.routes import notification_router
 from stock_cgcel.routes import stock_cgcel_router
-# from stock_cgpisl.routes import stock_cgpisl_router
-from grc_cgcel.routes import grc_cgcel_router
 
 version = "v1"
 
@@ -64,4 +65,3 @@ app.include_router(notification_router, prefix="/notification", tags=["Notificat
 app.include_router(stock_cgcel_router, prefix="/stock_cgcel", tags=["Stock CGCEL"])
 # app.include_router(stock_cgpisl_router, prefix="/stock_cgpisl", tags=["Stock CGPISL"])
 app.include_router(grc_cgcel_router, prefix="/grc_cgcel", tags=["GRC CGCEL"])
-

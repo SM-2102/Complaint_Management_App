@@ -90,3 +90,4 @@ class StockCGCELIndentEnquiry(BaseModel):
     indent_number: str
     indent_date: str
     party_name: Optional[str]
+    created_by: Optional[str]

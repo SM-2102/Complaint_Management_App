@@ -57,8 +57,6 @@ const API_ENDPOINTS = {
   GRC_CGCEL_FINALIZE_RETURN: `${BASE_API_URL}grc_cgcel/finalize_grc_return`,
   GRC_CGCEL_REPORT_PRINT: `${BASE_API_URL}grc_cgcel/print_report`,
 
-
-
   GRC_CGPISL_UPLOAD: `${BASE_API_URL}grc_cgpisl/upload`,
 
   COMPLAINT_UPLOAD: `${BASE_API_URL}complaint/upload`,

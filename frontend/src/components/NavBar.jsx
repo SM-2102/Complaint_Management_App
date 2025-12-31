@@ -14,29 +14,6 @@ const submenuOrder = {
     "Create RFR Record",
     "Upload Complaints",
   ],
-  stock: [
-    "CGCEL Upload Stock",
-    "CGCEL View Stock",
-    "CGCEL Spare Indent",
-    "CGCEL Generate Indent",
-    "CGCEL Indent Details",
-    "CGCEL Update Stock",
-    "Upload Stock Records",
-    "View Stock Records",
-    "Raise Spare Indent",
-    "Generate Spare Indent",
-    "Indent Details",
-  ],
-  grc: [
-    "CGCEL Upload GRC",
-    "CGCEL Receive GRC",
-    "CGCEL Spare Return",
-    "CGCEL GRC Enquiry",
-    "Upload GRC Records",
-    "Receive GRC Records",
-    "Spare Return",
-    "GRC Enquiry",
-  ],
 };
 
 // Helper to sort actions by submenuOrder
@@ -111,6 +88,8 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
     }
 
     if (filteredSubmenus.length > 0) {
+      const isDisabled =
+        company === "ALL" && (key === "stock" || key === "grc");
       menuItems.push({
         title,
         submenus: filteredSubmenus.map(({ label, path }) => ({
@@ -118,6 +97,7 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
           path,
         })),
         isDirect: false,
+        disabled: isDisabled,
       });
     }
   });
@@ -146,11 +126,13 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
   }, [open]);
 
   // Open submenu on hover
-  const handleSubmenuEnter = (idx) => {
+  const handleSubmenuEnter = (idx, disabled) => {
+    if (disabled) return;
     setSubmenuOpen((prev) => (prev.includes(idx) ? prev : [...prev, idx]));
   };
   // Close submenu on mouse leave
-  const handleSubmenuLeave = (idx) => {
+  const handleSubmenuLeave = (idx, disabled) => {
+    if (disabled) return;
     setSubmenuOpen((prev) => prev.filter((i) => i !== idx));
   };
 
@@ -191,32 +173,43 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
             <div
               key={item.title}
               className="mb-2"
-              onMouseEnter={() => handleSubmenuEnter(idx)}
-              onMouseLeave={() => handleSubmenuLeave(idx)}
+              onMouseEnter={() => handleSubmenuEnter(idx, item.disabled)}
+              onMouseLeave={() => handleSubmenuLeave(idx, item.disabled)}
             >
-              <div className="flex items-center text-black font-semibold px-6 py-3 rounded-md cursor-pointer hover:bg-blue-900/30 transition select-none">
+              <div
+                className={`flex items-center px-6 py-3 rounded-md select-none transition
+  ${
+    item.disabled
+      ? "text-black cursor-not-allowed bg-transparent"
+      : "text-black font-semibold cursor-pointer bg-transparent hover:bg-blue-900/30"
+  }`}
+              >
                 <span>{item.title}</span>
-                {submenuOpen.includes(idx) ? (
-                  <FaChevronUp className="ml-2 text-blue-700" />
-                ) : (
-                  <FaChevronDown className="ml-2 text-blue-700" />
-                )}
-              </div>
-              {submenuOpen.includes(idx) && item.submenus.length > 0 && (
-                <div className="ml-4 mt-1 flex flex-col">
-                  {item.submenus.map((sub) => (
-                    <Link
-                      key={sub.title}
-                      to={sub.path}
-                      className="text-black no-underline text-sm px-6 py-2 rounded hover:bg-blue-700/30 hover:text-white transition font-normal"
-                      style={{ fontFamily: "Montserrat, Arial, sans-serif" }}
-                      onClick={() => setOpen(false)}
-                    >
-                      {sub.title}
-                    </Link>
+
+                {!item.disabled &&
+                  (submenuOpen.includes(idx) ? (
+                    <FaChevronUp className="ml-2 text-blue-700" />
+                  ) : (
+                    <FaChevronDown className="ml-2 text-blue-700" />
                   ))}
-                </div>
-              )}
+              </div>
+
+              {!item.disabled &&
+                submenuOpen.includes(idx) &&
+                item.submenus.length > 0 && (
+                  <div className="ml-4 mt-1 flex flex-col">
+                    {item.submenus.map((sub) => (
+                      <Link
+                        key={sub.title}
+                        to={sub.path}
+                        className="text-black no-underline text-sm px-6 py-2 rounded hover:bg-blue-700/30 hover:text-white transition"
+                        onClick={() => setOpen(false)}
+                      >
+                        {sub.title}
+                      </Link>
+                    ))}
+                  </div>
+                )}
             </div>
           ),
         )}

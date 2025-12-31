@@ -73,9 +73,7 @@ Stock CGCEL enquiry using query parameters.
 """
 
 
-@stock_cgcel_router.get(
-    "/enquiry", status_code=status.HTTP_200_OK
-)
+@stock_cgcel_router.get("/enquiry", status_code=status.HTTP_200_OK)
 async def enquiry_stock_cgcel(
     spare_description: Optional[str] = None,
     spare_code: Optional[str] = None,
@@ -99,7 +97,7 @@ async def enquiry_stock_cgcel(
             own,
             limit,
             offset,
-            return_total=True
+            return_total=True,
         )
         return {"records": result, "total_records": total_records}
     except Exception as exc:
@@ -307,7 +305,7 @@ async def enquiry_indent_cgcel(
             to_indent_number,
             limit,
             offset,
-            return_total=True
+            return_total=True,
         )
         return {"records": result, "total_records": total_records}
     except Exception as exc:

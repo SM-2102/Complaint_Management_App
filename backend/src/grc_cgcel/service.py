@@ -1,35 +1,35 @@
-from datetime import date
 import csv
 import io
-from datetime import date
 import os
+from datetime import date
 from typing import List, Optional
+
+from fastapi import UploadFile
+from pydantic import ValidationError
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
-
-from fastapi import UploadFile
-from pydantic import ValidationError
 from sqlalchemy import case, insert, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql import func
-from utils.file_utils import safe_join
-from grc_cgcel.schemas import (
-    GRCCGCELReturnSave,
-    GRCCGCELSchema,
-    GRCCGCELReceiveSchema,
-    GRCCGCELUpdateReceiveSchema,
-    GRCCGCELDisputeCreate,
-    GRCCGCELReturnSchema,
-    GRCFullPayload,
-    GRCCGCELHistorySchema,
-)
-from grc_cgcel.models import GRCCGCEL, GRCCGCELDispute, GRCCGCELReturnHistory
+
 from exceptions import SpareNotFound
+from grc_cgcel.models import GRCCGCEL, GRCCGCELDispute, GRCCGCELReturnHistory
+from grc_cgcel.schemas import (
+    GRCCGCELDisputeCreate,
+    GRCCGCELHistorySchema,
+    GRCCGCELReceiveSchema,
+    GRCCGCELReturnSave,
+    GRCCGCELReturnSchema,
+    GRCCGCELSchema,
+    GRCCGCELUpdateReceiveSchema,
+    GRCFullPayload,
+)
 from utils.date_utils import format_date_ddmmyyyy
+from utils.file_utils import safe_join
 
 
 class GRCCGCELService:
@@ -102,6 +102,7 @@ class GRCCGCELService:
 
         # Use (spare_code, grc_number) as composite key
         from sqlalchemy import tuple_
+
         keys = [(r.spare_code, r.grc_number) for r in records]
 
         result = await session.execute(
@@ -128,7 +129,7 @@ class GRCCGCELService:
                 for k, v in r.dict(exclude_unset=False).items()
                 if k in ("spare_code", "grc_number") or k in present_fields
             }
-            data_dict['status'] = 'N'
+            data_dict["status"] = "N"
             key = (r.spare_code, r.grc_number)
             if key in existing:
                 to_update[key] = data_dict
@@ -141,7 +142,7 @@ class GRCCGCELService:
         table = GRCCGCEL.__table__
 
         try:
-            await session.execute(update(table).values(status='Y'))
+            await session.execute(update(table).values(status="Y"))
 
             if to_insert:
                 await session.execute(insert(table).values(to_insert))
@@ -150,14 +151,21 @@ class GRCCGCELService:
             if to_update:
                 # Only update fields present in the CSV (excluding spare_code, grc_number)
                 update_fields = present_fields.copy()
-                update_fields.add('status')
+                update_fields.add("status")
                 for key, values in to_update.items():
                     stmt = (
                         update(table)
                         .where(
-                            (table.c.spare_code == key[0]) & (table.c.grc_number == key[1])
+                            (table.c.spare_code == key[0])
+                            & (table.c.grc_number == key[1])
                         )
-                        .values(**{field: values[field] for field in update_fields if field in values})
+                        .values(
+                            **{
+                                field: values[field]
+                                for field in update_fields
+                                if field in values
+                            }
+                        )
                     )
                     await session.execute(stmt)
                 updated = len(to_update)
@@ -187,20 +195,20 @@ class GRCCGCELService:
             "resolution": f"Inserted : {inserted}, Updated : {updated}",
             "type": "success",
         }
-    
-    async def not_received_grc_numbers(
-        self, session: AsyncSession
-    ):
-        statement = select(GRCCGCEL.grc_number).where(
-            GRCCGCEL.receive_date.is_(None),
-        ).distinct()
+
+    async def not_received_grc_numbers(self, session: AsyncSession):
+        statement = (
+            select(GRCCGCEL.grc_number)
+            .where(
+                GRCCGCEL.receive_date.is_(None),
+            )
+            .distinct()
+        )
         result = await session.execute(statement)
         rows = result.scalars().all()
         return rows
-    
-    async def not_received_by_grc_number(
-        self, grc_number: int, session: AsyncSession
-    ):
+
+    async def not_received_by_grc_number(self, grc_number: int, session: AsyncSession):
         statement = select(GRCCGCEL).where(
             GRCCGCEL.grc_number == grc_number,
             GRCCGCEL.receive_date.is_(None),
@@ -219,11 +227,10 @@ class GRCCGCELService:
                 alt_spare_qty=row.alt_spare_qty,
                 alt_spare_code=row.alt_spare_code,
                 dispute_remark=row.dispute_remark,
-                )
+            )
             for row in rows
         ]
-    
-    
+
     async def update_cgcel_grc_receive(
         self, updateData: List[GRCCGCELUpdateReceiveSchema], session: AsyncSession
     ):
@@ -239,15 +246,25 @@ class GRCCGCELService:
 
             # If issue_qty != receive_qty, add to GRCCGCELDispute
             if getattr(data, "issue_qty", None) != getattr(data, "receive_qty", None):
-                
+
                 dispute_data = GRCCGCELDisputeCreate(
                     spare_code=data.spare_code,
-                    division=getattr(data, "division", getattr(existing_record, "division", None)),
+                    division=getattr(
+                        data, "division", getattr(existing_record, "division", None)
+                    ),
                     grc_number=data.grc_number,
                     grc_date=getattr(existing_record, "grc_date", None),
-                    spare_description=getattr(data, "spare_description", getattr(existing_record, "spare_description", None)),
+                    spare_description=getattr(
+                        data,
+                        "spare_description",
+                        getattr(existing_record, "spare_description", None),
+                    ),
                     issue_qty=getattr(existing_record, "issue_qty", None),
-                    grc_pending_qty=getattr(data, "grc_pending_qty", getattr(existing_record, "grc_pending_qty", None)),
+                    grc_pending_qty=getattr(
+                        data,
+                        "grc_pending_qty",
+                        getattr(existing_record, "grc_pending_qty", None),
+                    ),
                     damaged_qty=getattr(data, "damaged_qty", None),
                     short_qty=getattr(data, "short_qty", None),
                     alt_spare_qty=getattr(data, "alt_spare_qty", None),
@@ -261,12 +278,10 @@ class GRCCGCELService:
         except:
             await session.rollback()
 
-    async def grc_return_by_division(
-        self, division: str, session: AsyncSession
-    ):
+    async def grc_return_by_division(self, division: str, session: AsyncSession):
         statement = select(GRCCGCEL).where(
             GRCCGCEL.division == division,
-            GRCCGCEL.status == 'N',
+            GRCCGCEL.status == "N",
         )
         result = await session.execute(statement)
         rows = result.all()
@@ -288,10 +303,12 @@ class GRCCGCELService:
             )
             for row in rows
         ]
-   
+
     #
 
-    async def get_grc_cgcel_by_code(self, spare_code: str, grc_number: int, session: AsyncSession):
+    async def get_grc_cgcel_by_code(
+        self, spare_code: str, grc_number: int, session: AsyncSession
+    ):
         statement = select(GRCCGCEL).where(
             (GRCCGCEL.spare_code == spare_code) & (GRCCGCEL.grc_number == grc_number)
         )
@@ -302,10 +319,10 @@ class GRCCGCELService:
         else:
             raise SpareNotFound()
 
-    
-
     async def save_cgcel_grc_return(
-        self, updateData: List[GRCCGCELReturnSave], session: AsyncSession,
+        self,
+        updateData: List[GRCCGCELReturnSave],
+        session: AsyncSession,
     ):
         for data in updateData:
             existing_record = await self.get_grc_cgcel_by_code(
@@ -336,11 +353,15 @@ class GRCCGCELService:
                 history_kwargs = {
                     "division": getattr(existing_record, "division", None),
                     "spare_code": getattr(data, "spare_code", None),
-                    "spare_description": getattr(existing_record, "spare_description", None),
+                    "spare_description": getattr(
+                        existing_record, "spare_description", None
+                    ),
                     "grc_number": getattr(data, "grc_number", None),
                     "grc_date": getattr(existing_record, "grc_date", None),
                     "issue_qty": getattr(existing_record, "issue_qty", None),
-                    "grc_pending_qty": getattr(existing_record, "grc_pending_qty", None),
+                    "grc_pending_qty": getattr(
+                        existing_record, "grc_pending_qty", None
+                    ),
                     "good_qty": good_qty,
                     "defective_qty": defective_qty,
                     "returning_qty": returning_qty,
@@ -363,9 +384,15 @@ class GRCCGCELService:
             existing_defective_qty = getattr(existing_record, "defective_qty", 0) or 0
             existing_record.returning_qty = existing_good_qty + existing_defective_qty
             prev_returned_qty = getattr(existing_record, "returned_qty", 0) or 0
-            existing_record.returned_qty = prev_returned_qty + existing_good_qty + existing_defective_qty
-            prev_actual_pending_qty = getattr(existing_record, "actual_pending_qty", 0) or 0
-            existing_record.actual_pending_qty = prev_actual_pending_qty - (existing_good_qty + existing_defective_qty)
+            existing_record.returned_qty = (
+                prev_returned_qty + existing_good_qty + existing_defective_qty
+            )
+            prev_actual_pending_qty = (
+                getattr(existing_record, "actual_pending_qty", 0) or 0
+            )
+            existing_record.actual_pending_qty = prev_actual_pending_qty - (
+                existing_good_qty + existing_defective_qty
+            )
             existing_record.good_qty = 0
             existing_record.defective_qty = 0
             existing_record.challan_by = token["user"]["username"]
@@ -374,9 +401,6 @@ class GRCCGCELService:
             await session.commit()
         except:
             await session.rollback()
-
-        
-
 
     async def next_cgcel_challan_code(self, session: AsyncSession):
         statement = (
@@ -417,17 +441,24 @@ class GRCCGCELService:
             def draw_block(start_y_offset):
                 # Header
                 can.setFont("Helvetica-Bold", 10)
-                can.drawString(105, 722 - start_y_offset, f"{data.get('challan_number', '')}")
-                can.drawString(260, 722 - start_y_offset, date.today().strftime("%d-%m-%Y"))
+                can.drawString(
+                    105, 722 - start_y_offset, f"{data.get('challan_number', '')}"
+                )
+                can.drawString(
+                    260, 722 - start_y_offset, date.today().strftime("%d-%m-%Y")
+                )
                 can.drawString(432, 722 - start_y_offset, f"{data.get('division', '')}")
-                can.drawString(440, 687 - start_y_offset, f"{data.get('docket_number', '')}")
-                can.drawString(173, 687 - start_y_offset, f"{data.get('sent_through', '')}")
+                can.drawString(
+                    440, 687 - start_y_offset, f"{data.get('docket_number', '')}"
+                )
+                can.drawString(
+                    173, 687 - start_y_offset, f"{data.get('sent_through', '')}"
+                )
                 can.drawString(438, 56 - start_y_offset, f"{token['user']['username']}")
-
 
                 can.setFont("Helvetica", 11)
                 y = 642 - start_y_offset
-                items = data.get('grc_rows', [])
+                items = data.get("grc_rows", [])
                 for idx, item in enumerate(items, 1):
                     if report_type == "Defective":
                         draw_centered(can, item.get("grc_number"), 18, 95, y)
@@ -446,7 +477,9 @@ class GRCCGCELService:
                         draw_centered(can, item.get("grc_date"), 98, 160, y)
                         draw_centered(can, item.get("spare_code"), 165, 250, y)
                         draw_centered(can, item.get("spare_description"), 250, 430, y)
-                        draw_centered(can, item.get("actual_pending_qty") or 0, 430, 480, y)
+                        draw_centered(
+                            can, item.get("actual_pending_qty") or 0, 430, 480, y
+                        )
                         draw_centered(can, item.get("good_qty") or 0, 484, 510, y)
                         draw_centered(can, item.get("defective_qty") or 0, 510, 560, y)
                     y -= 19

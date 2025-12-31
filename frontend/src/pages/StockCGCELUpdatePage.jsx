@@ -74,9 +74,7 @@ const StockCGCELUpdatePage = () => {
     if (name === "spare_description") {
       if (newValue.length > 0 && spareList.length > 0) {
         const filtered = spareList.filter((item) =>
-          item.spare_description
-            .toLowerCase()
-            .includes(newValue.toLowerCase()),
+          item.spare_description.toLowerCase().includes(newValue.toLowerCase()),
         );
         setSpareDescriptionSuggestions(filtered);
         setShowSpareDescriptionSuggestions(filtered.length > 0);
@@ -176,7 +174,7 @@ const StockCGCELUpdatePage = () => {
         noValidate
       >
         <h2 className="text-xl font-semibold text-blue-800 mb-4 pb-2 border-b border-blue-500 justify-center flex items-center gap-2">
-          Update CGCEL Stock
+          Update ASC Stock
         </h2>
         {/* City and PIN on same line, equal label/input width */}
         <div className="flex items-center w-full gap-7">

@@ -14,6 +14,7 @@ class GRCCGCELSchema(BaseModel):
     issue_qty: int
     grc_pending_qty: int
 
+
 class GRCCGCELReceiveSchema(BaseModel):
     spare_code: str
     spare_description: str
@@ -23,7 +24,8 @@ class GRCCGCELReceiveSchema(BaseModel):
     short_qty: Optional[int]
     alt_spare_qty: Optional[int]
     alt_spare_code: Optional[str]
-    dispute_remark: Optional[str]    
+    dispute_remark: Optional[str]
+
 
 class GRCCGCELUpdateReceiveSchema(BaseModel):
     spare_code: str
@@ -34,6 +36,7 @@ class GRCCGCELUpdateReceiveSchema(BaseModel):
     alt_spare_qty: Optional[int]
     alt_spare_code: Optional[str]
     dispute_remark: Optional[str]
+
 
 class GRCCGCELDisputeCreate(BaseModel):
     spare_code: str
@@ -48,6 +51,7 @@ class GRCCGCELDisputeCreate(BaseModel):
     short_qty: Optional[int]
     alt_spare_qty: Optional[int]
     alt_spare_code: Optional[str]
+
 
 class GRCCGCELReturnSchema(BaseModel):
     grc_number: int
@@ -64,6 +68,7 @@ class GRCCGCELReturnSchema(BaseModel):
     docket_number: Optional[str]
     sent_through: Optional[str]
 
+
 class GRCCGCELReturnSave(BaseModel):
     spare_code: str
     grc_number: int
@@ -72,6 +77,7 @@ class GRCCGCELReturnSave(BaseModel):
     invoice: str
     sent_through: Optional[str]
     docket_number: Optional[str]
+
 
 class GRCRowPayload(BaseModel):
     grc_number: int
@@ -82,12 +88,14 @@ class GRCRowPayload(BaseModel):
     good_qty: Optional[int]
     defective_qty: Optional[int]
 
+
 class GRCFullPayload(BaseModel):
     division: str
     challan_number: str
     sent_through: Optional[str]
     docket_number: Optional[str]
     grc_rows: List[GRCRowPayload]
+
 
 class GRCCGCELHistorySchema(BaseModel):
     division: str

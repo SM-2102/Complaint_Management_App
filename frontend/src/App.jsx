@@ -223,7 +223,7 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
                 <GRCCGCELReturnSparePage />
               </PrivateRoute>
             }
-          />  
+          />
         </Routes>
       </div>
       <Footer />

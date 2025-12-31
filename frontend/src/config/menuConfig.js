@@ -31,7 +31,7 @@ export const menuConfig = [
     bgColor: "#f0f4f8",
     actions: [
       {
-        label: "CGCEL Upload Stock",
+        label: "Upload Stock Records",
         path: "/UploadCGCELStockRecords",
         company: "CGCEL",
       },
@@ -41,17 +41,17 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "CGCEL View Stock",
+        label: "Stock Records Enquiry",
         path: "/ViewCGCELStockRecords",
         company: "CGCEL",
       },
       {
-        label: "View Stock Records",
+        label: "Stock Records Enquiry",
         path: "/ViewCGPISLStockRecords",
         company: "CGPISL",
       },
       {
-        label: "CGCEL Spare Indent",
+        label: "Raise Spare Indent",
         path: "/RaiseCGCELSpareIndent",
         company: "CGCEL",
       },
@@ -61,7 +61,7 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "CGCEL Generate Indent",
+        label: "Generate Spare Indent",
         path: "/GenerateCGCELSpareIndent",
         company: "CGCEL",
       },
@@ -71,17 +71,17 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "CGCEL Indent Details",
+        label: "Spare Indent Enquiry",
         path: "/IndentDetailsCGCEL",
         company: "CGCEL",
       },
       {
-        label: "Indent Details",
+        label: "Spare Indent Enquiry",
         path: "/IndentDetailsCGPISL",
         company: "CGPISL",
       },
       {
-        label: "CGCEL Update Stock",
+        label: "Update ASC Stock",
         path: "/UpdateCGCELStock",
         company: "CGCEL",
       },
