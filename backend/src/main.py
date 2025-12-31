@@ -6,7 +6,7 @@ from employee.routes import employee_router
 from exceptions import register_exceptions
 
 # from stock_cgpisl.routes import stock_cgpisl_router
-from grc_cgcel.routes import grc_cgcel_router
+# from grc_cgcel.routes import grc_cgcel_router
 from menu.routes import menu_router
 from middleware.middleware import register_middleware
 from notification.routes import notification_router

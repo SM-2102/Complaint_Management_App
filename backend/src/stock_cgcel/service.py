@@ -90,14 +90,9 @@ class StockCGCELService:
         # -------------------------
         records = []
 
-        int_fields = {"cnf_qty", "grc_qty", "own_qty", "msl_qty", "indent_qty"}
+        int_fields = {"cnf_qty", "grc_qty", "own_qty", "indent_qty"}
         float_fields = {
             "alp",
-            "purchase_price",
-            "discount",
-            "alp",
-            "gst_price",
-            "gst_rate",
         }
 
         for row in raw_rows:
