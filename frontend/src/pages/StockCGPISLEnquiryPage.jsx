@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 // Inline Filter component with filter fields
 import { Container } from "@mui/material";
 import EnquiryTableCGPISL from "../components/EnquiryTableCGPISL.jsx";
-import ShowToast from "../components/Toast.jsx";
+import ShowToast from "../components/Toast";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { stockCGPISLEnquiry } from "../services/stockCGPISLEnquiryService.js";
+import { stockCGPISLEnquiry } from "../services/stockCGPISLEnquiryService";
 import { fetchStockCGPISLList } from "../services/stockCGPISLStockListService.js";
 
 const columns = [
@@ -17,16 +17,7 @@ const columns = [
   { key: "alp", label: "ALP" },
 ];
 
-const divisionOptions = [
-  "FANS",
-  "PUMP",
-  "SDA",
-  "WHC",
-  "FHP",
-  "LT",
-  "HT",
-  "OTHERS",
-];
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
 
 const Filter = ({
   open = false,
@@ -51,22 +42,21 @@ const Filter = ({
   const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
   const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
     useState(false);
-  const spareCodeSuggestionClickedRef = React.useRef(false);
+  const isTypingSpareCodeRef = React.useRef(false);
+  const isTypingSpareDescriptionRef = React.useRef(false);
 
   const [spareDescriptionSuggestions, setSpareDescriptionSuggestions] =
     useState([]);
   const [showSpareDescriptionSuggestions, setShowSpareDescriptionSuggestions] =
     useState(false);
-  const spareDescriptionSuggestionClickedRef = React.useRef(false);
 
   useEffect(() => {
-    if (spareCodeSuggestionClickedRef.current) {
+    if (!isTypingSpareCodeRef.current) {
       setShowSpareCodeSuggestions(false);
-      setSpareCodeSuggestions([]);
-      spareCodeSuggestionClickedRef.current = false;
       return;
     }
-    if (spareCode && spareCodes && spareCodes.length > 0) {
+
+    if (spareCode && spareCodes.length > 0) {
       const filtered = spareCodes.filter((n) =>
         n.toLowerCase().includes(spareCode.toLowerCase()),
       );
@@ -76,15 +66,13 @@ const Filter = ({
       setShowSpareCodeSuggestions(false);
     }
   }, [spareCode, spareCodes]);
-
   useEffect(() => {
-    if (spareDescriptionSuggestionClickedRef.current) {
+    if (!isTypingSpareDescriptionRef.current) {
       setShowSpareDescriptionSuggestions(false);
-      setSpareDescriptionSuggestions([]);
-      spareDescriptionSuggestionClickedRef.current = false;
       return;
     }
-    if (spareDescription && spareDescriptions && spareDescriptions.length > 0) {
+
+    if (spareDescription && spareDescriptions.length > 0) {
       const filtered = spareDescriptions.filter((n) =>
         n.toLowerCase().includes(spareDescription.toLowerCase()),
       );
@@ -94,6 +82,7 @@ const Filter = ({
       setShowSpareDescriptionSuggestions(false);
     }
   }, [spareDescription, spareDescriptions]);
+
   return (
     <>
       <div
@@ -109,7 +98,7 @@ const Filter = ({
               htmlFor="spareCode"
               style={{
                 fontWeight: 600,
-                color: "#1f8825ff",
+                color: "#2e7d32",
                 letterSpacing: 0.5,
                 fontSize: 13,
                 marginBottom: 4,
@@ -123,7 +112,10 @@ const Filter = ({
               id="spareCode"
               name="spareCode"
               value={spareCode}
-              onChange={(e) => setSpareCode(e.target.value)}
+              onChange={(e) => {
+                isTypingSpareCodeRef.current = true;
+                setSpareCode(e.target.value);
+              }}
               placeholder="Spare Code"
               style={{
                 width: "100%",
@@ -134,13 +126,11 @@ const Filter = ({
                 background: "#f7f9fc",
                 transition: "border 0.2s",
                 outline: "none",
-                boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
-              }}
-              onFocus={(e) => (e.target.style.border = "1.5px solid #388e3c")}
-              onBlur={(e) => {
-                if (!spareCodeSuggestionClickedRef.current) {
-                  setShowSpareCodeSuggestions(false);
-                }
+                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",              }}
+              onFocus={(e) => (e.target.style.border = "1.5px solid #2e7d32")}
+              onBlur={() => {
+                isTypingSpareCodeRef.current = false;
+                setShowSpareCodeSuggestions(false);
               }}
             />
             {showSpareCodeSuggestions && (
@@ -153,7 +143,7 @@ const Filter = ({
                   background: "#fff",
                   border: "0.5px solid #d1d5db",
                   borderRadius: "0.25rem",
-                  boxShadow: "0 2px 8px rgba(56,142,60,0.08)",
+                  boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
                   width: "100%",
                   maxHeight: 160,
                   overflowY: "auto",
@@ -169,14 +159,13 @@ const Filter = ({
                       padding: "6px 10px",
                       cursor: "pointer",
                       fontSize: 13,
-                      color: "#0c250aff",
+                      color: "#0a1825ff",
                       borderBottom: "1px solid #f0f0f0",
                     }}
                     onMouseDown={() => {
-                      spareCodeSuggestionClickedRef.current = true;
+                      isTypingSpareCodeRef.current = false;
                       setSpareCode(n);
                       setShowSpareCodeSuggestions(false);
-                      setSpareCodeSuggestions([]);
                     }}
                   >
                     {n}
@@ -190,7 +179,7 @@ const Filter = ({
               htmlFor="spareDescription"
               style={{
                 fontWeight: 600,
-                color: "#1f8825ff",
+                color: "#2e7d32",
                 letterSpacing: 0.5,
                 fontSize: 13,
                 marginBottom: 4,
@@ -204,8 +193,11 @@ const Filter = ({
               id="spareDescription"
               name="spareDescription"
               value={spareDescription}
-              onChange={(e) => setSpareDescription(e.target.value)}
-              placeholder="Spare Description"
+              onChange={(e) => {
+                isTypingSpareDescriptionRef.current = true;
+                setSpareDescription(e.target.value);
+              }}
+              placeholder="Spare Code"
               style={{
                 width: "100%",
                 padding: "6px 10px",
@@ -215,13 +207,11 @@ const Filter = ({
                 background: "#f7f9fc",
                 transition: "border 0.2s",
                 outline: "none",
-                boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
-              }}
-              onFocus={(e) => (e.target.style.border = "1.5px solid #388e3c")}
-              onBlur={(e) => {
-                if (!spareDescriptionSuggestionClickedRef.current) {
-                  setShowSpareDescriptionSuggestions(false);
-                }
+                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",              }}
+              onFocus={(e) => (e.target.style.border = "1.5px solid #2e7d32")}
+              onBlur={() => {
+                isTypingSpareDescriptionRef.current = false;
+                setShowSpareDescriptionSuggestions(false);
               }}
             />
             {showSpareDescriptionSuggestions && (
@@ -234,7 +224,7 @@ const Filter = ({
                   background: "#fff",
                   border: "0.5px solid #d1d5db",
                   borderRadius: "0.25rem",
-                  boxShadow: "0 2px 8px rgba(56,142,60,0.08)",
+                  boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
                   width: "100%",
                   maxHeight: 160,
                   overflowY: "auto",
@@ -250,14 +240,13 @@ const Filter = ({
                       padding: "6px 10px",
                       cursor: "pointer",
                       fontSize: 13,
-                      color: "#0a2510ff",
+                      color: "#0a1825ff",
                       borderBottom: "1px solid #f0f0f0",
                     }}
                     onMouseDown={() => {
-                      spareDescriptionSuggestionClickedRef.current = true;
+                      isTypingSpareDescriptionRef.current = false;
                       setSpareDescription(n);
                       setShowSpareDescriptionSuggestions(false);
-                      setSpareDescriptionSuggestions([]);
                     }}
                   >
                     {n}
@@ -272,7 +261,7 @@ const Filter = ({
                 htmlFor="division"
                 style={{
                   fontWeight: 600,
-                  color: "#1f8825ff",
+                  color: "#2e7d32",
                   letterSpacing: 0.5,
                   fontSize: 13,
                   width: 150,
@@ -292,8 +281,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
-                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",                  width: "100%",
                 }}
               >
                 <option value=""></option>
@@ -311,13 +299,13 @@ const Filter = ({
                 htmlFor="cnf"
                 style={{
                   fontWeight: 600,
-                  color: "#1f8825ff",
+                  color: "#2e7d32",
                   letterSpacing: 0.5,
                   fontSize: 13,
                   width: 150,
                 }}
               >
-                CNF Stock
+                CNF
               </label>
               <select
                 id="cnf"
@@ -331,8 +319,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
-                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",                  width: "100%",
                 }}
               >
                 <option value=""></option>
@@ -347,13 +334,13 @@ const Filter = ({
                 htmlFor="grc"
                 style={{
                   fontWeight: 600,
-                  color: "#1f8825ff",
+                  color: "#2e7d32",
                   letterSpacing: 0.5,
                   fontSize: 13,
                   width: 150,
                 }}
               >
-                GRC Stock
+                GRC
               </label>
               <select
                 id="grc"
@@ -367,8 +354,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
-                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",                  width: "100%",
                 }}
               >
                 <option value=""></option>
@@ -383,13 +369,13 @@ const Filter = ({
                 htmlFor="own"
                 style={{
                   fontWeight: 600,
-                  color: "#1f8825ff",
+                  color: "#2e7d32",
                   letterSpacing: 0.5,
                   fontSize: 13,
                   width: 150,
                 }}
               >
-                Own Stock
+                Own
               </label>
               <select
                 id="own"
@@ -403,8 +389,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(56, 142, 60, 0.04)",
-                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",                  width: "100%",
                 }}
               >
                 <option value=""></option>
@@ -427,13 +412,13 @@ const Filter = ({
               onClick={onSearch}
               style={{
                 padding: "8px 16px",
-                background: "linear-gradient(90deg, #388e3c 60%, #2e7d32 100%)",
+                background: "linear-gradient(90deg, #2e7d32 60%, #1b5e20 100%)",
                 color: "#fff",
                 border: "none",
                 borderRadius: 10,
                 fontWeight: "bold",
                 fontSize: 15,
-                boxShadow: "0 2px 8px rgba(56,142,60,0.08)",
+                boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
                 cursor: "pointer",
                 letterSpacing: 1,
                 transition: "background 0.2s, box-shadow 0.2s",
@@ -445,13 +430,13 @@ const Filter = ({
               onClick={onClear}
               style={{
                 padding: "8px 16px",
-                background: "linear-gradient(90deg, #388e3c 60%, #2e7d32 100%)",
+                background: "linear-gradient(90deg, #2e7d32 60%, #1b5e20 100%)",
                 color: "#fff",
                 border: "none",
                 borderRadius: 10,
                 fontWeight: "bold",
                 fontSize: 15,
-                boxShadow: "0 2px 8px rgba(56,142,60,0.08)",
+                boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
                 cursor: "pointer",
                 letterSpacing: 1,
                 marginLeft: 8,
@@ -490,12 +475,17 @@ const StockCGPISLEnquiryPage = () => {
   // Data states
 
   const [data, setData] = useState([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false); // Don't load on mount
   const [error, setError] = useState(null);
   const [filterOpen, setFilterOpen] = useState(true);
   const [searched, setSearched] = useState(false);
   const [spareCodes, setSpareCodes] = useState([]);
   const [spareDescriptions, setSpareDescriptions] = useState([]);
+
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(100);
 
   const handleClear = () => {
     setDivision("");
@@ -507,6 +497,7 @@ const StockCGPISLEnquiryPage = () => {
     setSearched(false);
     setData([]);
     setError(null);
+    setPage(1);
   };
 
   useEffect(() => {
@@ -527,28 +518,76 @@ const StockCGPISLEnquiryPage = () => {
     };
   }, []);
 
+  // Fetch data when page/limit changes or after search
+
+  const fetchData = async (params = {}, pageNum = page, pageLimit = limit) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const offset = (pageNum - 1) * pageLimit;
+      const res = await stockCGPISLEnquiry(params, pageLimit, offset);
+      if (res && typeof res === "object" && Array.isArray(res.records)) {
+        setData(res.records);
+        setTotalRecords(res.total_records || 0);
+      } else if (Array.isArray(res)) {
+        setData(res);
+        setTotalRecords(res.length);
+      } else {
+        setData([]);
+        setTotalRecords(0);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to fetch data");
+      setData([]);
+      setTotalRecords(0);
+    }
+    setLoading(false);
+  };
+
   // Handler for search button
   const handleSearch = async () => {
     setLoading(true);
     setError(null);
     setSearched(true);
     setFilterOpen(false);
-    try {
-      // Update fetchRetailEnquiry to accept params
-      const params = {};
-      if (spareDescription) params.spare_description = spareDescription;
-      if (spareCode) params.spare_code = spareCode;
-      if (division) params.division = division;
-      if (cnf) params.cnf = cnf;
-      if (grc) params.grc = grc;
-      if (own) params.own = own;
-      const res = await stockCGPISLEnquiry(params);
-      setData(res);
-    } catch (err) {
-      setError(err.message || "Failed to fetch data");
-      setData([]);
-    }
+    setPage(1);
+    const params = {};
+    if (spareDescription) params.spare_description = spareDescription;
+    if (spareCode) params.spare_code = spareCode;
+    if (division) params.division = division;
+    if (cnf) params.cnf = cnf;
+    if (grc) params.grc = grc;
+    if (own) params.own = own;
+    await fetchData(params, 1, limit);
     setLoading(false);
+  };
+
+  // Handler for page change
+  const handlePageChange = async (newPage) => {
+    setPage(newPage);
+    const params = {};
+    if (spareDescription) params.spare_description = spareDescription;
+    if (spareCode) params.spare_code = spareCode;
+    if (division) params.division = division;
+    if (cnf) params.cnf = cnf;
+    if (grc) params.grc = grc;
+    if (own) params.own = own;
+    await fetchData(params, newPage, limit);
+  };
+
+  // Handler for limit change
+  const handleLimitChange = async (e) => {
+    const newLimit = parseInt(e.target.value, 10) || 100;
+    setLimit(newLimit);
+    setPage(1);
+    const params = {};
+    if (spareDescription) params.spare_description = spareDescription;
+    if (spareCode) params.spare_code = spareCode;
+    if (division) params.division = division;
+    if (cnf) params.cnf = cnf;
+    if (grc) params.grc = grc;
+    if (own) params.own = own;
+    await fetchData(params, 1, newLimit);
   };
 
   return (
@@ -588,6 +627,7 @@ const StockCGPISLEnquiryPage = () => {
             columns={columns}
             title="Stock CGPISL Enquiry List"
             sum_column="amount"
+            total_records={totalRecords}
             noDataMessage={
               searched && data.length === 0 ? (
                 <tr>
@@ -606,6 +646,106 @@ const StockCGPISLEnquiryPage = () => {
               ) : null
             }
           />
+          {/* Pagination Controls */}
+          {searched && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginTop: 24,
+                gap: 8,
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 16,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
+                {/* Centered Pagination Buttons */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 16,
+                    flex: 1,
+                  }}
+                >
+                  <button
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page === 1 || loading}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 6,
+                      background: "#2e7d32",
+                      color: "#fff",
+                      border: "none",
+                      fontWeight: "bold",
+                      fontSize: 15,
+                      cursor: page === 1 ? "not-allowed" : "pointer",
+                      opacity: page === 1 ? 0.6 : 1,
+                    }}
+                  >
+                    Previous
+                  </button>
+                  <span style={{ fontWeight: 600, fontSize: 16 }}>
+                    Page {page}
+                  </span>
+                  <button
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={data.length < limit || loading}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 6,
+                      background: "#2e7d32",
+                      color: "#fff",
+                      border: "none",
+                      fontWeight: "bold",
+                      fontSize: 15,
+                      cursor: data.length < limit ? "not-allowed" : "pointer",
+                      opacity: data.length < limit ? 0.6 : 1,
+                    }}
+                  >
+                    Next
+                  </button>
+                </div>
+                {/* Rows per page selector aligned right */}
+                <div
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <label style={{ fontWeight: 500 }}>
+                    Rows per page:
+                    <select
+                      value={limit}
+                      onChange={handleLimitChange}
+                      style={{
+                        marginLeft: 8,
+                        padding: "4px 8px",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value={200}>200</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </Container>

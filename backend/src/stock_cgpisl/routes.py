@@ -69,12 +69,10 @@ async def upload_stock_cgpisl(
 """
 Stock CGPISL enquiry using query parameters.
 
- """
+"""
 
 
-@stock_cgpisl_router.get(
-    "/enquiry", response_model=List[StockCGPISLEnquiry], status_code=status.HTTP_200_OK
-)
+@stock_cgpisl_router.get("/enquiry", status_code=status.HTTP_200_OK)
 async def enquiry_stock_cgpisl(
     spare_description: Optional[str] = None,
     spare_code: Optional[str] = None,
@@ -82,11 +80,13 @@ async def enquiry_stock_cgpisl(
     cnf: Optional[str] = None,
     grc: Optional[str] = None,
     own: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
     try:
-        result = await stock_cgpisl_service.enquiry_stock_cgpisl(
+        result, total_records = await stock_cgpisl_service.enquiry_stock_cgpisl(
             session,
             spare_description,
             spare_code,
@@ -94,10 +94,13 @@ async def enquiry_stock_cgpisl(
             cnf,
             grc,
             own,
+            limit,
+            offset,
+            return_total=True,
         )
-        return result
-    except:
-        return []
+        return {"records": result, "total_records": total_records}
+    except Exception as exc:
+        return {"records": [], "total_records": 0}
 
 
 """
@@ -153,9 +156,7 @@ async def get_cgpisl_by_code(
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    spare = await stock_cgpisl_service.get_stock_cgpisl_by_code(
-        data.spare_code, session
-    )
+    spare = await stock_cgpisl_service.get_stock_cgpisl_by_code(data.spare_code, session)
     return spare
 
 
@@ -259,7 +260,6 @@ Stock CGPISL Indent enquiry using query parameters.
 
 @stock_cgpisl_router.get(
     "/indent_enquiry",
-    response_model=List[StockCGPISLIndentEnquiry],
     status_code=status.HTTP_200_OK,
 )
 async def enquiry_indent_cgpisl(
@@ -270,11 +270,13 @@ async def enquiry_indent_cgpisl(
     to_indent_date: Optional[date] = None,
     from_indent_number: Optional[str] = None,
     to_indent_number: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
     try:
-        result = await stock_cgpisl_service.enquiry_indent_cgpisl(
+        result, total_records = await stock_cgpisl_service.enquiry_indent_cgpisl(
             session,
             spare_description,
             spare_code,
@@ -283,7 +285,10 @@ async def enquiry_indent_cgpisl(
             to_indent_date,
             from_indent_number,
             to_indent_number,
+            limit,
+            offset,
+            return_total=True,
         )
-        return result
-    except:
-        return []
+        return {"records": result, "total_records": total_records}
+    except Exception as exc:
+        return {"records": [], "total_records": 0}

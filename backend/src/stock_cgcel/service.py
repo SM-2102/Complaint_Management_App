@@ -556,8 +556,8 @@ class StockCGCELService:
             )
 
         if to_indent_number:
-            if len(from_indent_number) != 6:
-                from_indent_number = "I" + str(from_indent_number).zfill(5)
+            if len(to_indent_number) != 6:
+                to_indent_number = "I" + str(to_indent_number).zfill(5)
             statement = statement.where(
                 StockCGCELIndent.indent_number <= to_indent_number
             )

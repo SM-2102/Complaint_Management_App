@@ -31,7 +31,6 @@ const API_ENDPOINTS = {
   STOCK_CGCEL_UPDATE: `${BASE_API_URL}stock_cgcel/update`,
   STOCK_CGCEL_PENDING_INDENT: `${BASE_API_URL}stock_cgcel/indent_details`, //append division param
   STOCK_CGCEL_NEXT_INDENT_CODE: `${BASE_API_URL}stock_cgcel/next_indent_code`,
-  STOCK_CGCEL_LAST_INDENT_CODE: `${BASE_API_URL}stock_cgcel/last_indent_code`,
   STOCK_CGCEL_GENERATE_INDENT: `${BASE_API_URL}stock_cgcel/generate_indent`,
   STOCK_CGCEL_INDENT_ENQUIRY: `${BASE_API_URL}stock_cgcel/indent_enquiry`, // append indent_number param
 

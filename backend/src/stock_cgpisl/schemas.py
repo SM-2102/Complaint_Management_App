@@ -2,22 +2,17 @@ from datetime import date
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
+from sqlalchemy import Column
 
 
 class StockCGPISLSchema(BaseModel):
     spare_code: str = Field(..., max_length=30)
-    division: str = Field(..., max_length=20)
-    spare_description: str = Field(..., max_length=40)
+    division: Optional[str] = Field(None, max_length=20)
+    spare_description: Optional[str] = Field(None, max_length=40)
     cnf_qty: Optional[int] = None
     grc_qty: Optional[int] = None
     own_qty: Optional[int] = None
     alp: Optional[float] = None
-    purchase_price: Optional[float] = None
-    discount: Optional[float] = None
-    alp: Optional[float] = None
-    gst_price: Optional[float] = None
-    gst_rate: Optional[float] = None
-    msl_qty: Optional[int] = None
     indent_qty: Optional[int] = None
 
 
@@ -86,3 +81,4 @@ class StockCGPISLIndentEnquiry(BaseModel):
     indent_number: str
     indent_date: str
     party_name: Optional[str]
+    created_by: Optional[str]

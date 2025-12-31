@@ -16,6 +16,7 @@ import {
  * @param {Array} data - The list of enquiry objects to display.
  * @param {Array} columns - The list of column definitions: [{ key: string, label: string }].
  * @param {string} [title] - Optional title for the table.
+ * @param {integer} total_records - total records count.
  */
 
 const EnquiryTableCGPISL = ({
@@ -24,6 +25,7 @@ const EnquiryTableCGPISL = ({
   title = "Enquiry Table",
   noDataMessage = null,
   sum_column = null,
+  total_records = 0,
 }) => {
   const tableRef = useRef();
 
@@ -33,11 +35,11 @@ const EnquiryTableCGPISL = ({
     printWindow.document.write(`<html><head><title>${title}</title>`);
     printWindow.document.write(`<style>
       body{font-family:sans-serif;}
-      .print-title{font-size:2rem;font-weight:800;text-align:center;color:#388e3c;margin-bottom:18px;letter-spacing:1px;}
+      .print-title{font-size:2rem;font-weight:800;text-align:center;color:#1976d2;margin-bottom:18px;letter-spacing:1px;}
       table{width:100%;border-collapse:collapse;}
       th,td{text-align:center;padding:4px 8px;border:1px solid #ddd;}
-      th{background:#e8f5e9;}
-      tr:nth-child(even){background:#f1f8e9;}
+      th{background:#e3eafc;}
+      tr:nth-child(even){background:#f4f8ff;}
       tr:nth-child(odd){background:#fff;}
     </style>`);
     printWindow.document.write(`</head><body>`);
@@ -68,7 +70,7 @@ const EnquiryTableCGPISL = ({
         fontWeight={700}
         mb={2}
         align="center"
-        color="#2e7d32"
+        color="primary.dark"
         sx={{ mb: 1 }}
       >
         {title}
@@ -83,7 +85,7 @@ const EnquiryTableCGPISL = ({
           <button
             onClick={handlePrint}
             style={{
-              background: "#388e3c",
+              background: "#1976d2",
               color: "#fff",
               border: "none",
               borderRadius: "6px",
@@ -100,10 +102,10 @@ const EnquiryTableCGPISL = ({
           <Typography
             variant="subtitle1"
             sx={{
-              color: "#388e3c",
+              color: "#1976d2",
               fontWeight: 700,
               fontSize: 17,
-              background: "#cef5d1ff",
+              background: "#e3eafc",
               px: 2,
               py: 0.5,
               borderRadius: 2,
@@ -112,8 +114,8 @@ const EnquiryTableCGPISL = ({
             }}
           >
             <span style={{ letterSpacing: 0.5 }}>Total Records:</span>{" "}
-            <span style={{ color: "#1b5e20", fontWeight: 600 }}>
-              {data.length}
+            <span style={{ color: "#0d47a1", fontWeight: 600 }}>
+              {total_records}
             </span>
           </Typography>
         </Box>
@@ -125,7 +127,7 @@ const EnquiryTableCGPISL = ({
         >
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ background: "rgba(207, 245, 210, 1)" }}>
+              <TableRow sx={{ background: "#e3eafc" }}>
                 {columns.map((col) => (
                   <TableCell
                     key={col.key}
@@ -151,7 +153,7 @@ const EnquiryTableCGPISL = ({
                     <TableRow
                       key={idx}
                       sx={{
-                        background: idx % 2 === 0 ? "#ecfadcff" : "#fff",
+                        background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
                         height: 32,
                       }}
                     >

@@ -22,16 +22,7 @@ const columns = [
   { key: "indent", label: "Generate" },
 ];
 
-const divisionOptions = [
-  "FANS",
-  "PUMP",
-  "SDA",
-  "WHC",
-  "FHP",
-  "LT",
-  "HT",
-  "OTHERS",
-];
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
 
 const initialForm = {
   indent_code: "",
@@ -66,7 +57,7 @@ const StockCGPISLGenerateIndentPage = () => {
         if (mounted && data) {
           setForm((prev) => ({
             ...prev,
-            indent_code: data.next_cgpisl_indent_code || "",
+            indent_code: data.next_cgcel_indent_code || "",
           }));
         }
       })
@@ -262,7 +253,7 @@ const StockCGPISLGenerateIndentPage = () => {
         >
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ background: "#e8f5e9" }}>
+              <TableRow sx={{ background: "#e3eafc" }}>
                 {columns.map((col) => (
                   <TableCell
                     key={col.key}
@@ -301,7 +292,7 @@ const StockCGPISLGenerateIndentPage = () => {
                   <TableRow
                     key={idx}
                     sx={{
-                      background: idx % 2 === 0 ? "#f1f8f4" : "#fff",
+                      background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
                       height: 32,
                     }}
                   >
@@ -334,7 +325,7 @@ const StockCGPISLGenerateIndentPage = () => {
                               fontWeight: 700,
                               fontSize: "15px",
                               cursor: "pointer",
-                              boxShadow: "0 1px 4px rgba(46,125,50,0.12)",
+                              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
                               transition: "background 0.2s, color 0.2s",
                             }}
                             aria-label="Toggle Received"
@@ -365,19 +356,19 @@ const StockCGPISLGenerateIndentPage = () => {
           <Typography
             variant="subtitle1"
             sx={{
-              color: "#2e7d32",
+              color: "#1976d2",
               fontWeight: 700,
               fontSize: 17,
-              background: "#e8f5e9",
+              background: "#e3eafc",
               px: 2,
               py: 0.5,
               borderRadius: 2,
-              boxShadow: "0 1px 4px rgba(46,125,50,0.12)",
+              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
               display: "inline-block",
             }}
           >
             <span style={{ letterSpacing: 0.5 }}>Selected Records:</span>{" "}
-            <span style={{ color: "#1b5e20", fontWeight: 600 }}>
+            <span style={{ color: "#0d47a1", fontWeight: 600 }}>
               {data.filter((row) => row.indent === "Y").length}
             </span>
           </Typography>
@@ -386,7 +377,7 @@ const StockCGPISLGenerateIndentPage = () => {
             onClick={handleCreateIndent}
             disabled={updating || data.length === 0}
             style={{
-              background: "#2e7d32",
+              background: "#1976d2",
               color: "#fff",
               fontWeight: 700,
               fontSize: "16px",
@@ -394,7 +385,7 @@ const StockCGPISLGenerateIndentPage = () => {
               borderRadius: "6px",
               padding: "8px 24px",
               cursor: updating ? "not-allowed" : "pointer",
-              boxShadow: "0 1px 4px rgba(46,125,50,0.12)",
+              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
               opacity: updating ? 0.7 : 1,
               transition: "background 0.2s, color 0.2s",
             }}

@@ -1,7 +1,7 @@
 import csv
 import io
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import UploadFile
 from pydantic import ValidationError
@@ -9,6 +9,7 @@ from sqlalchemy import case, insert, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.sql import func
 
 from exceptions import SpareNotFound, StockNotAvailable
 from stock_cgpisl.models import StockCGPISL, StockCGPISLIndent
@@ -25,7 +26,6 @@ from utils.date_utils import format_date_ddmmyyyy
 
 
 class StockCGPISLService:
-
     async def upload_stock_cgpisl(self, session: AsyncSession, file: UploadFile):
         content = await file.read()
 
@@ -80,9 +80,7 @@ class StockCGPISLService:
         spare_codes = [r["spare_code"] for r in raw_rows]
 
         result = await session.execute(
-            select(StockCGPISL.spare_code).where(
-                StockCGPISL.spare_code.in_(spare_codes)
-            )
+            select(StockCGPISL.spare_code).where(StockCGPISL.spare_code.in_(spare_codes))
         )
         existing_codes = set(result.scalars().all())
 
@@ -91,14 +89,9 @@ class StockCGPISLService:
         # -------------------------
         records = []
 
-        int_fields = {"cnf_qty", "grc_qty", "own_qty", "msl_qty", "indent_qty"}
+        int_fields = {"cnf_qty", "grc_qty", "own_qty", "indent_qty"}
         float_fields = {
             "alp",
-            "purchase_price",
-            "discount",
-            "alp",
-            "gst_price",
-            "gst_rate",
         }
 
         for row in raw_rows:
@@ -248,6 +241,54 @@ class StockCGPISLService:
             "type": "success",
         }
 
+    def _apply_stock_cgpisl_filters(
+        self,
+        statement,
+        spare_description=None,
+        spare_code=None,
+        division=None,
+        cnf=None,
+        grc=None,
+        own=None,
+        model=StockCGPISL,
+    ):
+        if spare_description:
+            statement = statement.where(
+                model.spare_description.ilike(f"{spare_description}")
+            )
+        if division:
+            statement = statement.where(model.division == division)
+        if spare_code:
+            statement = statement.where(model.spare_code.ilike(f"{spare_code}"))
+        if cnf:
+            if cnf == "Y":
+                statement = statement.where(
+                    (model.cnf_qty.isnot(None) & (model.cnf_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (model.cnf_qty.is_(None) | (model.cnf_qty == 0))
+                )
+        if grc:
+            if grc == "Y":
+                statement = statement.where(
+                    (model.grc_qty.isnot(None) & (model.grc_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (model.grc_qty.is_(None) | (model.grc_qty == 0))
+                )
+        if own:
+            if own == "Y":
+                statement = statement.where(
+                    (model.own_qty.isnot(None) & (model.own_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (model.own_qty.is_(None) | (model.own_qty == 0))
+                )
+        return statement
+
     async def enquiry_stock_cgpisl(
         self,
         session: AsyncSession,
@@ -257,57 +298,37 @@ class StockCGPISLService:
         cnf: Optional[str] = None,
         grc: Optional[str] = None,
         own: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
+        return_total: bool = False,
     ):
-
         statement = select(StockCGPISL)
+        statement = self._apply_stock_cgpisl_filters(
+            statement, spare_description, spare_code, division, cnf, grc, own
+        )
 
-        if spare_description:
-            statement = statement.where(
-                StockCGPISL.spare_description.ilike(f"{spare_description}")
+        total_records = None
+        if return_total:
+            count_query = select(func.count()).select_from(StockCGPISL)
+            count_query = self._apply_stock_cgpisl_filters(
+                count_query,
+                spare_description,
+                spare_code,
+                division,
+                cnf,
+                grc,
+                own,
+                StockCGPISL,
             )
-
-        if division:
-            statement = statement.where(StockCGPISL.division == division)
-
-        if spare_code:
-            statement = statement.where(StockCGPISL.spare_code.ilike(f"{spare_code}"))
-
-        if cnf:
-            if cnf == "Y":
-                statement = statement.where(
-                    (StockCGPISL.cnf_qty.isnot(None) & (StockCGPISL.cnf_qty > 0))
-                )
-            else:
-                statement = statement.where(
-                    (StockCGPISL.cnf_qty.is_(None) | (StockCGPISL.cnf_qty == 0))
-                )
-
-        if grc:
-            if grc == "Y":
-                statement = statement.where(
-                    (StockCGPISL.grc_qty.isnot(None) & (StockCGPISL.grc_qty > 0))
-                )
-            else:
-                statement = statement.where(
-                    (StockCGPISL.grc_qty.is_(None) | (StockCGPISL.grc_qty == 0))
-                )
-
-        if own:
-            if own == "Y":
-                statement = statement.where(
-                    (StockCGPISL.own_qty.isnot(None) & (StockCGPISL.own_qty > 0))
-                )
-            else:
-                statement = statement.where(
-                    (StockCGPISL.own_qty.is_(None) | (StockCGPISL.own_qty == 0))
-                )
+            total_result = await session.execute(count_query)
+            total_records = total_result.scalar() or 0
 
         statement = statement.order_by(StockCGPISL.spare_code)
+        statement = statement.limit(limit).offset(offset)
 
         result = await session.execute(statement)
         rows = result.all()
-
-        return [
+        records = [
             StockCGPISLEnquiry(
                 spare_code=row.StockCGPISL.spare_code,
                 division=row.StockCGPISL.division,
@@ -319,6 +340,10 @@ class StockCGPISLService:
             )
             for row in rows
         ]
+
+        if return_total:
+            return records, total_records
+        return records
 
     async def list_cgpisl_stock(self, session: AsyncSession):
         statement = select(
@@ -373,10 +398,7 @@ class StockCGPISLService:
             raise SpareNotFound()
 
     async def create_indent_cgpisl(
-        self,
-        spare_code: str,
-        indentData: StockCGPISLIndentCreate,
-        session: AsyncSession,
+        self, spare_code: str, indentData: StockCGPISLIndentCreate, session: AsyncSession
     ):
         existing_record = await self.get_stock_cgpisl_by_code(spare_code, session)
         for key, value in indentData.model_dump().items():
@@ -387,6 +409,7 @@ class StockCGPISLService:
             await session.rollback()
         await session.refresh(existing_record)
         return existing_record
+
 
     async def get_cgpisl_indent_details_by_division(
         self, division: str, session: AsyncSession
@@ -461,20 +484,18 @@ class StockCGPISLService:
             await session.rollback()
         return indent_records
 
-    async def enquiry_indent_cgpisl(
+    def _apply_indent_cgpisl_filters(
         self,
-        session: AsyncSession,
-        spare_description: Optional[str] = None,
-        spare_code: Optional[str] = None,
-        division: Optional[str] = None,
-        from_indent_date: Optional[date] = None,
-        to_indent_date: Optional[date] = None,
-        from_indent_number: Optional[str] = None,
-        to_indent_number: Optional[str] = None,
+        statement,
+        spare_description=None,
+        spare_code=None,
+        division=None,
+        from_indent_date=None,
+        to_indent_date=None,
+        from_indent_number=None,
+        to_indent_number=None,
+        model=StockCGPISLIndent,
     ):
-
-        statement = select(StockCGPISLIndent)
-
         if spare_description:
             statement = statement.where(
                 StockCGPISLIndent.spare_description.ilike(f"{spare_description}")
@@ -504,26 +525,75 @@ class StockCGPISLService:
             )
 
         if to_indent_number:
-            if len(from_indent_number) != 6:
-                from_indent_number = "I" + str(from_indent_number).zfill(5)
+            if len(to_indent_number) != 6:
+                to_indent_number = "I" + str(to_indent_number).zfill(5)
             statement = statement.where(
                 StockCGPISLIndent.indent_number <= to_indent_number
             )
 
+        return statement
+
+    async def enquiry_indent_cgpisl(
+        self,
+        session: AsyncSession,
+        spare_description: Optional[str] = None,
+        spare_code: Optional[str] = None,
+        division: Optional[str] = None,
+        from_indent_date: Optional[date] = None,
+        to_indent_date: Optional[date] = None,
+        from_indent_number: Optional[str] = None,
+        to_indent_number: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
+        return_total: bool = False,
+    ):
+        statement = select(StockCGPISLIndent)
+        statement = self._apply_indent_cgpisl_filters(
+            statement,
+            spare_description,
+            spare_code,
+            division,
+            from_indent_date,
+            to_indent_date,
+            from_indent_number,
+            to_indent_number,
+        )
+
+        total_records = None
+        if return_total:
+            count_query = select(func.count()).select_from(StockCGPISLIndent)
+            count_query = self._apply_indent_cgpisl_filters(
+                count_query,
+                spare_description,
+                spare_code,
+                division,
+                from_indent_date,
+                to_indent_date,
+                from_indent_number,
+                to_indent_number,
+                StockCGPISLIndent,
+            )
+            total_result = await session.execute(count_query)
+            total_records = total_result.scalar() or 0
+
         statement = statement.order_by(StockCGPISLIndent.spare_code)
+        statement = statement.limit(limit).offset(offset)
 
         result = await session.execute(statement)
-        rows = result.scalars().all()
-        if rows:
-            return [
-                StockCGPISLIndentEnquiry(
-                    spare_code=row.spare_code,
-                    division=row.division,
-                    spare_description=row.spare_description,
-                    indent_qty=row.indent_qty,
-                    indent_number=row.indent_number,
-                    indent_date=format_date_ddmmyyyy(row.indent_date),
-                    party_name=row.party_name,
-                )
-                for row in rows
-            ]
+        rows = result.all()
+        records = [
+            StockCGPISLIndentEnquiry(
+                spare_code=row.StockCGPISLIndent.spare_code,
+                division=row.StockCGPISLIndent.division,
+                spare_description=row.StockCGPISLIndent.spare_description,
+                indent_qty=row.StockCGPISLIndent.indent_qty,
+                indent_number=row.StockCGPISLIndent.indent_number,
+                indent_date=format_date_ddmmyyyy(row.StockCGPISLIndent.indent_date),
+                party_name=row.StockCGPISLIndent.party_name,
+                created_by=row.StockCGPISLIndent.created_by,
+            )
+            for row in rows
+        ]
+        if return_total:
+            return records, total_records
+        return records
