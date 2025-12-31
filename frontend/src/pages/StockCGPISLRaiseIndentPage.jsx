@@ -38,6 +38,8 @@ const StockCGPISLRaiseIndentPage = () => {
   const [error, setError] = useState({});
   const [showToast, setShowToast] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const isTypingRef = useRef(false);
+
   const [spareList, setSpareList] = useState([]);
   const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
   const [spareDescriptionSuggestions, setSpareDescriptionSuggestions] =
@@ -48,6 +50,7 @@ const StockCGPISLRaiseIndentPage = () => {
     useState(false);
 
   useEffect(() => {
+    if (!isTypingRef.current) return;
     if (!form.spare_code || spareList.length === 0) {
       setShowSpareCodeSuggestions(false);
       return;
@@ -67,6 +70,7 @@ const StockCGPISLRaiseIndentPage = () => {
   }, [form.spare_code, spareList]);
 
   useEffect(() => {
+    if (!isTypingRef.current) return;
     if (!form.spare_description || spareList.length === 0) {
       setShowSpareDescriptionSuggestions(false);
       return;
@@ -86,6 +90,9 @@ const StockCGPISLRaiseIndentPage = () => {
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
+    if (name === "spare_code" || name === "spare_description") {
+      isTypingRef.current = true;
+    }
 
     if (name === "division") {
       setForm((prev) => ({
@@ -128,6 +135,8 @@ const StockCGPISLRaiseIndentPage = () => {
       } else {
         return;
       }
+      isTypingRef.current = false;
+
       setForm((prev) => ({
         ...prev,
         division: prev.division || "", // keep division
@@ -137,11 +146,13 @@ const StockCGPISLRaiseIndentPage = () => {
         grc_qty: data.grc_qty ?? "",
         own_qty: data.own_qty ?? "",
         indent_qty: data.indent_qty ?? "",
-        party_name: data.party_name ?? "",
-        order_number: data.order_number ?? "",
-        order_date: data.order_date ?? "",
-        remark: data.remark ?? "",
+        party_name: data.party_name || "U/G Stock",
+        order_number: data.order_number || "NA",
+        order_date: data.order_date || new Date().toLocaleDateString("en-CA"),
+        remark: data.remark ?? "NIL",
       }));
+      setShowSpareCodeSuggestions(false);
+      setShowSpareDescriptionSuggestions(false);
     } catch (err) {
       setError({
         message: err?.message || "Not found",
@@ -291,7 +302,6 @@ const StockCGPISLRaiseIndentPage = () => {
                         setForm((prev) => ({
                           ...prev,
                           spare_code: item.spare_code,
-                          spare_description: item.spare_description,
                         }));
                         setShowSpareCodeSuggestions(false);
                       }}
@@ -374,7 +384,6 @@ const StockCGPISLRaiseIndentPage = () => {
                         onMouseDown={() => {
                           setForm((prev) => ({
                             ...prev,
-                            spare_code: item.spare_code,
                             spare_description: item.spare_description,
                           }));
                           setShowSpareDescriptionSuggestions(false);

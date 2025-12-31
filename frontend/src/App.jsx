@@ -200,14 +200,14 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
               </PrivateRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/IndentDetailsCGPISL"
             element={
               <PrivateRoute>
                 <StockCGPISLIndentEnquiryPage />
               </PrivateRoute>
             }
-          />
+          /> */}
           <Route
             path="/ReceiveCGCELGRCRecords"
             element={

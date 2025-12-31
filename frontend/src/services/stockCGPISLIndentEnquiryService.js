@@ -7,7 +7,13 @@ import { authFetch } from "./authFetchService";
  * @param {Object} params - Filter params: final_status, name, division, delivery_date
  * @returns {Promise<Array>} List of warranty enquiry records
  */
-async function stockCGPISLIndentEnquiry(params = {}) {
+/**
+ * @param {Object} params - Filter params: final_status, name, division, delivery_date, limit, offset
+ * @param {number} [limit=100] - Number of records per page
+ * @param {number} [offset=0] - Offset for pagination
+ * @returns {Promise<Array>} List of warranty enquiry records
+ */
+async function stockCGPISLIndentEnquiry(params = {}, limit = 100, offset = 0) {
   // Build query string from params
   const query = Object.entries(params)
     .filter(([_, v]) => v !== undefined && v !== "")

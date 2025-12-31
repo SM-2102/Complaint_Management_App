@@ -7,9 +7,17 @@ import { authFetch } from "./authFetchService";
  * @param {Object} params - Filter params: final_status, name, division, delivery_date
  * @returns {Promise<Array>} List of warranty enquiry records
  */
-async function stockCGPISLEnquiry(params = {}) {
-  // Build query string from params
-  const query = Object.entries(params)
+/**
+ * Fetch warranty enquiry records with optional filters and pagination
+ * @param {Object} params - Filter params: final_status, name, division, delivery_date, limit, offset
+ * @param {number} [limit=100] - Number of records per page
+ * @param {number} [offset=0] - Offset for pagination
+ * @returns {Promise<Array>} List of warranty enquiry records
+ */
+async function stockCGPISLEnquiry(params = {}, limit = 100, offset = 0) {
+  // Add pagination params
+  const mergedParams = { ...params, limit, offset };
+  const query = Object.entries(mergedParams)
     .filter(([_, v]) => v !== undefined && v !== "")
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
     .join("&");
