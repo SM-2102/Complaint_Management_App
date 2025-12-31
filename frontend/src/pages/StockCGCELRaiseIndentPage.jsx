@@ -133,10 +133,10 @@ useEffect(() => {
         grc_qty: data.grc_qty ?? "",
         own_qty: data.own_qty ?? "",
         indent_qty: data.indent_qty ?? "",
-        party_name: data.party_name ?? "",
-        order_number: data.order_number ?? "",
-        order_date: data.order_date ?? "",
-        remark: data.remark ?? "",
+        party_name: data.party_name || "U/G Stock",
+        order_number: data.order_number || "NA",
+        order_date: data.order_date || new Date().toLocaleDateString("en-CA"),
+        remark: data.remark ?? "NIL",
       }));
     } catch (err) {
       setError({

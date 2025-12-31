@@ -407,42 +407,49 @@ class GRCCGCELService:
             can = canvas.Canvas(packet, pagesize=A4)
             width, height = A4
 
+            def draw_centered(can, text, x_start, x_end, y, font="Helvetica", size=11):
+                text = "" if text is None else str(text)
+                can.setFont(font, size)
+                text_width = can.stringWidth(text, font, size)
+                x_mid = x_start + (x_end - x_start) / 2
+                can.drawString(x_mid - text_width / 2, y, text)
+
             def draw_block(start_y_offset):
                 # Header
                 can.setFont("Helvetica-Bold", 10)
                 can.drawString(105, 722 - start_y_offset, f"{data.get('challan_number', '')}")
                 can.drawString(260, 722 - start_y_offset, date.today().strftime("%d-%m-%Y"))
-                can.drawString(430, 722 - start_y_offset, f"{data.get('division', '')}")
+                can.drawString(432, 722 - start_y_offset, f"{data.get('division', '')}")
                 can.drawString(440, 687 - start_y_offset, f"{data.get('docket_number', '')}")
-                can.drawString(175, 687 - start_y_offset, f"{data.get('sent_through', '')}")
+                can.drawString(173, 687 - start_y_offset, f"{data.get('sent_through', '')}")
+                can.drawString(438, 56 - start_y_offset, f"{token['user']['username']}")
 
 
-                can.setFont("Helvetica", 10)
-                y = 650 - start_y_offset
+                can.setFont("Helvetica", 11)
+                y = 642 - start_y_offset
                 items = data.get('grc_rows', [])
                 for idx, item in enumerate(items, 1):
                     if report_type == "Defective":
-                        can.drawString(60, y, str(idx))
-                        can.drawString(65, y, str(item.get('grc_number', '')))
-                        can.drawString(110, y, str(item.get('grc_date', '')))
-                        can.drawString(170, y, str(item.get('spare_code_spare_description', '')))
-                        can.drawString(440, y, str(item.get('defective_qty', '')))
+                        draw_centered(can, item.get("grc_number"), 18, 95, y)
+                        draw_centered(can, item.get("grc_date"), 98, 160, y)
+                        draw_centered(can, item.get("spare_code"), 165, 250, y)
+                        draw_centered(can, item.get("spare_description"), 250, 480, y)
+                        draw_centered(can, item.get("defective_qty") or 0, 480, 560, y)
                     elif report_type == "Good":
-                        can.drawString(30, y, str(idx))
-                        can.drawString(65, y, str(item.get('grc_number', '')))
-                        can.drawString(110, y, str(item.get('grc_date', '')))
-                        can.drawString(170, y, str(item.get('spare_code_spare_description', '')))
-                        can.drawString(440, y, str(item.get('good_qty', '')))
+                        draw_centered(can, item.get("grc_number"), 18, 95, y)
+                        draw_centered(can, item.get("grc_date"), 98, 160, y)
+                        draw_centered(can, item.get("spare_code"), 165, 250, y)
+                        draw_centered(can, item.get("spare_description"), 250, 430, y)
+                        can.drawString(390, y, str(item.get("good_qty") or 0))
                     else:
-                        can.drawString(60, y, str(idx))
-                        can.drawString(65, y, str(item.get('grc_number', '')))
-                        can.drawString(110, y, str(item.get('grc_date', '')))
-                        can.drawString(170, y, str(item.get('spare_code_spare_description', '')))
-                        can.drawString(320, y, str(item.get('actual_pending_qty', '')))
-                        can.drawString(390, y, str(item.get('good_qty', '')))
-                        can.drawString(440, y, str(item.get('defective_qty', '')))
-                        can.drawString(500, y, str(item.get('returned_qty', '')))
-                    y -= 15
+                        draw_centered(can, item.get("grc_number"), 18, 95, y)
+                        draw_centered(can, item.get("grc_date"), 98, 160, y)
+                        draw_centered(can, item.get("spare_code"), 165, 250, y)
+                        draw_centered(can, item.get("spare_description"), 250, 430, y)
+                        draw_centered(can, item.get("actual_pending_qty") or 0, 430, 480, y)
+                        draw_centered(can, item.get("good_qty") or 0, 484, 510, y)
+                        draw_centered(can, item.get("defective_qty") or 0, 510, 560, y)
+                    y -= 19
                     if y < 100:
                         break  # Avoid overflow for now
 
