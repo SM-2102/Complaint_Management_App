@@ -20,6 +20,7 @@ import { updateCGCELReturnFinalize } from "../services/grcCGCELReturnFinalizeSer
 const columns = [
   { key: "grc_number", label: "GRC Number" },
   { key: "grc_date", label: "GRC Date" },
+  { key: "spare_code", label: "Spare Code" },
   { key: "spare_description", label: "Spare Description" },
   { key: "issue_qty", label: "Issue Qty" },
   { key: "grc_pending_qty", label: "GRC Pending Qty" },
@@ -90,6 +91,21 @@ const GRCCGCELReturnSparePage = () => {
           docket_number: form.docket_number,
           grc_rows: data
             .filter((row) => row.invoice !== "Y")
+            .filter((row) => {
+              const good = Number(row.good_qty) || 0;
+              const defective = Number(row.defective_qty) || 0;
+
+              if (reportType === "All") {
+                return good + defective > 0;
+              }
+
+              if (reportType === "Good") {
+                return good > 0;
+              }
+
+              // Defective
+              return defective > 0;
+            })
             .map((row) => ({
               grc_number: row.grc_number,
               grc_date: row.grc_date,

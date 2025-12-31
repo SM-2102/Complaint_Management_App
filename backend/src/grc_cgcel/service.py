@@ -282,7 +282,7 @@ class GRCCGCELService:
         statement = select(GRCCGCEL).where(
             GRCCGCEL.division == division,
             GRCCGCEL.status == "N",
-        )
+        ).order_by(GRCCGCEL.grc_number)
         result = await session.execute(statement)
         rows = result.all()
         return [
@@ -341,6 +341,7 @@ class GRCCGCELService:
         self, updateData: List[GRCCGCELReturnSave], session: AsyncSession, token: dict
     ):
         for data in updateData:
+            print("Finalizing return for:", data)
             # Save history BEFORE updating CGCEL only if invoice == 'N'
             existing_record = await self.get_grc_cgcel_by_code(
                 data.spare_code, data.grc_number, session
@@ -349,7 +350,7 @@ class GRCCGCELService:
             defective_qty = getattr(data, "defective_qty", 0) or 0
             returning_qty = good_qty + defective_qty
             invoice_val = getattr(data, "invoice", None)
-            if invoice_val == "N":
+            if (invoice_val == "N" and returning_qty > 0) :
                 history_kwargs = {
                     "division": getattr(existing_record, "division", None),
                     "spare_code": getattr(data, "spare_code", None),
