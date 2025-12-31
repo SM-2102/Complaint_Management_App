@@ -29,6 +29,8 @@ const StockCGCELRaiseIndentPage = () => {
   const [error, setError] = useState({});
   const [showToast, setShowToast] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const isTypingRef = useRef(false);
+
   const [spareList, setSpareList] = useState([]);
   const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
   const [spareDescriptionSuggestions, setSpareDescriptionSuggestions] =
@@ -39,6 +41,7 @@ const StockCGCELRaiseIndentPage = () => {
     useState(false);
 
   useEffect(() => {
+    if (!isTypingRef.current) return;
   if (!form.spare_code || spareList.length === 0) {
     setShowSpareCodeSuggestions(false);
     return;
@@ -60,6 +63,7 @@ const StockCGCELRaiseIndentPage = () => {
 }, [form.spare_code, spareList]);
 
 useEffect(() => {
+  if (!isTypingRef.current) return;
   if (!form.spare_description || spareList.length === 0) {
     setShowSpareDescriptionSuggestions(false);
     return;
@@ -81,6 +85,9 @@ useEffect(() => {
 
   const handleChange = async (e) => {
   const { name, value } = e.target;
+   if (name === "spare_code" || name === "spare_description") {
+    isTypingRef.current = true;
+  }
 
   if (name === "division") {
     setForm((prev) => ({
@@ -124,6 +131,8 @@ useEffect(() => {
       } else {
         return;
       }
+      isTypingRef.current = false;
+
       setForm((prev) => ({
         ...prev,
         division: prev.division || "", // keep division
@@ -138,6 +147,10 @@ useEffect(() => {
         order_date: data.order_date || new Date().toLocaleDateString("en-CA"),
         remark: data.remark ?? "NIL",
       }));
+      setShowSpareCodeSuggestions(false);
+setShowSpareDescriptionSuggestions(false);
+
+
     } catch (err) {
       setError({
         message: err?.message || "Not found",
@@ -288,7 +301,6 @@ useEffect(() => {
   setForm((prev) => ({
     ...prev,
     spare_code: item.spare_code,
-    spare_description: item.spare_description,
   }));
   setShowSpareCodeSuggestions(false);
 }}
@@ -374,7 +386,6 @@ useEffect(() => {
                         onMouseDown={() => {
   setForm((prev) => ({
     ...prev,
-    spare_code: item.spare_code,
     spare_description: item.spare_description,
   }));
   setShowSpareDescriptionSuggestions(false);
