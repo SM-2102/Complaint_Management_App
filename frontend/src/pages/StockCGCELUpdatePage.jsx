@@ -62,7 +62,7 @@ const StockCGCELUpdatePage = () => {
     if (name === "spare_code") {
       if (newValue.length > 0 && spareList.length > 0) {
         const filtered = spareList.filter((item) =>
-          item.spare_code.toLowerCase().startsWith(newValue.toLowerCase()),
+          item.spare_code.toLowerCase().includes(newValue.toLowerCase()),
         );
         setSpareCodeSuggestions(filtered);
         setShowSpareCodeSuggestions(filtered.length > 0);
@@ -76,7 +76,7 @@ const StockCGCELUpdatePage = () => {
         const filtered = spareList.filter((item) =>
           item.spare_description
             .toLowerCase()
-            .startsWith(newValue.toLowerCase()),
+            .includes(newValue.toLowerCase()),
         );
         setSpareDescriptionSuggestions(filtered);
         setShowSpareDescriptionSuggestions(filtered.length > 0);
