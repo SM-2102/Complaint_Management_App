@@ -17,7 +17,16 @@ const columns = [
   { key: "alp", label: "ALP" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = [
+  "FANS",
+  "PUMP",
+  "SDA",
+  "WHC",
+  "FHP",
+  "LT",
+  "HT",
+  "OTHERS",
+];
 
 const Filter = ({
   open = false,
