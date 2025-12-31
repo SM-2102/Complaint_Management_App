@@ -31,7 +31,7 @@ export const menuConfig = [
     bgColor: "#f0f4f8",
     actions: [
       {
-        label: "Upload CGCEL Stock",
+        label: "CGCEL Upload Stock",
         path: "/UploadCGCELStockRecords",
         company: "CGCEL",
       },
@@ -41,7 +41,7 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "View CGCEL Stock",
+        label: "CGCEL View Stock",
         path: "/ViewCGCELStockRecords",
         company: "CGCEL",
       },
@@ -81,7 +81,7 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "Update CGCEL Stock",
+        label: "CGCEL Update Stock",
         path: "/UpdateCGCELStock",
         company: "CGCEL",
       },
@@ -94,7 +94,7 @@ export const menuConfig = [
     bgColor: "#e7d7f8ff",
     actions: [
       {
-        label: "Upload CGCEL GRC",
+        label: "CGCEL Upload GRC",
         path: "/UploadCGCELGRCRecords",
         company: "CGCEL",
       },
@@ -104,7 +104,7 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "Receive CGCEL GRC",
+        label: "CGCEL Receive GRC",
         path: "/ReceiveCGCELGRCRecords",
         company: "CGCEL",
       },
@@ -123,10 +123,8 @@ export const menuConfig = [
         path: "/GRCCGPISLSpareReturn",
         company: "CGPISL",
       },
-      { label: "GRC CGCEL Report", path: "/GRCCGCELReport", company: "CGCEL" },
-      { label: "GRC Report", path: "/GRCCGPISLReport", company: "CGPISL" },
       {
-        label: "GRC CGCEL Enquiry",
+        label: "CGCEL GRC Enquiry",
         path: "/GRCCGCELEnquiry",
         company: "CGCEL",
       },

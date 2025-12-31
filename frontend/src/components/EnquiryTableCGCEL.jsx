@@ -16,6 +16,7 @@ import {
  * @param {Array} data - The list of enquiry objects to display.
  * @param {Array} columns - The list of column definitions: [{ key: string, label: string }].
  * @param {string} [title] - Optional title for the table.
+ * @param {integer} total_records - total records count.
  */
 
 const EnquiryTableCGCEL = ({
@@ -24,6 +25,7 @@ const EnquiryTableCGCEL = ({
   title = "Enquiry Table",
   noDataMessage = null,
   sum_column = null,
+  total_records = 0,
 }) => {
   const tableRef = useRef();
 
@@ -113,7 +115,7 @@ const EnquiryTableCGCEL = ({
           >
             <span style={{ letterSpacing: 0.5 }}>Total Records:</span>{" "}
             <span style={{ color: "#0d47a1", fontWeight: 600 }}>
-              {data.length}
+              {total_records}
             </span>
           </Typography>
         </Box>

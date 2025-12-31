@@ -14,76 +14,95 @@ class GRCCGCELSchema(BaseModel):
     issue_qty: int
     grc_pending_qty: int
 
-# class GRCCGCELEnquiry(BaseModel):
-#     spare_code: str
-#     division: str
-#     spare_description: str
-#     cnf_qty: Optional[int]
-#     grc_qty: Optional[int]
-#     own_qty: Optional[int]
-#     sale_price: Optional[float]
+class GRCCGCELReceiveSchema(BaseModel):
+    spare_code: str
+    spare_description: str
+    issue_qty: int
+    receive_qty: Optional[int]
+    defective_qty: Optional[int]
+    short_qty: Optional[int]
+    alt_spare_qty: Optional[int]
+    alt_spare_code: Optional[str]
+    dispute_remark: Optional[str]    
 
+class GRCCGCELUpdateReceiveSchema(BaseModel):
+    spare_code: str
+    grc_number: int
+    receive_qty: Optional[int]
+    defective_qty: Optional[int]
+    short_qty: Optional[int]
+    alt_spare_qty: Optional[int]
+    alt_spare_code: Optional[str]
+    dispute_remark: Optional[str]
 
-# class GRCCGCELEnquiryGRCList(BaseModel):
-#     spare_code: str
-#     spare_description: str
+class GRCCGCELDisputeCreate(BaseModel):
+    spare_code: str
+    division: str
+    grc_number: int
+    grc_date: date
+    spare_description: str
+    issue_qty: int
+    grc_pending_qty: int
+    dispute_remark: Optional[str]
+    damaged_qty: Optional[int]
+    short_qty: Optional[int]
+    alt_spare_qty: Optional[int]
+    alt_spare_code: Optional[str]
 
+class GRCCGCELReturnSchema(BaseModel):
+    grc_number: int
+    grc_date: str
+    spare_code: str
+    spare_description: str
+    issue_qty: int
+    grc_pending_qty: int
+    actual_pending_qty: Optional[int]
+    returned_qty: Optional[int]
+    good_qty: Optional[int]
+    defective_qty: Optional[int]
+    invoice: Optional[str]
+    docket_number: Optional[str]
+    sent_through: Optional[str]
 
-# class GRCCGCELCreateIndentResponse(BaseModel):
-#     spare_code: str
-#     spare_description: str
-#     cnf_qty: Optional[int]
-#     grc_qty: Optional[int]
-#     own_qty: Optional[int]
-#     indent_qty: Optional[int]
-#     party_name: Optional[str]
-#     order_number: Optional[str]
-#     order_date: Optional[date]
-#     remark: Optional[str]
+class GRCCGCELReturnSave(BaseModel):
+    spare_code: str
+    grc_number: int
+    good_qty: Optional[int]
+    defective_qty: Optional[int]
+    invoice: str
+    sent_through: Optional[str]
+    docket_number: Optional[str]
 
+class GRCRowPayload(BaseModel):
+    grc_number: int
+    grc_date: str
+    spare_code: str
+    spare_description: str
+    actual_pending_qty: Optional[int]
+    good_qty: Optional[int]
+    defective_qty: Optional[int]
 
-# class GRCCGCELCode(BaseModel):
-#     spare_code: str
+class GRCFullPayload(BaseModel):
+    division: str
+    challan_number: str
+    sent_through: Optional[str]
+    docket_number: Optional[str]
+    grc_rows: List[GRCRowPayload]
 
-
-# class GRCCGCELDescription(BaseModel):
-#     spare_description: str
-
-
-# class GRCCGCELIndentCreate(BaseModel):
-#     indent_qty: int
-#     party_name: str
-#     order_number: str
-#     order_date: date
-#     remark: str
-
-
-# class GRCCGCELUpdate(BaseModel):
-#     spare_code: str = Field(..., max_length=30)
-#     division: str = Field(..., max_length=20)
-#     spare_description: str = Field(..., max_length=40)
-#     movement_type: str = Field(..., max_length=10)
-#     own_qty: int
-#     remark: str = Field(..., max_length=40)
-
-
-# class GRCCGCELGenerateIndentResponse(BaseModel):
-#     spare_code: str
-#     spare_description: str
-#     indent_qty: int
-
-
-# class GRCCGCELGenerateIndentRecord(BaseModel):
-#     indent_number: str
-#     division: str
-#     spare_code: List[str]
-
-
-# class GRCCGCELIndentEnquiry(BaseModel):
-#     spare_code: str
-#     division: str
-#     spare_description: str
-#     indent_qty: int
-#     indent_number: str
-#     indent_date: date
-#     party_name: Optional[str]
+class GRCCGCELHistorySchema(BaseModel):
+    division: str
+    spare_code: str
+    spare_description: str
+    grc_number: int
+    grc_date: date
+    issue_qty: int
+    grc_pending_qty: int
+    good_qty: Optional[int]
+    defective_qty: Optional[int]
+    returning_qty: Optional[int]
+    challan_number: Optional[str]
+    challan_date: Optional[date]
+    docket_number: Optional[str]
+    sent_through: Optional[str]
+    remark: Optional[str]
+    challan_by: Optional[str]

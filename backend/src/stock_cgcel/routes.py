@@ -74,7 +74,7 @@ Stock CGCEL enquiry using query parameters.
 
 
 @stock_cgcel_router.get(
-    "/enquiry", response_model=List[StockCGCELEnquiry], status_code=status.HTTP_200_OK
+    "/enquiry", status_code=status.HTTP_200_OK
 )
 async def enquiry_stock_cgcel(
     spare_description: Optional[str] = None,
@@ -83,11 +83,13 @@ async def enquiry_stock_cgcel(
     cnf: Optional[str] = None,
     grc: Optional[str] = None,
     own: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
     try:
-        result = await stock_cgcel_service.enquiry_stock_cgcel(
+        result, total_records = await stock_cgcel_service.enquiry_stock_cgcel(
             session,
             spare_description,
             spare_code,
@@ -95,10 +97,13 @@ async def enquiry_stock_cgcel(
             cnf,
             grc,
             own,
+            limit,
+            offset,
+            return_total=True
         )
-        return result
-    except:
-        return []
+        return {"records": result, "total_records": total_records}
+    except Exception as exc:
+        return {"records": [], "total_records": 0}
 
 
 """
@@ -275,7 +280,6 @@ Stock CGCEL Indent enquiry using query parameters.
 
 @stock_cgcel_router.get(
     "/indent_enquiry",
-    response_model=List[StockCGCELIndentEnquiry],
     status_code=status.HTTP_200_OK,
 )
 async def enquiry_indent_cgcel(
@@ -286,11 +290,13 @@ async def enquiry_indent_cgcel(
     to_indent_date: Optional[date] = None,
     from_indent_number: Optional[str] = None,
     to_indent_number: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
     try:
-        result = await stock_cgcel_service.enquiry_indent_cgcel(
+        result, total_records = await stock_cgcel_service.enquiry_indent_cgcel(
             session,
             spare_description,
             spare_code,
@@ -299,7 +305,10 @@ async def enquiry_indent_cgcel(
             to_indent_date,
             from_indent_number,
             to_indent_number,
+            limit,
+            offset,
+            return_total=True
         )
-        return result
-    except:
-        return []
+        return {"records": result, "total_records": total_records}
+    except Exception as exc:
+        return {"records": [], "total_records": 0}

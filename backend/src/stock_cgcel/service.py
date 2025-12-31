@@ -244,6 +244,53 @@ class StockCGCELService:
             "resolution": f"Inserted : {inserted}, Updated : {updated}",
             "type": "success",
         }
+    
+    def _apply_stock_cgcel_filters(
+        self,
+        statement,
+        spare_description=None,
+        spare_code=None,
+        division=None,
+        cnf=None,
+        grc=None,
+        own=None,
+        model=StockCGCEL,
+    ):
+        if spare_description:
+            statement = statement.where(
+                model.spare_description.ilike(f"{spare_description}")
+            )
+        if division:
+            statement = statement.where(model.division == division)
+        if spare_code:
+            statement = statement.where(model.spare_code.ilike(f"{spare_code}"))
+        if cnf:
+            if cnf == "Y":
+                statement = statement.where((model.cnf_qty.isnot(None) & (model.cnf_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (model.cnf_qty.is_(None) | (model.cnf_qty == 0))
+                )
+        if grc:
+            if grc == "Y":
+                statement = statement.where(
+                    (model.grc_qty.isnot(None) & (model.grc_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (model.grc_qty.is_(None) | (model.grc_qty == 0))
+                )
+        if own:
+            if own == "Y":
+                statement = statement.where(
+                    (model.own_qty.isnot(None) & (model.own_qty > 0))
+                )
+            else:
+                statement = statement.where(
+                    (model.own_qty.is_(None) | (model.own_qty == 0))
+                )
+        return statement
 
     async def enquiry_stock_cgcel(
         self,
@@ -254,57 +301,30 @@ class StockCGCELService:
         cnf: Optional[str] = None,
         grc: Optional[str] = None,
         own: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
+        return_total: bool = False,
     ):
-
         statement = select(StockCGCEL)
+        statement = self._apply_stock_cgcel_filters(
+            statement, spare_description, spare_code, division, cnf, grc, own
+        )
 
-        if spare_description:
-            statement = statement.where(
-                StockCGCEL.spare_description.ilike(f"{spare_description}")
+        total_records = None
+        if return_total:
+            count_query = select(func.count()).select_from(StockCGCEL)
+            count_query = self._apply_stock_cgcel_filters(
+                count_query, spare_description, spare_code, division, cnf, grc, own, StockCGCEL
             )
-
-        if division:
-            statement = statement.where(StockCGCEL.division == division)
-
-        if spare_code:
-            statement = statement.where(StockCGCEL.spare_code.ilike(f"{spare_code}"))
-
-        if cnf:
-            if cnf == "Y":
-                statement = statement.where(
-                    (StockCGCEL.cnf_qty.isnot(None) & (StockCGCEL.cnf_qty > 0))
-                )
-            else:
-                statement = statement.where(
-                    (StockCGCEL.cnf_qty.is_(None) | (StockCGCEL.cnf_qty == 0))
-                )
-
-        if grc:
-            if grc == "Y":
-                statement = statement.where(
-                    (StockCGCEL.grc_qty.isnot(None) & (StockCGCEL.grc_qty > 0))
-                )
-            else:
-                statement = statement.where(
-                    (StockCGCEL.grc_qty.is_(None) | (StockCGCEL.grc_qty == 0))
-                )
-
-        if own:
-            if own == "Y":
-                statement = statement.where(
-                    (StockCGCEL.own_qty.isnot(None) & (StockCGCEL.own_qty > 0))
-                )
-            else:
-                statement = statement.where(
-                    (StockCGCEL.own_qty.is_(None) | (StockCGCEL.own_qty == 0))
-                )
+            total_result = await session.execute(count_query)
+            total_records = total_result.scalar() or 0
 
         statement = statement.order_by(StockCGCEL.spare_code)
+        statement = statement.limit(limit).offset(offset)
 
         result = await session.execute(statement)
         rows = result.all()
-
-        return [
+        records = [
             StockCGCELEnquiry(
                 spare_code=row.StockCGCEL.spare_code,
                 division=row.StockCGCEL.division,
@@ -316,6 +336,10 @@ class StockCGCELService:
             )
             for row in rows
         ]
+
+        if return_total:
+            return records, total_records
+        return records
 
     async def list_cgcel_stock(self, session: AsyncSession):
         statement = select(
@@ -485,21 +509,19 @@ class StockCGCELService:
         except Exception:
             await session.rollback()
         return indent_records
-
-    async def enquiry_indent_cgcel(
+    
+    def _apply_indent_cgcel_filters(
         self,
-        session: AsyncSession,
-        spare_description: Optional[str] = None,
-        spare_code: Optional[str] = None,
-        division: Optional[str] = None,
-        from_indent_date: Optional[date] = None,
-        to_indent_date: Optional[date] = None,
-        from_indent_number: Optional[str] = None,
-        to_indent_number: Optional[str] = None,
+        statement,
+        spare_description=None,
+        spare_code=None,
+        division=None,
+        from_indent_date=None,
+        to_indent_date=None,
+        from_indent_number=None,
+        to_indent_number=None,
+        model=StockCGCELIndent,
     ):
-
-        statement = select(StockCGCELIndent)
-
         if spare_description:
             statement = statement.where(
                 StockCGCELIndent.spare_description.ilike(f"{spare_description}")
@@ -533,22 +555,55 @@ class StockCGCELService:
                 from_indent_number = 'I' + str(from_indent_number).zfill(5)
             statement = statement.where(
                 StockCGCELIndent.indent_number <= to_indent_number
+            )        
+          
+        return statement
+
+    async def enquiry_indent_cgcel(
+        self,
+        session: AsyncSession,
+        spare_description: Optional[str] = None,
+        spare_code: Optional[str] = None,
+        division: Optional[str] = None,
+        from_indent_date: Optional[date] = None,
+        to_indent_date: Optional[date] = None,
+        from_indent_number: Optional[str] = None,
+        to_indent_number: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
+        return_total: bool = False,
+    ):
+        statement = select(StockCGCELIndent)
+        statement = self._apply_indent_cgcel_filters(
+            statement, spare_description, spare_code, division, from_indent_date, to_indent_date, from_indent_number, to_indent_number
+        )
+
+        total_records = None
+        if return_total:
+            count_query = select(func.count()).select_from(StockCGCELIndent)
+            count_query = self._apply_indent_cgcel_filters(
+                count_query, spare_description, spare_code, division, from_indent_date, to_indent_date, from_indent_number, to_indent_number, StockCGCELIndent  
             )
+            total_result = await session.execute(count_query)
+            total_records = total_result.scalar() or 0
 
         statement = statement.order_by(StockCGCELIndent.spare_code)
+        statement = statement.limit(limit).offset(offset)
 
         result = await session.execute(statement)
-        rows = result.scalars().all()
-        if rows:
-            return [
-                StockCGCELIndentEnquiry(
-                    spare_code=row.spare_code,
-                    division=row.division,
-                    spare_description=row.spare_description,
-                    indent_qty=row.indent_qty,
-                    indent_number=row.indent_number,
-                    indent_date=format_date_ddmmyyyy(row.indent_date),
-                    party_name=row.party_name,
-                )
-                for row in rows
-            ]
+        rows = result.all()
+        records = [
+            StockCGCELIndentEnquiry(
+                spare_code=row.StockCGCELIndent.spare_code,
+                division=row.StockCGCELIndent.division,
+                spare_description=row.StockCGCELIndent.spare_description,
+                indent_qty=row.StockCGCELIndent.indent_qty,
+                indent_number=row.StockCGCELIndent.indent_number,
+                indent_date=format_date_ddmmyyyy(row.StockCGCELIndent.indent_date),
+                party_name=row.StockCGCELIndent.party_name,
+            )
+            for row in rows
+        ]
+        if return_total:
+            return records, total_records
+        return records

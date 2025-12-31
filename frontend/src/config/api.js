@@ -44,11 +44,21 @@ const API_ENDPOINTS = {
   STOCK_CGPISL_CREATE_INDENT: `${BASE_API_URL}stock_cgpisl/create_indent`,
   STOCK_CGPISL_PENDING_INDENT: `${BASE_API_URL}stock_cgpisl/indent_details`, //append division param
   STOCK_CGPISL_NEXT_INDENT_CODE: `${BASE_API_URL}stock_cgpisl/next_indent_code`,
-  STOCK_CGPISL_LAST_INDENT_CODE: `${BASE_API_URL}stock_cgpisl/last_indent_code`,
   STOCK_CGPISL_GENERATE_INDENT: `${BASE_API_URL}stock_cgpisl/generate_indent`,
   STOCK_CGPISL_INDENT_ENQUIRY: `${BASE_API_URL}stock_cgpisl/indent_enquiry`, // append indent_number param
 
   GRC_CGCEL_UPLOAD: `${BASE_API_URL}grc_cgcel/upload`,
+  GRC_CGCEL_NOT_RECEIVED_NUMBERS: `${BASE_API_URL}grc_cgcel/not_received_grc`,
+  GRC_CGCEL_NOT_RECEIVED_BY_GRC_NUMBER: `${BASE_API_URL}grc_cgcel/not_received_by_grc_number`,
+  GRC_CGCEL_UPDATE_RECEIVE: `${BASE_API_URL}grc_cgcel/update_receive`,
+  GRC_CGCEL_NEXT_CHALLAN_CODE: `${BASE_API_URL}grc_cgcel/next_challan_code`,
+  GRC_CGCEL_LIST_BY_DIVISION: `${BASE_API_URL}grc_cgcel/grc_return_by_division`, // append division param
+  GRC_CGCEL_SAVE_RETURN: `${BASE_API_URL}grc_cgcel/save_grc_return`,
+  GRC_CGCEL_FINALIZE_RETURN: `${BASE_API_URL}grc_cgcel/finalize_grc_return`,
+  GRC_CGCEL_REPORT_PRINT: `${BASE_API_URL}grc_cgcel/print_report`,
+
+
+
   GRC_CGPISL_UPLOAD: `${BASE_API_URL}grc_cgpisl/upload`,
 
   COMPLAINT_UPLOAD: `${BASE_API_URL}complaint/upload`,

@@ -502,12 +502,12 @@ const StockCGCELIndentEnquiryPage = () => {
   const [division, setDivision] = useState("");
   const [spareDescription, setSpareDescription] = useState("");
   const [spareCode, setSpareCode] = useState("");
-  const [available, setAvailable] = useState("");
   const [fromIndentDate, setFromIndentDate] = useState("");
   const [toIndentDate, setToIndentDate] = useState("");
   // Data states
 
   const [data, setData] = useState([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false); // Don't load on mount
   const [error, setError] = useState(null);
   const [filterOpen, setFilterOpen] = useState(true);
@@ -517,11 +517,14 @@ const StockCGCELIndentEnquiryPage = () => {
   const [fromIndentNumber, setFromIndentNumber] = useState("");
   const [toIndentNumber, setToIndentNumber] = useState("");
 
+  // Pagination states
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(100);
+
   const handleClear = () => {
     setDivision("");
     setSpareDescription("");
     setSpareCode("");
-    setAvailable("");
     setFromIndentDate("");
     setToIndentDate("");
     setFromIndentNumber("");
@@ -529,6 +532,8 @@ const StockCGCELIndentEnquiryPage = () => {
     setSearched(false);
     setData([]);
     setError(null);
+    setPage(1);
+
   };
 
   useEffect(() => {
@@ -549,34 +554,79 @@ const StockCGCELIndentEnquiryPage = () => {
     };
   }, []);
 
+  // Fetch data when page/limit changes or after search
+
+  const fetchData = async (params = {}, pageNum = page, pageLimit = limit) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const offset = (pageNum - 1) * pageLimit;
+      const res = await stockCGCELIndentEnquiry(params, pageLimit, offset);
+      if (res && typeof res === 'object' && Array.isArray(res.records)) {
+        setData(res.records);
+        setTotalRecords(res.total_records || 0);
+      } else if (Array.isArray(res)) {
+        setData(res);
+        setTotalRecords(res.length);
+      } else {
+        setData([]);
+        setTotalRecords(0);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to fetch data");
+      setData([]);
+      setTotalRecords(0);
+    }
+    setLoading(false);
+  };
+
+
   // Handler for search button
   const handleSearch = async () => {
     setLoading(true);
     setError(null);
     setSearched(true);
     setFilterOpen(false);
-    try {
-      // Update fetchIndentEnquiry to accept params
+    setPage(1); // Reset to first page on new search
+ 
       const params = {};
       if (spareDescription) params.spare_description = spareDescription;
       if (spareCode) params.spare_code = spareCode;
       if (division) params.division = division;
-      if (available) params.available = available;
       if (fromIndentDate) params.from_indent_date = fromIndentDate;
       if (toIndentDate) params.to_indent_date = toIndentDate;
       if (fromIndentNumber) params.from_indent_number = fromIndentNumber;
       if (toIndentNumber) params.to_indent_number = toIndentNumber;
-      const res = await stockCGCELIndentEnquiry(params);
-      // Add index property to each row (for display)
-      const indexedRes = Array.isArray(res)
-        ? res.map((row, idx) => ({ ...row, index: idx + 1 }))
-        : [];
-      setData(indexedRes);
-    } catch (err) {
-      setError(err.message || "Failed to fetch data");
-      setData([]);
-    }
-    setLoading(false);
+      await fetchData(params, 1, limit);
+      setLoading(false);
+  };
+
+  const handlePageChange = async (newPage) => {
+    setPage(newPage);
+    const params = {};  
+    if (spareDescription) params.spare_description = spareDescription;
+    if (spareCode) params.spare_code = spareCode;
+    if (division) params.division = division;
+    if (fromIndentDate) params.from_indent_date = fromIndentDate;
+    if (toIndentDate) params.to_indent_date = toIndentDate;
+    if (fromIndentNumber) params.from_indent_number = fromIndentNumber;
+    if (toIndentNumber) params.to_indent_number = toIndentNumber;
+    await fetchData(params, newPage, limit);
+  };
+
+  const handleLimitChange = async (e) => {
+    const newLimit = parseInt(e.target.value, 10) || 100;
+    setLimit(newLimit);
+    setPage(1);
+    const params = {};  
+    if (spareDescription) params.spare_description = spareDescription;
+    if (spareCode) params.spare_code = spareCode;
+    if (division) params.division = division;
+    if (fromIndentDate) params.from_indent_date = fromIndentDate;
+    if (toIndentDate) params.to_indent_date = toIndentDate;
+    if (fromIndentNumber) params.from_indent_number = fromIndentNumber;
+    if (toIndentNumber) params.to_indent_number = toIndentNumber;
+    await fetchData(params, 1, newLimit);
   };
 
   return (
@@ -591,8 +641,6 @@ const StockCGCELIndentEnquiryPage = () => {
         setSpareDescription={setSpareDescription}
         spareCode={spareCode}
         setSpareCode={setSpareCode}
-        available={available}
-        setAvailable={setAvailable}
         spareCodes={spareCodes}
         spareDescriptions={spareDescriptions}
         onSearch={handleSearch}
@@ -616,10 +664,11 @@ const StockCGCELIndentEnquiryPage = () => {
       ) : (
         <>
           <EnquiryTableCGCEL
-            data={data.map((row, idx) => ({ ...row, index: idx + 1 }))}
+            data={data}
             columns={columns}
             title="Stock CGCEL Indent Enquiry List"
             sum_column="amount"
+            total_records={totalRecords}
             noDataMessage={
               searched && data.length === 0 ? (
                 <tr>
@@ -638,9 +687,46 @@ const StockCGCELIndentEnquiryPage = () => {
               ) : null
             }
           />
-        </>
-      )}
-    </Container>
+        {/* Pagination Controls */}
+                  {searched && (
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 24, gap: 8, width: "100%" }}>
+                      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 16, width: "100%", position: "relative" }}>
+                        {/* Centered Pagination Buttons */}
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 16, flex: 1 }}>
+                          <button
+                            onClick={() => handlePageChange(page - 1)}
+                            disabled={page === 1 || loading}
+                            style={{ padding: "8px 16px", borderRadius: 6, background: "#1976d2", color: "#fff", border: "none", fontWeight: "bold", fontSize: 15, cursor: page === 1 ? "not-allowed" : "pointer", opacity: page === 1 ? 0.6 : 1 }}
+                          >
+                            Previous
+                          </button>
+                          <span style={{ fontWeight: 600, fontSize: 16 }}>Page {page}</span>
+                          <button
+                            onClick={() => handlePageChange(page + 1)}
+                            disabled={data.length < limit || loading}
+                            style={{ padding: "8px 16px", borderRadius: 6, background: "#1976d2", color: "#fff", border: "none", fontWeight: "bold", fontSize: 15, cursor: data.length < limit ? "not-allowed" : "pointer", opacity: data.length < limit ? 0.6 : 1 }}
+                          >
+                            Next
+                          </button>
+                        </div>
+                        {/* Rows per page selector aligned right */}
+                        <div style={{ position: "absolute", right: 0, display: "flex", alignItems: "center" }}>
+                          <label style={{ fontWeight: 500 }}>
+                            Rows per page:
+                            <select value={limit} onChange={handleLimitChange} style={{ marginLeft: 8, padding: "4px 8px", borderRadius: 4 }}>
+                              <option value={25}>25</option>
+                              <option value={50}>50</option>
+                              <option value={100}>100</option>
+                              <option value={200}>200</option>
+                            </select>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </Container>
   );
 };
 

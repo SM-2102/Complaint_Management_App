@@ -3,15 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BirthdayWish from "../components/BirthdayWish";
 import HolidayWish from "../components/HolidayWish";
 import MenuCard from "../components/MenuCard";
-import CustomerChart from "../charts/CustomerChart";
-import ChallanChart from "../charts/ChallanChart";
-import WarrantyStatusChart from "../charts/WarrantyStatusChart";
-import OutOfWarrantyStatusChart from "../charts/OutOfWarrantyStatusChart";
-import OutOfWarrantyTimeline from "../charts/OutOfWarrantyTimeline";
-import WarrantySRFDeliveryTimelineChart from "../charts/WarrantySRFDeliveryTimelineChart";
-import RetailDivisionDonutChart from "../charts/RetailDivisionDonutChart";
-import RetailSettledPieChart from "../charts/RetailSettledPieChart";
-import VendorStatusChart from "../charts/VendorStatusChart";
+import GRCBarChart from "../charts/GRCBarChart";
 import { useDashboardData } from "../hooks/useDashboardData";
 import SpinnerLoading from "../components/SpinnerLoading";
 import { menuConfig } from "../config/menuConfig";
@@ -40,18 +32,6 @@ const mergeDivisionData = (...arrays) => {
     merged[division].count += count || 0;
   });
   return Object.values(merged);
-};
-
-const getTotals = (totalsObj = {}, company) => {
-  if (company === "ALL") {
-    return {
-      CGCEL: totalsObj.CGCEL || 0,
-      CGPISL: totalsObj.CGPISL || 0,
-    };
-  }
-  return {
-    [company]: totalsObj[company] || 0,
-  };
 };
 
 
@@ -132,19 +112,34 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     }
     navigate({ search: params.toString() }, { replace: true });
   };
+
+  // Stock division data
   const divisionData = useMemo(() => {
-  const donut = data?.stock?.division_wise_donut;
-  if (!donut) return [];
+    const donut = data?.stock?.division_wise_donut;
+    if (!donut) return [];
 
-  if (selectedCompany === "ALL") {
-    return mergeDivisionData(
-      normalizeDivisionData(donut.CGCEL),
-      normalizeDivisionData(donut.CGPISL)
-    );
-  }
+    if (selectedCompany === "ALL") {
+      return mergeDivisionData(
+        normalizeDivisionData(donut.CGCEL),
+        normalizeDivisionData(donut.CGPISL)
+      );
+    }
+    return normalizeDivisionData(donut[selectedCompany]);
+  }, [data, selectedCompany]);
 
-  return normalizeDivisionData(donut[selectedCompany]);
-}, [data, selectedCompany]);
+  // GRC division data
+  const grcDivisionData = useMemo(() => {
+    const donut = data?.grc?.division_wise_donut;
+    if (!donut) return [];
+
+    if (selectedCompany === "ALL") {
+      return mergeDivisionData(
+        normalizeDivisionData(donut.CGCEL),
+        normalizeDivisionData(donut.CGPISL)
+      );
+    }
+    return normalizeDivisionData(donut[selectedCompany]);
+  }, [data, selectedCompany]);
 
 const meta = useMemo(() => {
   const stock = data?.stock;
@@ -262,7 +257,7 @@ const meta = useMemo(() => {
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
-                    <CustomerChart data={data} />
+                    <div>WIP</div>
                   ))}
                 {key === "stock" &&
                   (loading ? (
@@ -282,21 +277,16 @@ const meta = useMemo(() => {
                 {key === "grc" &&
                   (loading ? (
                     <div className="w-full flex justify-center items-center">
-                      <SpinnerLoading text="Loading Retail Data ..." />
+                      <SpinnerLoading text="Loading GRC Data ..." />
                     </div>
                   ) : error ? (
                     <div className="w-full flex justify-center items-center">
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
-                    <div className="flex flex-col md:flex-row gap-0 items-start justify-start w-full">
-                      <div className="w-full md:px-0">
-                        <RetailDivisionDonutChart data={data} />
-                      </div>
-                      <div className="w-full md:px-0">
-                        <RetailSettledPieChart data={data} />
-                      </div>
-                    </div>
+                    <GRCBarChart
+                      data={grcDivisionData}
+                    />
                   ))}
               </MenuCard>
             ),

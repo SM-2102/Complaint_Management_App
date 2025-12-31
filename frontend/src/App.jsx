@@ -27,6 +27,8 @@ import StockCGCELGenerateIndentPage from "./pages/StockCGCELGenerateIndentPage.j
 import StockCGCELIndentEnquiryPage from "./pages/StockCGCELIndentEnquiryPage.jsx";
 import StockCGPISLGenerateIndentPage from "./pages/StockCGPISLGenerateIndentPage.jsx";
 import StockCGPISLIndentEnquiryPage from "./pages/StockCGPISLIndentEnquiryPage.jsx";
+import GRCCGCELReceiveSparePage from "./pages/GRCCGCELReceiveSparePage.jsx";
+import GRCCGCELReturnSparePage from "./pages/GRCCGCELReturnSparePage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -110,7 +112,7 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
               </PrivateRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/UploadCGPISLStockRecords"
             element={
               <PrivateRoute requiredRole="ADMIN">
@@ -206,6 +208,22 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/ReceiveCGCELGRCRecords"
+            element={
+              <PrivateRoute>
+                <GRCCGCELReceiveSparePage />
+              </PrivateRoute>
+            }
+          />*/}
+          <Route
+            path="/GRCCGCELSpareReturn"
+            element={
+              <PrivateRoute>
+                <GRCCGCELReturnSparePage />
+              </PrivateRoute>
+            }
+          />  
         </Routes>
       </div>
       <Footer />
