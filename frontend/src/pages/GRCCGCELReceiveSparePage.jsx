@@ -15,6 +15,7 @@ import { FiSearch } from "react-icons/fi";
 import { fetchNotReceivedGRCNumbers } from "../services/grcCGCELNotRceievedGRCNumberService";
 import { fetchNotReceivedGRCDetails } from "../services/grcCGCELNotReceivedDetailsService";
 import { receiveGRCSpare } from "../services/grcCGCELNotReceivedUpdateService";
+import { stockCGCELListByDivision } from "../services/stockCGCELStockListByDivisionService";
 
 const columns = [
   { key: "spare_code", label: "Spare Code" },
@@ -30,12 +31,39 @@ const columns = [
 
 const initialForm = {
   grc_number: "",
+  division: "",
 };
 
 // Suggestions for Received By
 
 const GRCCGCELReceiveSparePage = () => {
   const [data, setData] = useState([]);
+  // Handler for GRC Number search (defined later, after state hooks)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const tableRef = useRef();
+  const [updating, setUpdating] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [grcSuggestions, setGrcSuggestions] = useState([]);
+  const [showGrcSuggestions, setShowGrcSuggestions] = useState(false);
+  const [stockList, setStockList] = useState([]);
+  const [focusedAltIndex, setFocusedAltIndex] = useState(null);
+
+  // fetch stock list helper
+  const fetchStockByDivision = async (division) => {
+    if (!division) {
+      setStockList([]);
+      return;
+    }
+    try {
+      const res = await stockCGCELListByDivision(division);
+      setStockList(Array.isArray(res) ? res : []);
+    } catch (err) {
+      setStockList([]);
+    }
+  };
+
   // Handler for GRC Number search
   const handleGrcSearch = async () => {
     if (!form.grc_number) return;
@@ -54,6 +82,14 @@ const GRCCGCELReceiveSparePage = () => {
     try {
       const result = await fetchNotReceivedGRCDetails(form.grc_number);
       setData(Array.isArray(result) ? result : []);
+      const divisionValue =
+        Array.isArray(result) && result.length > 0 ? result[0].division : "";
+      setForm((prev) => ({ ...prev, division: divisionValue }));
+      if (divisionValue) {
+        await fetchStockByDivision(divisionValue);
+      } else {
+        setStockList([]);
+      }
       if (!result || (Array.isArray(result) && result.length === 0)) {
         setError({
           message: "No details found for this GRC Number.",
@@ -74,14 +110,6 @@ const GRCCGCELReceiveSparePage = () => {
       setLoading(false);
     }
   };
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [showToast, setShowToast] = useState(false);
-  const tableRef = useRef();
-  const [updating, setUpdating] = useState(false);
-  const [form, setForm] = useState(initialForm);
-  const [grcSuggestions, setGrcSuggestions] = useState([]);
-  const [showGrcSuggestions, setShowGrcSuggestions] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -315,6 +343,35 @@ const GRCCGCELReceiveSparePage = () => {
               )}
             </div>
           </div>
+           <div
+            className="flex items-center gap-3 justify-center mb-3"
+            style={{ position: "relative" }}
+          >
+            <label
+              htmlFor="division"
+              className="text-md font-medium text-blue-800"
+            >
+              Division
+            </label>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                position: "relative",
+              }}
+            >
+              <input
+                id="division"
+                name="division"
+                type="text"
+                value={form.division}
+                readOnly
+                autoComplete="off"
+                className="w-34 text-center px-2 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 font-medium cursor-not-allowed"
+                style={{ minWidth: 100 }}
+              />
+            </div>
+          </div>
         </form>
 
         {/* Table Section */}
@@ -389,39 +446,114 @@ const GRCCGCELReceiveSparePage = () => {
                           "dispute_remark",
                           "alt_spare_qty",
                         ].includes(col.key) ? (
-                          <input
-                            type={col.key.includes("qty") ? "number" : "text"}
-                            value={row[col.key] ?? ""}
-                            min={col.key.includes("qty") ? 0 : undefined}
-                            maxLength={
-                              col.key === "dispute_remark"
-                                ? 40
-                                : col.key === "alt_spare_code"
-                                  ? 30
+                          col.key === "alt_spare_code" ? (
+                            <div style={{ position: "relative", display: "inline-block" }}>
+                              <input
+                                type="text"
+                                value={row[col.key] ?? ""}
+                                maxLength={30}
+                                style={{
+                                  width: 180,
+                                  textAlign: "center",
+                                  border: "1px solid #d1d5db",
+                                  borderRadius: 6,
+                                  padding: "4px 6px",
+                                  background: "#f8fafc",
+                                  fontWeight: 500,
+                                }}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  setData((prev) =>
+                                    prev.map((r, i) =>
+                                      i === idx ? { ...r, [col.key]: value } : r,
+                                    ),
+                                  );
+                                }}
+                                onFocus={() => setFocusedAltIndex(idx)}
+                                onBlur={() => setTimeout(() => setFocusedAltIndex(null), 150)}
+                              />
+                              {focusedAltIndex === idx && stockList && stockList.length > 0 && (
+                                (() => {
+                                  const query = String(row.alt_spare_code ?? "").toLowerCase();
+                                  const filtered = stockList.filter((s) =>
+                                    s.spare_code.toLowerCase().includes(query) ||
+                                    (s.spare_description || "").toLowerCase().includes(query),
+                                  );
+                                  return filtered.length > 0 ? (
+                                    <ul
+                                      style={{
+                                        position: "absolute",
+                                        top: "100%",
+                                        left: 0,
+                                        zIndex: 20,
+                                        background: "#fff",
+                                        border: "1px solid #d1d5db",
+                                        borderRadius: 6,
+                                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                                        width: 180,
+                                        maxHeight: 180,
+                                        overflowY: "auto",
+                                        margin: 0,
+                                        padding: 0,
+                                        listStyle: "none",
+                                      }}
+                                    >
+                                      {filtered.slice(0, 20).map((spare, sidx) => (
+                                        <li
+                                          key={spare.spare_code + sidx}
+                                          style={{ padding: "6px 10px", cursor: "pointer" }}
+                                          onMouseDown={() => {
+                                            setData((prev) =>
+                                              prev.map((r, i) =>
+                                                i === idx
+                                                  ? { ...r, alt_spare_code: spare.spare_code }
+                                                  : r,
+                                              ),
+                                            );
+                                            setFocusedAltIndex(null);
+                                          }}
+                                        >
+                                          <div style={{ fontSize: 10,fontWeight: 600 }}>{spare.spare_code}</div>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : null;
+                                })()
+                              )}
+                            </div>
+                          ) : (
+                            <input
+                              type={col.key.includes("qty") ? "number" : "text"}
+                              value={row[col.key] ?? ""}
+                              min={col.key.includes("qty") ? 0 : undefined}
+                              maxLength={
+                                col.key === "dispute_remark"
+                                  ? 40
                                   : undefined
-                            }
-                            style={{
-                              width: col.key.includes("qty") ? 70 : 180,
-                              textAlign: "center",
-                              border: "1px solid #d1d5db",
-                              borderRadius: 6,
-                              padding: "4px 6px",
-                              background: "#f8fafc",
-                              fontWeight: 500,
-                            }}
-                            onChange={(e) => {
-                              const value = col.key.includes("qty")
-                                ? e.target.value === ""
-                                  ? ""
-                                  : Number(e.target.value)
-                                : e.target.value;
-                              setData((prev) =>
-                                prev.map((r, i) =>
-                                  i === idx ? { ...r, [col.key]: value } : r,
-                                ),
-                              );
-                            }}
-                          />
+                              }
+                              style={{
+                                width: col.key.includes("qty") ? 70 : 180,
+                                textAlign: "center",
+                                border: "1px solid #d1d5db",
+                                borderRadius: 6,
+                                padding: "4px 6px",
+                                background: "#f8fafc",
+                                fontWeight: 500,
+                              }}
+                              onChange={(e) => {
+                                const value = col.key.includes("qty")
+                                  ? e.target.value === ""
+                                    ? ""
+                                    : Number(e.target.value)
+                                  : e.target.value;
+                                setData((prev) =>
+                                  prev.map((r, i) =>
+                                    i === idx ? { ...r, [col.key]: value } : r,
+                                  ),
+                                );
+                              }}
+                            />
+                          )
                         ) : row[col.key] !== null &&
                           row[col.key] !== undefined ? (
                           row[col.key]

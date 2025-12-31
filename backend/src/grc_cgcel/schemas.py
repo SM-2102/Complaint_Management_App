@@ -19,6 +19,7 @@ class GRCCGCELReceiveSchema(BaseModel):
     spare_code: str
     spare_description: str
     issue_qty: int
+    division: str
     receive_qty: Optional[int]
     defective_qty: Optional[int]
     short_qty: Optional[int]

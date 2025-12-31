@@ -431,7 +431,7 @@ class GRCCGCELService:
             can = canvas.Canvas(packet, pagesize=A4)
             width, height = A4
 
-            def draw_centered(can, text, x_start, x_end, y, font="Helvetica", size=11):
+            def draw_centered(can, text, x_start, x_end, y, font="Helvetica", size=8):
                 text = "" if text is None else str(text)
                 can.setFont(font, size)
                 text_width = can.stringWidth(text, font, size)
@@ -473,7 +473,7 @@ class GRCCGCELService:
                         draw_centered(can, item.get("spare_description"), 250, 430, y)
                         can.drawString(390, y, str(item.get("good_qty") or 0))
                     else:
-                        draw_centered(can, item.get("grc_number"), 18, 95, y)
+                        draw_centered(can, item.get("grc_number"), 18, 98, y)
                         draw_centered(can, item.get("grc_date"), 98, 160, y)
                         draw_centered(can, item.get("spare_code"), 165, 250, y)
                         draw_centered(can, item.get("spare_description"), 250, 430, y)
@@ -499,11 +499,11 @@ class GRCCGCELService:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         static_dir = os.path.normpath(os.path.join(base_dir, "..", "static"))
         if report_type == "Defective":
-            template_path = safe_join(static_dir, "grc_defective.pdf")
+            template_path = safe_join(static_dir, "grc_cgcel_defective.pdf")
         elif report_type == "Good":
-            template_path = safe_join(static_dir, "grc_good.pdf")
+            template_path = safe_join(static_dir, "grc_cgcel_good.pdf")
         else:
-            template_path = safe_join(static_dir, "grc_all.pdf")
+            template_path = safe_join(static_dir, "grc_cgcel_all.pdf")
 
         # Read the template PDF
         try:
