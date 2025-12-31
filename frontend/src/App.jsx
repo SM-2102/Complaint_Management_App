@@ -112,7 +112,7 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
               </PrivateRoute>
             }
           />
-          {/* <Route
+          <Route
             path="/UploadCGPISLStockRecords"
             element={
               <PrivateRoute requiredRole="ADMIN">
@@ -215,7 +215,7 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
                 <GRCCGCELReceiveSparePage />
               </PrivateRoute>
             }
-          />*/}
+          />
           <Route
             path="/GRCCGCELSpareReturn"
             element={
