@@ -14,7 +14,7 @@ const columns = [
   { key: "cnf_qty", label: "CNF Quantity" },
   { key: "grc_qty", label: "GRC Quantity" },
   { key: "own_qty", label: "Own Stock" },
-  { key: "sale_price", label: "ALP" },
+  { key: "alp", label: "ALP" },
 ];
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];

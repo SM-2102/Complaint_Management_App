@@ -14,7 +14,7 @@ class StockCGPISLSchema(BaseModel):
     alp: Optional[float] = None
     purchase_price: Optional[float] = None
     discount: Optional[float] = None
-    sale_price: Optional[float] = None
+    alp: Optional[float] = None
     gst_price: Optional[float] = None
     gst_rate: Optional[float] = None
     msl_qty: Optional[int] = None
@@ -29,7 +29,7 @@ class StockCGPISLEnquiry(BaseModel):
     cnf_qty: Optional[int]
     grc_qty: Optional[int]
     own_qty: Optional[int]
-    sale_price: Optional[float]
+    alp: Optional[float]
 
 
 class StockCGPISLEnquiryStockList(BaseModel):

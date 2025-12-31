@@ -97,7 +97,7 @@ class StockCGPISLService:
             "alp",
             "purchase_price",
             "discount",
-            "sale_price",
+            "alp",
             "gst_price",
             "gst_rate",
         }
@@ -312,7 +312,7 @@ class StockCGPISLService:
                 cnf_qty=row.StockCGPISL.cnf_qty,
                 grc_qty=row.StockCGPISL.grc_qty,
                 own_qty=row.StockCGPISL.own_qty,
-                sale_price=row.StockCGPISL.sale_price,
+                alp=row.StockCGPISL.alp,
             )
             for row in rows
         ]

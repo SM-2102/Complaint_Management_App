@@ -32,7 +32,7 @@ const GRCBarChart = ({ data }) => {
         data: dataValues,
         backgroundColor: backgroundColors.slice(0, labels.length),
         borderColor: "#fff",
-        borderWidth: 2,
+        borderWidth: 1,
         borderRadius: 8,
         maxBarThickness: 32,
       },

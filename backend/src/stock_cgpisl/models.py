@@ -19,7 +19,7 @@ class StockCGPISL(SQLModel, table=True):
     alp: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     purchase_price: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     discount: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
-    sale_price: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
+    alp: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     gst_price: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     gst_rate: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     msl_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))

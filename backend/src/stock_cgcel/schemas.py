@@ -13,12 +13,6 @@ class StockCGCELSchema(BaseModel):
     grc_qty: Optional[int] = None
     own_qty: Optional[int] = None
     alp: Optional[float] = None
-    purchase_price: Optional[float] = None
-    discount: Optional[float] = None
-    sale_price: Optional[float] = None
-    gst_price: Optional[float] = None
-    gst_rate: Optional[float] = None
-    msl_qty: Optional[int] = None
     indent_qty: Optional[int] = None
 
 
@@ -30,7 +24,7 @@ class StockCGCELEnquiry(BaseModel):
     cnf_qty: Optional[int]
     grc_qty: Optional[int]
     own_qty: Optional[int]
-    sale_price: Optional[float]
+    alp: Optional[float]
 
 
 class StockCGCELEnquiryStockList(BaseModel):

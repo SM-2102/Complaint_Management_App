@@ -97,7 +97,7 @@ class StockCGCELService:
             "alp",
             "purchase_price",
             "discount",
-            "sale_price",
+            "alp",
             "gst_price",
             "gst_rate",
         }
@@ -332,7 +332,7 @@ class StockCGCELService:
                 cnf_qty=row.StockCGCEL.cnf_qty,
                 grc_qty=row.StockCGCEL.grc_qty,
                 own_qty=row.StockCGCEL.own_qty,
-                sale_price=row.StockCGCEL.sale_price,
+                alp=row.StockCGCEL.alp,
             )
             for row in rows
         ]
