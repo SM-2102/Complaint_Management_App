@@ -457,7 +457,7 @@ const GRCCGCELReceiveSparePage = () => {
                                 style={{
                                   width: 180,
                                   textAlign: "center",
-                                  border: "1px solid #d1d5db",
+                                  border: "1px solid #7c9ccbff",
                                   borderRadius: 6,
                                   padding: "4px 6px",
                                   background: "#f8fafc",
@@ -496,7 +496,7 @@ const GRCCGCELReceiveSparePage = () => {
                                     <ul
                                       style={{
                                         background: "#fff",
-                                        border: "1px solid #d1d5db",
+                                        border: "1px solid #7c9ccbff ",
                                         borderRadius: 6,
                                         boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                                         width: 180,
@@ -544,7 +544,7 @@ const GRCCGCELReceiveSparePage = () => {
                               style={{
                                 width: col.key.includes("qty") ? 70 : 180,
                                 textAlign: "center",
-                                border: "1px solid #d1d5db",
+                                border: "1px solid #7c9ccbff",
                                 borderRadius: 6,
                                 padding: "4px 6px",
                                 background: "#f8fafc",

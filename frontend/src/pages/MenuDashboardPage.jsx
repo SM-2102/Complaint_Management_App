@@ -244,7 +244,7 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
         {!showBirthday && showHoliday && <HolidayWish holiday={holiday} />}
 
         {/* Discreet Company Filter Dots - Top Right Corner, No SVG, Minimal Focus */}
-        <div className="flex justify-end items-start w-full mt-2 mb-2">
+        <div className="flex justify-end items-start w-full mt-3 mb-4">
           <div className="flex gap-2">
             {/* CGPISL Dot */}
             <button
@@ -295,7 +295,7 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
         </div>
         <ComplaintStatsCards stats={complaintStats} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 flex-grow min-w-0 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 flex-grow min-w-0 w-full mt-2">
           {filteredCards.map(
             ({ key, title, icon, actions, dashboardActions, bgColor }) => (
               <MenuCard

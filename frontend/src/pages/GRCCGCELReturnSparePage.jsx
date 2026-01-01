@@ -558,7 +558,7 @@ const GRCCGCELReturnSparePage = () => {
                             style={{
                               width: col.key.includes("qty") ? 70 : 180,
                               textAlign: "center",
-                              border: "1px solid #d1d5db",
+                              border: "1px solid #7c9ccbff",
                               borderRadius: 6,
                               padding: "4px 6px",
                               background:
