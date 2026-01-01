@@ -313,11 +313,11 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
                 {/* ...existing chart rendering logic... */}
                 {key === "complaint" &&
                   (loading ? (
-                    <div className="w-full flex justify-center items-center">
+                    <div className="w-full flex justify-center items-center flex-1 h-full">
                       <SpinnerLoading text="Loading Complaint Data ..." />
                     </div>
                   ) : error ? (
-                    <div className="w-full flex justify-center items-center">
+                    <div className="w-full flex justify-center items-center flex-1 h-full">
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
@@ -332,11 +332,11 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
                   ))}
                 {key === "stock" &&
                   (loading ? (
-                    <div className="w-full flex justify-center items-center">
+                    <div className="w-full flex justify-center items-center flex-1 h-full">
                       <SpinnerLoading text="Loading Stock Data ..." />
                     </div>
                   ) : error ? (
-                    <div className="w-full flex justify-center items-center">
+                    <div className="w-full flex justify-center items-center flex-1 h-full">
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (

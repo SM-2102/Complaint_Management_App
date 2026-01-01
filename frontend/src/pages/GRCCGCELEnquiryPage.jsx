@@ -5,6 +5,8 @@ import EnquiryTableCGCEL from "../components/EnquiryTableCGCEL.jsx";
 import ShowToast from "../components/Toast.jsx";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { grcCGCELEnquiry } from "../services/grcCGCELEnquiryService.js";
+import { fetchStockCGCELList } from "../services/stockCGCELStockListService.js";
+
 const columns = [
   { key: "grc_number", label: "GRC Number" },
   { key: "grc_date", label: "GRC Date" },
@@ -24,6 +26,9 @@ const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
 const Filter = ({
   open = false,
   onToggle,
+  spareCode,
+  setSpareCode,
+  spareCodes,
   division,
   setDivision,
   onSearch,
@@ -39,6 +44,26 @@ const Filter = ({
     GRCStatus,
     setGRCStatus,
 }) => {
+  const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
+    const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
+      useState(false);
+    const isTypingSpareCodeRef = React.useRef(false);
+    useEffect(() => {
+        if (!isTypingSpareCodeRef.current) {
+          setShowSpareCodeSuggestions(false);
+          return;
+        }
+    
+        if (spareCode && spareCodes.length > 0) {
+          const filtered = spareCodes.filter((n) =>
+            n.toLowerCase().includes(spareCode.toLowerCase()),
+          );
+          setSpareCodeSuggestions(filtered);
+          setShowSpareCodeSuggestions(filtered.length > 0);
+        } else {
+          setShowSpareCodeSuggestions(false);
+        }
+      }, [spareCode, spareCodes]);
 
   return (
     <>
@@ -88,6 +113,88 @@ const Filter = ({
                 ))}
               </select>
             </div>
+          </div>
+          <div style={{ marginBottom: 10, position: "relative" }}>
+            <label
+              htmlFor="spareCode"
+              style={{
+                fontWeight: 600,
+                color: "#1976d2",
+                letterSpacing: 0.5,
+                fontSize: 13,
+                marginBottom: 4,
+                display: "block",
+              }}
+            >
+              Spare Code
+            </label>
+            <input
+              type="text"
+              id="spareCode"
+              name="spareCode"
+              value={spareCode}
+              onChange={(e) => {
+                isTypingSpareCodeRef.current = true;
+                setSpareCode(e.target.value);
+              }}
+              placeholder="Spare Code"
+              style={{
+                width: "100%",
+                padding: "6px 10px",
+                border: "1px solid #d1d5db",
+                borderRadius: 6,
+                fontSize: 13,
+                background: "#f7f9fc",
+                transition: "border 0.2s",
+                outline: "none",
+                boxShadow: "0 1px 2px rgba(25, 118, 210, 0.04)",
+              }}
+              onFocus={(e) => (e.target.style.border = "1.5px solid #1976d2")}
+              onBlur={() => {
+                isTypingSpareCodeRef.current = false;
+                setShowSpareCodeSuggestions(false);
+              }}
+            />
+            {showSpareCodeSuggestions && (
+              <ul
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  zIndex: 10,
+                  background: "#fff",
+                  border: "0.5px solid #d1d5db",
+                  borderRadius: "0.25rem",
+                  boxShadow: "0 2px 8px rgba(25,118,210,0.08)",
+                  width: "100%",
+                  maxHeight: 160,
+                  overflowY: "auto",
+                  margin: 0,
+                  padding: 0,
+                  listStyle: "none",
+                }}
+              >
+                {spareCodeSuggestions.map((n) => (
+                  <li
+                    key={n}
+                    style={{
+                      padding: "6px 10px",
+                      cursor: "pointer",
+                      fontSize: 13,
+                      color: "#0a1825ff",
+                      borderBottom: "1px solid #f0f0f0",
+                    }}
+                    onMouseDown={() => {
+                      isTypingSpareCodeRef.current = false;
+                      setSpareCode(n);
+                      setShowSpareCodeSuggestions(false);
+                    }}
+                  >
+                    {n}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <div style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
             <label
@@ -324,6 +431,7 @@ const GRCCGCELEnquiryPage = () => {
   const [division, setDivision] = useState("");
   const [fromGRCDate, setFromGRCDate] = useState("");
   const [toGRCDate, setToGRCDate] = useState("");
+  const [spareCode, setSpareCode] = useState("");
   // Data states
 
   const [data, setData] = useState([]);
@@ -334,6 +442,7 @@ const GRCCGCELEnquiryPage = () => {
   const [searched, setSearched] = useState(false);
   const [GRCNumber, setGRCNumber] = useState("");
   const [challanNumber, setChallanNumber] = useState("");
+  const [spareCodes, setSpareCodes] = useState([]);
   const [GRCStatus, setGRCStatus] = useState("");
 
   // Pagination states
@@ -344,6 +453,7 @@ const GRCCGCELEnquiryPage = () => {
     setDivision("");
     setFromGRCDate("");
     setToGRCDate("");
+    setSpareCode("");
     setGRCNumber("");
     setChallanNumber("");
     setGRCStatus("");
@@ -353,6 +463,21 @@ const GRCCGCELEnquiryPage = () => {
     setPage(1);
   };
  
+  useEffect(() => {
+      let mounted = true;
+      fetchStockCGCELList()
+        .then((data) => {
+          if (mounted && Array.isArray(data)) {
+            setSpareCodes(data.map((item) => item.spare_code));
+          }
+        })
+        .catch(() => {
+          setSpareCodes([]);
+        });
+      return () => {
+        mounted = false;
+      };
+    }, []);
 
   // Fetch data when page/limit changes or after search
 
@@ -390,6 +515,8 @@ const GRCCGCELEnquiryPage = () => {
 
     const params = {};
     if (division) params.division = division;
+        if (spareCode) params.spare_code = spareCode;
+
     if (fromGRCDate) params.from_grc_date = fromGRCDate;
     if (toGRCDate) params.to_grc_date = toGRCDate;
     if (GRCNumber) params.grc_number = GRCNumber;
@@ -403,6 +530,8 @@ const GRCCGCELEnquiryPage = () => {
     setPage(newPage);
     const params = {};
     if (division) params.division = division;
+        if (spareCode) params.spare_code = spareCode;
+
     if (fromGRCDate) params.from_grc_date = fromGRCDate;
     if (toGRCDate) params.to_grc_date = toGRCDate;
     if (GRCNumber) params.grc_number = GRCNumber;
@@ -417,6 +546,8 @@ const GRCCGCELEnquiryPage = () => {
     setPage(1);
     const params = {};
     if (division) params.division = division;
+        if (spareCode) params.spare_code = spareCode;
+
     if (fromGRCDate) params.from_grc_date = fromGRCDate;
     if (toGRCDate) params.to_grc_date = toGRCDate;
     if (GRCNumber) params.grc_number = GRCNumber;
@@ -445,6 +576,10 @@ const GRCCGCELEnquiryPage = () => {
         setChallanNumber={setChallanNumber}
         GRCStatus={GRCStatus}
         setGRCStatus={setGRCStatus}
+        spareCode={spareCode}
+        setSpareCode={setSpareCode}
+                spareCodes={spareCodes}
+
       />
       {/* Results or placeholder */}
       {error ? (
