@@ -313,8 +313,8 @@ const GRCCGCELReturnSparePage = () => {
                 <option value="" disabled>
                   Select Division
                 </option>
-                {divisionOptions.map((opt) => (
-                  <option key={opt} value={opt}>
+                {divisionOptions.map((opt, idx) => (
+                  <option key={opt + idx} value={opt}>
                     {opt}
                   </option>
                 ))}
@@ -490,7 +490,7 @@ const GRCCGCELReturnSparePage = () => {
               ) : (
                 data.map((row, idx) => (
                   <TableRow
-                    key={idx}
+                    key={`${row.spare_code}-${row.grc_number}`}
                     sx={{
                       background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
                       height: 38,

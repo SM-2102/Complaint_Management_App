@@ -7,7 +7,15 @@ const ComplaintStatusChart = ({ data }) => {
 
   useEffect(() => {
     if (Array.isArray(data)) {
-      setChartData(data);
+      const merged = {};
+      data.forEach(({ division, Y = 0, N = 0 }) => {
+        if (!merged[division]) {
+          merged[division] = { division, Y: 0, N: 0 };
+        }
+        merged[division].Y += Y || 0;
+        merged[division].N += N || 0;
+      });
+      setChartData(Object.values(merged));
     } else {
       setChartData([]);
     }

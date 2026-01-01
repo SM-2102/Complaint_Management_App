@@ -331,7 +331,7 @@ const GRCCGCELReceiveSparePage = () => {
                       )
                   ).map((grc, idx) => (
                     <li
-                      key={grc + idx}
+                    key={grc}
                       style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
                       onMouseDown={() => {
                         setForm((prev) => ({ ...prev, grc_number: grc }));
@@ -421,7 +421,7 @@ const GRCCGCELReceiveSparePage = () => {
               ) : (
                 data.map((row, idx) => (
                   <TableRow
-                    key={idx}
+                    key={`${row.grc_number}-${row.spare_code}`}
                     sx={{
                       background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
                       height: 40,
@@ -509,7 +509,7 @@ const GRCCGCELReceiveSparePage = () => {
                                     >
                                       {filtered.slice(0, 20).map((spare, sidx) => (
                                         <li
-                                          key={spare.spare_code + sidx}
+                                          key={spare.spare_code}
                                           style={{ padding: "6px 10px", cursor: "pointer" }}
                                           onMouseDown={() => {
                                             setData((prev) =>
