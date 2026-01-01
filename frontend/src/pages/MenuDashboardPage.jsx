@@ -10,6 +10,10 @@ import { menuConfig } from "../config/menuConfig";
 import { fetchUserNotifications } from "../services/notificationUserService";
 import { useAuth } from "../context/AuthContext";
 import StockDivisionDonutChart from "../charts/StockDivisionDonutChart";
+import ComplaintStatusChart from "../charts/ComplaintStatusChart";
+import ComplaintTypePieChart from "../charts/ComplaintTypePieChart";
+
+import ComplaintStatsCards from "../components/ComplaintStatsCards";
 
 // Helper to filter actions by company
 const filterActionsByCompany = (actions, company) => {
@@ -112,11 +116,11 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     navigate({ search: params.toString() }, { replace: true });
   };
 
+
   // Stock division data
   const divisionData = useMemo(() => {
     const donut = data?.stock?.division_wise_donut;
     if (!donut) return [];
-
     if (selectedCompany === "ALL") {
       return mergeDivisionData(
         normalizeDivisionData(donut.CGCEL),
@@ -130,7 +134,6 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
   const grcDivisionData = useMemo(() => {
     const donut = data?.grc?.division_wise_donut;
     if (!donut) return [];
-
     if (selectedCompany === "ALL") {
       return mergeDivisionData(
         normalizeDivisionData(donut.CGCEL),
@@ -140,10 +143,71 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     return normalizeDivisionData(donut[selectedCompany]);
   }, [data, selectedCompany]);
 
+  // Complaint division status data
+  const complaintDivisionStatus = useMemo(() => {
+    const status = data?.complaint?.division_wise_status;
+    if (!status) return [];
+    if (selectedCompany === "ALL") {
+      // Merge CGCEL and CGPISL arrays
+      return [...(status.CGCEL || []), ...(status.CGPISL || [])];
+    }
+    return status[selectedCompany] || [];
+  }, [data, selectedCompany]);
+
+  // Complaint type pie chart data
+  const complaintTypeData = useMemo(() => {
+    const typeData = data?.complaint?.complaint_type;
+    if (!typeData) return [];
+    if (selectedCompany === "ALL") {
+      // Merge CGCEL and CGPISL arrays by type
+      const merged = {};
+      [...(typeData.CGCEL || []), ...(typeData.CGPISL || [])].forEach(({ type, count }) => {
+        if (!merged[type]) merged[type] = { type, count: 0 };
+        merged[type].count += count || 0;
+      });
+      return Object.values(merged);
+    }
+    return typeData[selectedCompany] || [];
+  }, [data, selectedCompany]);
+
+  // Complaint stats for cards (updated fields)
+  const complaintStats = useMemo(() => {
+    const c = data?.complaint;
+    if (!c) return [];
+    const getVal = (obj) => {
+      if (!obj) return 0;
+      if (selectedCompany === "ALL") {
+        return (obj.CGCEL || 0) + (obj.CGPISL || 0);
+      }
+      return obj[selectedCompany] || 0;
+    };
+    return [
+      {
+        title: "CRM Open Complaints",
+        value: getVal(c.crm_open_complaints),
+      },
+      {
+        title: "CRM Escalation Complaints",
+        value: getVal(c.crm_escalation_complaints),
+      },
+      {
+        title: "MD Escalation Complaints",
+        value: getVal(c.md_escalation_complaints),
+      },
+      {
+        title: "High Priority Complaints",
+        value: getVal(c.high_priority_complaints),
+      },
+      {
+        title: "Spare Pending Complaints",
+        value: getVal(c.spare_pending_complaints),
+      },
+    ];
+  }, [data, selectedCompany]);
+
   const meta = useMemo(() => {
     const stock = data?.stock;
     if (!stock) return null;
-
     const calc = (key) => {
       const values = stock[key] || {};
       if (selectedCompany === "ALL") {
@@ -151,7 +215,6 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
       }
       return values[selectedCompany] || 0;
     };
-
     return {
       totalStock: calc("number_of_items_in_stock"),
       totalGodown: calc("number_of_items_in_godown"),
@@ -166,6 +229,7 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
   return (
     <>
       <div className="flex flex-col min-h-[calc(100vh-7rem)] px-2 md:px-4 lg:px-8 bg-[#fff]">
+        {/* Complaint Stats Cards */}
         {showBirthday && (
           <BirthdayWish
             names={birthdayNames}
@@ -229,6 +293,7 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
             </button>
           </div>
         </div>
+        <ComplaintStatsCards stats={complaintStats} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 flex-grow min-w-0 w-full">
           {filteredCards.map(
@@ -243,20 +308,27 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
                 actions={actions}
                 dashboardActions={dashboardActions}
                 bgColor={bgColor}
-                className="min-h-[300px] max-w-full w-full"
+                className="min-h-[330px] max-w-full w-full"
               >
                 {/* ...existing chart rendering logic... */}
                 {key === "complaint" &&
                   (loading ? (
                     <div className="w-full flex justify-center items-center">
-                      <SpinnerLoading text="Loading Customer Data ..." />
+                      <SpinnerLoading text="Loading Complaint Data ..." />
                     </div>
                   ) : error ? (
                     <div className="w-full flex justify-center items-center">
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
-                    <div>WIP</div>
+                    <div className="flex flex-row gap-2 w-full items-stretch">
+                      <div className="flex-1 min-w-0 flex items-center justify-center">
+                        <ComplaintStatusChart data={complaintDivisionStatus} />
+                      </div>
+                      <div className="flex-1 min-w-0 flex items-center justify-center">
+                        <ComplaintTypePieChart data={complaintTypeData} />
+                      </div>
+                    </div>
                   ))}
                 {key === "stock" &&
                   (loading ? (
@@ -272,15 +344,15 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
                   ))}
                 {key === "grc" &&
                   (loading ? (
-                    <div className="w-full flex justify-center items-center">
+                    <div className="w-full flex justify-center items-center flex-1 h-full">
                       <SpinnerLoading text="Loading GRC Data ..." />
                     </div>
                   ) : error ? (
-                    <div className="w-full flex justify-center items-center">
+                    <div className="w-full flex justify-center items-center flex-1 h-full">
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
-                    <GRCBarChart data={grcDivisionData} />
+                    <GRCBarChart data={grcDivisionData} className="flex-1 h-full" />
                   ))}
               </MenuCard>
             ),

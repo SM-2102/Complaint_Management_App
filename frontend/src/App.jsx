@@ -29,6 +29,8 @@ import StockCGPISLGenerateIndentPage from "./pages/StockCGPISLGenerateIndentPage
 import StockCGPISLIndentEnquiryPage from "./pages/StockCGPISLIndentEnquiryPage.jsx";
 import GRCCGCELReceiveSparePage from "./pages/GRCCGCELReceiveSparePage.jsx";
 import GRCCGCELReturnSparePage from "./pages/GRCCGCELReturnSparePage.jsx";
+import GRCCGCELEnquiryPage from "./pages/GRCCGCELEnquiryPage.jsx";
+import  ComplaintPendingPage from "./pages/ComplaintPendingPage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -221,6 +223,25 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             element={
               <PrivateRoute>
                 <GRCCGCELReturnSparePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/GRCCGCELEnquiry"
+            element={
+              <PrivateRoute>
+                <GRCCGCELEnquiryPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ComplaintEnquiry"
+            element={
+              <PrivateRoute>
+                <ComplaintPendingPage
+                  selectedCompany={selectedCompany}
+                  setSelectedCompany={setSelectedCompany}
+                />
               </PrivateRoute>
             }
           />

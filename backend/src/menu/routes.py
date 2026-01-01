@@ -22,8 +22,10 @@ async def get_dashboard_data(
 
     stock = await menu_service.stock_overview(session)
     grc = await menu_service.grc_overview(session)
+    complaint = await menu_service.complaint_overview(session)
 
     dashboard_data = {
+        "complaint": complaint["complaint"],
         "stock": stock["stock"],
         "grc": grc["grc"],
     }

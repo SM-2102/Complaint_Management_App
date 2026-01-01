@@ -10,6 +10,70 @@ from stock_cgpisl.models import StockCGPISL
 
 
 class MenuService:
+    @classmethod
+
+    async def complaint_overview(
+        cls,
+        session: AsyncSession,
+    ) -> dict:
+        """
+        Returns static complaint overview data for CGCEL and CGPISL.
+        Structure:
+        {
+            "complaint": {
+                "division_wise_status": {...},
+                "complaint_type": {...},
+                "crm_open_complaints": {"CGCEL": int, "CGPISL": int},
+                "crm_escalation_complaints": {"CGCEL": int, "CGPISL": int},
+                "md_escalation_complaints": {"CGCEL": int, "CGPISL": int},
+                "spare_pending_complaints": {"CGCEL": int, "CGPISL": int},
+            }
+        }
+        """
+        # Static data for demonstration
+        division_wise_status_cgcel = [
+            {"division": "FANS", "Y": 10, "N": 5},
+            {"division": "MOTOR", "Y": 7, "N": 3},
+            {"division": "PUMP", "Y": 12, "N": 2},
+        ]
+        division_wise_status_cgpisl = [
+            {"division": "FANS", "Y": 8, "N": 4},
+            {"division": "LIGHT", "Y": 6, "N": 1},
+        ]
+        complaint_type_cgcel = [
+            {"type": "SERVICE", "count": 12},
+            {"type": "INSTALL", "count": 8},
+            {"type": "SALE", "count": 4},
+        ]
+        complaint_type_cgpisl = [
+            {"type": "SERVICE", "count": 9},
+            {"type": "INSTALL", "count": 5},
+            {"type": "SALE", "count": 3},
+        ]
+        # New static counts for demonstration
+        crm_open_complaints = {"CGCEL": 5, "CGPISL": 3}
+        crm_escalation_complaints = {"CGCEL": 2, "CGPISL": 1}
+        md_escalation_complaints = {"CGCEL": 1, "CGPISL": 2}
+        spare_pending_complaints = {"CGCEL": 4, "CGPISL": 2}
+        high_priority_complaints = {"CGCEL": 3, "CGPISL": 1}
+        return {
+            "complaint": {
+                "division_wise_status": {
+                    "CGCEL": division_wise_status_cgcel,
+                    "CGPISL": division_wise_status_cgpisl,
+                },
+                "complaint_type": {
+                    "CGCEL": complaint_type_cgcel,
+                    "CGPISL": complaint_type_cgpisl,
+                },
+                "crm_open_complaints": crm_open_complaints,
+                "crm_escalation_complaints": crm_escalation_complaints,
+                "md_escalation_complaints": md_escalation_complaints,
+                "high_priority_complaints": high_priority_complaints,
+                "spare_pending_complaints": spare_pending_complaints,
+            }
+        }
+    
     @staticmethod
     async def _division_donut_only(
         session: AsyncSession,

@@ -667,9 +667,10 @@ const StockCGCELIndentEnquiryPage = () => {
             title="Stock CGCEL Indent Enquiry List"
             sum_column="amount"
             total_records={totalRecords}
-            noDataMessage={
-              searched && data.length === 0 ? (
-                <tr>
+              exportButton={true}
+              noDataMessage={
+                searched && data.length === 0 ? (
+                  <tr>
                   <td
                     colSpan={columns.length}
                     style={{

@@ -31,7 +31,6 @@ class GRCCGCEL(SQLModel, table=True):
     challan_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
     docket_number: str = Field(sa_column=Column(pg.VARCHAR(8), nullable=True))
     sent_through: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=True))
-    remark: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     challan_by: str = Field(
         sa_column=Column(pg.VARCHAR(30), ForeignKey("users.username"), nullable=True)
     )
@@ -40,7 +39,7 @@ class GRCCGCEL(SQLModel, table=True):
     short_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
     alt_spare_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
     alt_spare_code: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    invoice: str = Field(sa_column=Column(pg.CHAR(1), nullable=True))
+    invoice: str = Field(sa_column=Column(pg.CHAR(1), nullable=True), default="N")
 
     def __repr__(self):
         return f"<GRC {self.spare_code}>"
@@ -94,7 +93,7 @@ class GRCCGCELReturnHistory(SQLModel, table=True):
     challan_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
     docket_number: str = Field(sa_column=Column(pg.VARCHAR(8), nullable=True))
     sent_through: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=True))
-    remark: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
+    dispute_remark: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     challan_by: str = Field(
         sa_column=Column(pg.VARCHAR(30), ForeignKey("users.username"), nullable=False)
     )

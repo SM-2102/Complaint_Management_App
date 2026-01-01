@@ -10,10 +10,9 @@ from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
-from sqlalchemy import case, insert, update
+from sqlalchemy import case, insert, tuple_, update, select, distinct
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from sqlalchemy.sql import func
 
 from exceptions import SpareNotFound
@@ -22,11 +21,13 @@ from grc_cgcel.schemas import (
     GRCCGCELDisputeCreate,
     GRCCGCELHistorySchema,
     GRCCGCELReceiveSchema,
+    GRCCGCELReturnFinalizePayload,
     GRCCGCELReturnSave,
     GRCCGCELReturnSchema,
     GRCCGCELSchema,
     GRCCGCELUpdateReceiveSchema,
     GRCFullPayload,
+    GRCCGCELEnquiry,
 )
 from utils.date_utils import format_date_ddmmyyyy
 from utils.file_utils import safe_join
@@ -222,7 +223,7 @@ class GRCCGCELService:
                 spare_description=row.spare_description,
                 issue_qty=row.issue_qty,
                 receive_qty=row.receive_qty,
-                defective_qty=row.defective_qty,
+                damaged_qty=row.damaged_qty,
                 short_qty=row.short_qty,
                 alt_spare_qty=row.alt_spare_qty,
                 alt_spare_code=row.alt_spare_code,
@@ -324,84 +325,100 @@ class GRCCGCELService:
         updateData: List[GRCCGCELReturnSave],
         session: AsyncSession,
     ):
-        for data in updateData:
-            existing_record = await self.get_grc_cgcel_by_code(
-                data.spare_code, data.grc_number, session
+        keys = [(d.spare_code, d.grc_number) for d in updateData]
+        result = await session.execute(
+            select(GRCCGCEL).where(
+                tuple_(GRCCGCEL.spare_code, GRCCGCEL.grc_number).in_(keys)
             )
-            for key, value in data.model_dump().items():
-                if key not in ("spare_code", "grc_number") and value is not None:
-                    setattr(existing_record, key, value)
-            session.add(existing_record)
+        )
+        existing_records = {(r.spare_code, r.grc_number): r for r in result.scalars().all()}
+        for data in updateData:
+            key = (data.spare_code, data.grc_number)
+            existing_record = existing_records.get(key)
+            if not existing_record:
+                continue  # or raise error if required
+            for k, v in data.model_dump().items():
+                if k not in ("spare_code", "grc_number") and v is not None:
+                    setattr(existing_record, k, v)
+            # No need to session.add(existing_record) if already loaded
         try:
             await session.commit()
-        except:
+        except Exception:
             await session.rollback()
 
     async def finalize_cgcel_grc_return(
-        self, updateData: List[GRCCGCELReturnSave], session: AsyncSession, token: dict
+        self, updateData: GRCCGCELReturnFinalizePayload, session: AsyncSession, token: dict
     ):
-        for data in updateData:
-            print("Finalizing return for:", data)
-            # Save history BEFORE updating CGCEL only if invoice == 'N'
-            existing_record = await self.get_grc_cgcel_by_code(
-                data.spare_code, data.grc_number, session
+        # updateData: GRCCGCELReturnFinalizePayload
+        #   - challan_number: str
+        #   - division: str
+        #   - sent_through: Optional[str]
+        #   - docket_number: Optional[str]
+        #   - grc_rows: List[GRCCGCELFinalizeRow]
+        keys = [(row.spare_code, row.grc_number) for row in updateData.grc_rows]
+        result = await session.execute(
+            select(GRCCGCEL).where(
+                tuple_(GRCCGCEL.spare_code, GRCCGCEL.grc_number).in_(keys)
             )
-            good_qty = getattr(data, "good_qty", 0) or 0
-            defective_qty = getattr(data, "defective_qty", 0) or 0
+        )
+        existing_records = {(r.spare_code, r.grc_number): r for r in result.scalars().all()}
+        history_records = []
+        updated_records = []
+        for row in updateData.grc_rows:
+            key = (row.spare_code, row.grc_number)
+            existing_record = existing_records.get(key)
+            if not existing_record:
+                continue
+            good_qty = getattr(row, "good_qty", 0) or 0
+            defective_qty = getattr(row, "defective_qty", 0) or 0
             returning_qty = good_qty + defective_qty
-            invoice_val = getattr(data, "invoice", None)
-            if (invoice_val == "N" and returning_qty > 0) :
+            # Always add to history if returning_qty > 0
+            if returning_qty > 0:
                 history_kwargs = {
-                    "division": getattr(existing_record, "division", None),
-                    "spare_code": getattr(data, "spare_code", None),
-                    "spare_description": getattr(
-                        existing_record, "spare_description", None
-                    ),
-                    "grc_number": getattr(data, "grc_number", None),
+                    "division": updateData.division,
+                    "spare_code": row.spare_code,
+                    "spare_description": getattr(existing_record, "spare_description", None),
+                    "grc_number": row.grc_number,
                     "grc_date": getattr(existing_record, "grc_date", None),
                     "issue_qty": getattr(existing_record, "issue_qty", None),
-                    "grc_pending_qty": getattr(
-                        existing_record, "grc_pending_qty", None
-                    ),
+                    "grc_pending_qty": getattr(existing_record, "grc_pending_qty", None),
                     "good_qty": good_qty,
                     "defective_qty": defective_qty,
                     "returning_qty": returning_qty,
-                    "invoice": invoice_val,
-                    "challan_number": getattr(data, "challan_number", None),
-                    "challan_date": getattr(data, "challan_date", None),
-                    "docket_number": getattr(data, "docket_number", None),
-                    "sent_through": getattr(data, "sent_through", None),
-                    "remark": getattr(data, "dispute_remark", None),
+                    "challan_number": updateData.challan_number,
+                    "challan_date": date.today(),
+                    "docket_number": updateData.docket_number,
+                    "sent_through": updateData.sent_through,
+                    "dispute_remark": getattr(existing_record, "dispute_remark", None),
                     "challan_by": token["user"]["username"],
                 }
-                history_record = GRCCGCELReturnHistory(**history_kwargs)
-                session.add(history_record)
-
-            for key, value in data.model_dump().items():
-                if key not in ("spare_code", "grc_number") and value is not None:
-                    setattr(existing_record, key, value)
-            # Set returned_qty = (good_qty or 0) + (defective_qty or 0)
-            existing_good_qty = getattr(existing_record, "good_qty", 0) or 0
-            existing_defective_qty = getattr(existing_record, "defective_qty", 0) or 0
-            existing_record.returning_qty = existing_good_qty + existing_defective_qty
+                history_records.append(GRCCGCELReturnHistory(**history_kwargs))
+            # Update the main record
+            existing_record.challan_by = token["user"]["username"]
+            new_good_qty = getattr(row, "good_qty", 0) or 0
+            new_defective_qty = getattr(row, "defective_qty", 0) or 0
+            existing_record.returning_qty = new_good_qty + new_defective_qty
             prev_returned_qty = getattr(existing_record, "returned_qty", 0) or 0
-            existing_record.returned_qty = (
-                prev_returned_qty + existing_good_qty + existing_defective_qty
-            )
-            prev_actual_pending_qty = (
-                getattr(existing_record, "actual_pending_qty", 0) or 0
-            )
-            existing_record.actual_pending_qty = prev_actual_pending_qty - (
-                existing_good_qty + existing_defective_qty
-            )
+            existing_record.returned_qty = prev_returned_qty + new_good_qty + new_defective_qty
+            prev_actual_pending_qty = getattr(existing_record, "actual_pending_qty", 0) or 0
+            existing_record.actual_pending_qty = prev_actual_pending_qty - (new_good_qty + new_defective_qty)
+            existing_record.challan_date = date.today()
             existing_record.good_qty = 0
             existing_record.defective_qty = 0
+            existing_record.challan_number = updateData.challan_number
+            existing_record.sent_through = updateData.sent_through
+            existing_record.docket_number = updateData.docket_number
+            existing_record.challan_date = date.today()
             existing_record.challan_by = token["user"]["username"]
-            session.add(existing_record)
+            updated_records.append(existing_record)
+        for rec in updated_records:
+            session.add(rec)
+        if history_records:
+            session.add_all(history_records)
         try:
             await session.commit()
-        except:
-            await session.rollback()
+        except Exception as e:
+            print("Commit error:", e)
 
     async def next_cgcel_challan_code(self, session: AsyncSession):
         statement = (
@@ -527,3 +544,112 @@ class GRCCGCELService:
         writer.write(output_stream)
         output_stream.seek(0)
         return output_stream
+    
+    def _apply_cgcel_filters(
+        self,
+        statement,
+        division=None,
+        from_grc_date=None,
+        to_grc_date=None,
+        grc_number=None,
+        challan_number=None,
+        model=None,
+    ):
+        if division:
+            statement = statement.where(model.division == division)
+
+
+        if from_grc_date:
+            statement = statement.where(
+                model.grc_date >= from_grc_date
+            )
+
+        if to_grc_date:
+            statement = statement.where(model.grc_date <= to_grc_date)
+
+        if grc_number:
+            statement = statement.where(
+                model.grc_number == grc_number
+            )
+
+        if challan_number:
+            if len(challan_number) != 6:
+                challan_number = "G" + str(challan_number).zfill(5)
+            statement = statement.where(
+                model.challan_number == challan_number
+            )        
+
+        return statement
+
+    async def enquiry_grc_cgcel(
+        self,
+        session: AsyncSession,
+        division: Optional[str] = None,
+        from_grc_date: Optional[date] = None,
+        to_grc_date: Optional[date] = None,
+        grc_number: Optional[str] = None,
+        challan_number: Optional[str] = None,
+        grc_status: Optional[str] = None,       
+        limit: int = 100,
+        offset: int = 0,
+        return_total: bool = False,
+    ):
+        if grc_status == "N":
+            statement = select(GRCCGCEL)
+        else:
+            statement = select(GRCCGCELReturnHistory)
+        statement = self._apply_cgcel_filters(
+            statement,
+            division,
+            from_grc_date,
+            to_grc_date,
+            grc_number,
+            challan_number,
+            GRCCGCEL if grc_status == "N" else GRCCGCELReturnHistory,
+        )
+
+        total_records = None
+        if return_total:
+            model = GRCCGCEL if grc_status == "N" else GRCCGCELReturnHistory
+            if model == GRCCGCELReturnHistory:
+                count_query = select(func.count(model.id))
+            else:
+                subq = select(model.spare_code, model.grc_number).distinct().subquery()
+                count_query = select(func.count()).select_from(subq)
+            count_query = self._apply_cgcel_filters(
+                count_query,
+                division,
+                from_grc_date,
+                to_grc_date,
+                grc_number,
+                challan_number,
+                model,
+            )
+            total_result = await session.execute(count_query)
+            total_records = total_result.scalar() or 0
+        model = GRCCGCEL if grc_status == "N" else GRCCGCELReturnHistory
+        statement = statement.order_by(model.spare_code)
+        statement = statement.limit(limit).offset(offset)
+
+        result = await session.execute(statement)
+        rows = result.scalars().all()
+        records = []
+        for row in rows:
+            # Build dict for only fields present in schema
+            record = {}
+            record['spare_code'] = getattr(row, 'spare_code', None)
+            record['spare_description'] = getattr(row, 'spare_description', None)
+            record['grc_number'] = getattr(row, 'grc_number', None)
+            record['grc_date'] = format_date_ddmmyyyy(getattr(row, 'grc_date', None))
+            record['issue_qty'] = getattr(row, 'issue_qty', None)
+            record['grc_pending_qty'] = getattr(row, 'grc_pending_qty', None)
+            record['returning_qty'] = getattr(row, 'returning_qty', None)
+            record['dispute_remark'] = getattr(row, 'dispute_remark', None)
+            record['challan_number'] = getattr(row, 'challan_number', None)
+            record['challan_date'] = format_date_ddmmyyyy(getattr(row, 'challan_date', None))
+            record['docket_number'] = getattr(row, 'docket_number', None)
+            records.append(GRCCGCELEnquiry(**record))
+        if return_total:
+            return records, total_records
+        return records
+

@@ -14,6 +14,8 @@ from grc_cgcel.schemas import (
     GRCCGCELReturnSchema,
     GRCCGCELUpdateReceiveSchema,
     GRCFullPayload,
+    GRCCGCELReturnFinalizePayload,
+    GRCCGCELEnquiry,
 )
 from grc_cgcel.service import GRCCGCELService
 
@@ -165,7 +167,7 @@ GRC CGCEL Finalize GRC Return Details
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def finalize_grc_cgcel_return(
-    data: List[GRCCGCELReturnSave],
+    data: GRCCGCELReturnFinalizePayload,
     session: AsyncSession = Depends(get_session),
     token=Depends(access_token_bearer),
 ):
@@ -211,3 +213,42 @@ async def print_grc_report(
             "Content-Disposition": f'attachment; filename="{data.challan_number}.pdf"'
         },
     )
+
+"""
+GRC CGCEL enquiry using query parameters.
+
+"""
+
+
+@grc_cgcel_router.get(
+    "/enquiry",
+    status_code=status.HTTP_200_OK,
+)
+async def enquiry_grc_cgcel(
+    division: Optional[str] = None,
+    from_grc_date: Optional[date] = None,
+    to_grc_date: Optional[date] = None,
+    grc_number: Optional[str] = None,
+    challan_number: Optional[str] = None,
+    grc_status: Optional[str] = "N",
+    limit: int = 100,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    try:
+        result, total_records = await grc_cgcel_service.enquiry_grc_cgcel(
+            session,
+            division,
+            from_grc_date,
+            to_grc_date,
+            grc_number,
+            challan_number,
+            grc_status,
+            limit,
+            offset,
+            return_total=True,
+        )
+        return {"records": result, "total_records": total_records}
+    except Exception as exc:
+        return {"records": [], "total_records": 0}

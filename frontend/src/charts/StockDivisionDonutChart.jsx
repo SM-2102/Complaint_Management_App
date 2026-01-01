@@ -131,19 +131,19 @@ const StockDivisionDonutChart = ({ data, meta }) => {
     color: "#fff",
     borderRadius: "0.5rem",
     boxShadow: "0 4px 24px rgba(118,75,162,0.15)",
-    padding: "0.2rem 0.3rem",
+    padding: "0.1rem 0.2rem",
     minWidth: "150px",
     textAlign: "center",
     fontFamily: stylishFont.fontFamily,
   };
   const numberStyle = {
-    fontSize: "1.1rem",
+    fontSize: "1rem",
     fontWeight: 700,
     margin: "0.1rem 0 0.08rem 0",
     letterSpacing: "1px",
   };
   const labelStyle = {
-    fontSize: "0.75rem",
+    fontSize: "0.7rem",
     fontWeight: 400,
     opacity: 0.85,
     letterSpacing: "0.5px",

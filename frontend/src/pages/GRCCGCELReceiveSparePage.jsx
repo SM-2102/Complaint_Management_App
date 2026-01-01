@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import Popper from "@mui/material/Popper";
 import {
   Paper,
   Typography,
@@ -22,7 +23,7 @@ const columns = [
   { key: "spare_description", label: "Spare Description" },
   { key: "issue_qty", label: "Issue Qty" },
   { key: "receive_qty", label: "Receive Qty" },
-  { key: "defective_qty", label: "Damage Qty" },
+  { key: "damaged_qty", label: "Damage Qty" },
   { key: "short_qty", label: "Short Qty" },
   { key: "alt_spare_qty", label: "Alt. Spare Qty" },
   { key: "alt_spare_code", label: "Alt. Spare Code" },
@@ -49,6 +50,7 @@ const GRCCGCELReceiveSparePage = () => {
   const [showGrcSuggestions, setShowGrcSuggestions] = useState(false);
   const [stockList, setStockList] = useState([]);
   const [focusedAltIndex, setFocusedAltIndex] = useState(null);
+  const [altSpareAnchorEl, setAltSpareAnchorEl] = useState(null);
 
   // fetch stock list helper
   const fetchStockByDivision = async (division) => {
@@ -139,7 +141,7 @@ const GRCCGCELReceiveSparePage = () => {
       spare_code: row.spare_code,
       grc_number: Number(form.grc_number),
       receive_qty: Number(row.receive_qty) ?? 0,
-      defective_qty: Number(row.defective_qty) ?? 0,
+      damaged_qty: Number(row.damaged_qty) ?? 0,
       short_qty: Number(row.short_qty) ?? 0,
       alt_spare_qty: Number(row.alt_spare_qty) ?? 0,
       alt_spare_code: row.alt_spare_code ?? "",
@@ -156,15 +158,15 @@ const GRCCGCELReceiveSparePage = () => {
       setUpdating(false);
       return;
     }
-    // Validation: issue_qty = receive_qty + defective_qty + short_qty + alt_spare_qty for all records
+    // Validation: issue_qty = receive_qty + damaged_qty + short_qty + alt_spare_qty for all records
     const invalidRows = payload.filter((row) => {
       const issue_qty = Number(row.issue_qty ?? 0);
       const receive_qty = Number(row.receive_qty ?? 0);
-      const defective_qty = Number(row.defective_qty ?? 0);
+      const damaged_qty = Number(row.damaged_qty ?? 0);
       const short_qty = Number(row.short_qty ?? 0);
       const alt_spare_qty = Number(row.alt_spare_qty ?? 0);
       return (
-        issue_qty !== receive_qty + defective_qty + short_qty + alt_spare_qty
+        issue_qty !== receive_qty + damaged_qty + short_qty + alt_spare_qty
       );
     });
     if (invalidRows.length > 0) {
@@ -440,7 +442,7 @@ const GRCCGCELReceiveSparePage = () => {
                         {/* Editable columns */}
                         {[
                           "receive_qty",
-                          "defective_qty",
+                          "damaged_qty",
                           "short_qty",
                           "alt_spare_code",
                           "dispute_remark",
@@ -469,11 +471,22 @@ const GRCCGCELReceiveSparePage = () => {
                                     ),
                                   );
                                 }}
-                                onFocus={() => setFocusedAltIndex(idx)}
-                                onBlur={() => setTimeout(() => setFocusedAltIndex(null), 150)}
+                                onFocus={(e) => {
+                                  setFocusedAltIndex(idx);
+                                  setAltSpareAnchorEl(e.target);
+                                }}
+                                onBlur={() => setTimeout(() => {
+                                  setFocusedAltIndex(null);
+                                  setAltSpareAnchorEl(null);
+                                }, 150)}
                               />
-                              {focusedAltIndex === idx && stockList && stockList.length > 0 && (
-                                (() => {
+                              <Popper
+                                open={focusedAltIndex === idx && stockList && stockList.length > 0}
+                                anchorEl={altSpareAnchorEl}
+                                placement="bottom-start"
+                                style={{ zIndex: 1300 }}
+                              >
+                                {(() => {
                                   const query = String(row.alt_spare_code ?? "").toLowerCase();
                                   const filtered = stockList.filter((s) =>
                                     s.spare_code.toLowerCase().includes(query) ||
@@ -482,10 +495,6 @@ const GRCCGCELReceiveSparePage = () => {
                                   return filtered.length > 0 ? (
                                     <ul
                                       style={{
-                                        position: "absolute",
-                                        top: "100%",
-                                        left: 0,
-                                        zIndex: 20,
                                         background: "#fff",
                                         border: "1px solid #d1d5db",
                                         borderRadius: 6,
@@ -511,15 +520,16 @@ const GRCCGCELReceiveSparePage = () => {
                                               ),
                                             );
                                             setFocusedAltIndex(null);
+                                            setAltSpareAnchorEl(null);
                                           }}
                                         >
-                                          <div style={{ fontSize: 10,fontWeight: 600 }}>{spare.spare_code}</div>
+                                          <div style={{ fontSize: 10, fontWeight: 600 }}>{spare.spare_code}</div>
                                         </li>
                                       ))}
                                     </ul>
                                   ) : null;
-                                })()
-                              )}
+                                })()}
+                              </Popper>
                             </div>
                           ) : (
                             <input

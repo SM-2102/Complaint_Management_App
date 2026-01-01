@@ -108,7 +108,7 @@ const MenuCard = ({
         )
           handleCardClick(e);
       }}
-      className={`relative rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200 ease-in-out p-6 flex flex-col justify-between focus:outline-none h-[360px] w-full max-w-xl`}
+      className={`relative rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200 ease-in-out pt-4 pl-4 pr-5 flex flex-col justify-start focus:outline-none h-[330px] w-full max-w-xl`}
       style={{ background: bgColor || "#fff" }}
     >
       {/* animated bluish left-to-right bar */}
@@ -278,7 +278,7 @@ const MenuCard = ({
         </div>
       </div>
 
-      <div className="text-gray-600">{children}</div>
+      <div className="flex-1 flex flex-col min-h-0 w-full">{children}</div>
     </div>
   );
 };

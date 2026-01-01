@@ -2,10 +2,6 @@
 ## Unique Services
 ---
 ## To Do List
-- Indent Enquiry Export 
-- Save as Draft
-- Finalize
-- GRC Enquiry
 
 
 - Dealer - 27/12
@@ -88,10 +84,10 @@
 
 ### GRC CGCEL Module
 - [x] **GRCCGCELUploadPage** - Upload GRC file .xlxs [ADMIN]
-- [ ] **GRCCGCELReceivePage** - GRC Receive Material
-- [ ] **GRCCGCELReturnPage** - GRC Return Material
-- [ ] **GRCCGCELEnquiryPage** - GRC Enquiry and Print
-- [ ] **GRCCGCELReportPage** - GRC Print
+- [x] **GRCCGCELReceivePage** - GRC Receive Material
+- [x] **GRCCGCELReturnPage** - GRC Return Material
+- [x] **GRCCGCELEnquiryPage** - GRC Enquiry and Print
+- [x] **GRCCGCELReportPage** - GRC Print
 
 ### GRC CGPISL Module
 - [x] **GRCCGPISLUploadPage** - Upload GRC file .xlxs [ADMIN]
@@ -99,6 +95,8 @@
 - [ ] **GRCCGPISLReturnPage** - GRC Return Material
 - [ ] **GRCCGPISLEnquiryPage** - GRC Enquiry and Print
 - [ ] **GRCCGPISLReportPage** - GRC Print
+
+### Dealer Module
 
 ---
 
@@ -160,9 +158,18 @@
 
 ### GRCCGCEL Module
 - [x] **/grc_cgcel/upload** - [ADMIN]
+- [x] **/grc_cgcel/not_received_grc**
+- [x] **/grc_cgcel/not_received_by_grc_number/{grc_number}**
+- [x] **/grc_cgcel/update_receive**
+- [x] **/grc_cgcel/grc_return_by_division/{division}**
+- [x] **/grc_cgcel/next_challan_code**
+- [x] **/grc_cgcel/save_grc_return**
+- [x] **/grc_cgcel/print_report/{report_type}**
+- [x] **/grc_cgcel/finalize_grc_return**
+- [x] **/grc_cgcel/enquiry/{params}**
+
 
 ### GRCCGPISL Module
-- [x] **/grc_cgpisl/upload** - [ADMIN]
 
 
 ---

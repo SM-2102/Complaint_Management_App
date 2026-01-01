@@ -124,7 +124,7 @@ const GRCCGCELReturnSparePage = () => {
           type: "success",
         });
       } else if (form.action_type === "Finalize") {
-        // Save as Draft logic
+        // Finalize logic with correct payload structure
         if (data.length === 0) {
           return;
         }
@@ -141,15 +141,18 @@ const GRCCGCELReturnSparePage = () => {
           });
           return;
         }
-        const payload = data.map((row) => ({
-          spare_code: row.spare_code || "",
-          grc_number: row.grc_number || 0,
-          good_qty: row.good_qty || 0,
-          defective_qty: row.defective_qty || 0,
-          invoice: row.invoice || "",
-          docket_number: form.docket_number || "",
+        const payload = {
+          challan_number: form.challan_number || "",
+          division: form.division || "",
           sent_through: form.sent_through || "",
-        }));
+          docket_number: form.docket_number || "",
+          grc_rows: data.map((row) => ({
+            spare_code: row.spare_code || "",
+            grc_number: row.grc_number || 0,
+            good_qty: row.good_qty || 0,
+            defective_qty: row.defective_qty || 0,
+          })),
+        };
         await updateCGCELReturnFinalize(payload);
         setShowToast(true);
         setError({ message: "Finalized successfully!", type: "success" });
@@ -209,12 +212,21 @@ const GRCCGCELReturnSparePage = () => {
     grcCGCELListByDivision(form.division)
       .then((result) => {
         if (mounted) {
-          setData(Array.isArray(result) ? result : []);
-          if (Array.isArray(result) && result.length > 0) {
+          // Normalize invoice value to 'N' if not 'Y' or 'N'
+          const normalized = Array.isArray(result)
+            ? result.map(row => ({
+                ...row,
+                invoice: row.invoice && ["Y", "N"].includes(row.invoice.trim())
+                  ? row.invoice.trim()
+                  : "N"
+              }))
+            : [];
+          setData(normalized);
+          if (normalized.length > 0) {
             setForm((prev) => ({
               ...prev,
-              sent_through: result[0].sent_through || "",
-              docket_number: result[0].docket_number || "",
+              sent_through: normalized[0].sent_through || "",
+              docket_number: normalized[0].docket_number || "",
             }));
           } else {
             setForm((prev) => ({

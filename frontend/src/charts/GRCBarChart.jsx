@@ -12,7 +12,7 @@ import {
 
 ChartJS.register(BarElement, Tooltip, Legend, CategoryScale, LinearScale);
 
-const GRCBarChart = ({ data }) => {
+const GRCBarChart = ({ data, className = "" }) => {
   // 'data' is expected to be an array of { division, count }
   const chartData = Array.isArray(data) ? data : [];
   const labels = chartData.map((item) => item.division);
@@ -38,9 +38,12 @@ const GRCBarChart = ({ data }) => {
         data: dataValues,
         backgroundColor: backgroundColors.slice(0, labels.length),
         borderColor: "#fff",
-        borderWidth: 1,
-        borderRadius: 8,
-        maxBarThickness: 32,
+        borderWidth: 0.5,
+        borderRadius: 6,
+        maxBarThickness: 48, // Thicker bars
+        minBarLength: 16,
+        categoryPercentage: 0.7,
+        barPercentage: 0.8,
       },
     ],
   };
@@ -48,14 +51,15 @@ const GRCBarChart = ({ data }) => {
   const options = {
     indexAxis: "y",
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false,
       },
       tooltip: {
         callbacks: {
-          label: function () {
-            return ""; // Remove tooltip label as well
+          label: function (context) {
+            return `Count : ${context.parsed.x}`;
           },
         },
         backgroundColor: "#fff",
@@ -71,23 +75,34 @@ const GRCBarChart = ({ data }) => {
         display: false,
       },
     },
+    layout: {
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+    },
     scales: {
       x: {
         grid: {
           display: false,
         },
+        border: {
+          display: false,
+        },
         ticks: {
-          display: false, // Hide x-axis count numbers
+          display: false,
           color: "#0f172a",
         },
+        min: 0,
       },
       y: {
         grid: {
           display: false,
         },
         ticks: {
-          display: true, // Show y-axis division labels
+          display: true,
           color: "#0f172a",
+          font: {
+            size: 16,
+            weight: "bold",
+          },
         },
       },
     },
@@ -97,21 +112,34 @@ const GRCBarChart = ({ data }) => {
     },
   };
 
+  // Dynamically set chart height based on number of bars
+  // Each bar gets 48px, min 200px, max 500px
+  const barHeight = 48;
+  const minHeight = 200;
+  const maxHeight = 500;
+  const dynamicHeight = Math.min(
+    Math.max(chartData.length * barHeight, minHeight),
+    maxHeight
+  );
+
   return (
-    <div className="p-1 md:p-1 rounded-lg flex flex-col items-center w-full min-w-0 overflow-hidden max-h-full">
+    <div
+      className={`rounded-lg flex flex-col w-full min-w-0 min-h-0 overflow-hidden max-h-full flex-1 ${className}`}
+      style={{
+        padding: 0,
+        height: dynamicHeight,
+        fontFamily: "'Poppins', 'Inter', 'Segoe UI', 'Arial', sans-serif",
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+      }}
+    >
       <div
-        className="relative w-full flex items-center justify-center overflow-hidden min-w-0 min-h-0"
-        style={{ maxWidth: "100%", maxHeight: "100%" }}
+        className="relative w-full flex justify-center items-center overflow-hidden min-w-0 min-h-0 flex-1"
+        style={{ maxWidth: "100%", maxHeight: "100%", padding: 0, margin: 0, height: '100%' }}
       >
         <Bar
           data={chartDataObj}
           options={options}
-          style={{
-            width: "100%",
-            height: "100%",
-            maxWidth: "100%",
-            maxHeight: "100%",
-          }}
         />
       </div>
     </div>

@@ -44,23 +44,14 @@ export const DashboardDataProvider = ({ children }) => {
     } catch (err) {
       setError(err);
       setData({
-        customer: {
-          number_of_customers: 0,
-          number_of_asc_names: 0,
-          top_customers: [],
-        },
-        challan: { number_of_challans: 0, number_of_items: 0 },
-        vendor: { status_per_division_stacked_bar_chart: [], total_vendors: 0 },
-        retail: { division_wise_donut: [], settled_vs_unsettled_pie_chart: [] },
-        warranty: {
-          division_wise_pending_completed_bar_graph: [],
-          srf_vs_delivery_month_wise_bar_graph: [],
-          warranty_heads: 0,
-        },
-        out_of_warranty: {
-          srf_receive_vs_delivery_bar_graph: [],
-          final_status_bar_graph: [],
-          out_of_warranty_count: 0,
+        complaint: {
+          division_wise_status: [],
+          complaint_type: {},
+          crm_open_complaints: 0,
+          crm_escalation_complaints: 0,
+          md_escalation_complaints: 0,
+          high_priority_complaints: 0,
+          spare_pending_complaints: 0,
         },
         stock: {
           division_wise_donut: [],
