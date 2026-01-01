@@ -16,6 +16,8 @@ import { fetchNextCGCELGRCChallanCode } from "../services/grcCGCELNextChallanCod
 import { grcCGCELListByDivision } from "../services/grcCGCELReturnListByDivisionService";
 import { printGRCReturn } from "../services/grcCGCELReturnPrintService";
 import { updateCGCELReturnFinalize } from "../services/grcCGCELReturnFinalizeService";
+import { validateReturn } from "../utils/grcCGCELReturnValidation";
+import { validateReturnQuantities } from "../utils/grcCGCELQuantityValidation";
 
 const columns = [
   { key: "grc_number", label: "GRC Number" },
@@ -32,6 +34,41 @@ const columns = [
 ];
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const QtyInput = React.memo(function QtyInput({
+  value,
+  disabled,
+  onCommit,
+}) {
+  const [local, setLocal] = useState(value ?? "");
+
+  useEffect(() => {
+    setLocal(value ?? "");
+  }, [value]);
+
+  return (
+    <input
+      type="number"
+      value={local}
+      disabled={disabled}
+      onChange={(e) => setLocal(e.target.value)}
+      onBlur={() =>
+        onCommit(local === "" ? "" : Number(local))
+      }
+      style={{
+        width: 70,
+        textAlign: "center",
+        border: "1px solid #7c9ccbff",
+        borderRadius: 6,
+        padding: "4px 6px",
+        background: disabled ? "#e5e7eb" : "#f8fafc",
+        fontWeight: 500,
+        color: disabled ? "#9ca3af" : undefined,
+        cursor: disabled ? "not-allowed" : undefined,
+      }}
+    />
+  );
+});
+
 
 const reportTypeOptions = ["All", "Good", "Defective"];
 const actionTypeOptions = ["Save as Draft", "Report", "Finalize"];
@@ -59,8 +96,28 @@ const GRCCGCELReturnSparePage = () => {
   // Track if report_type should be enabled
   const isReportTypeEnabled = form.action_type === "Report";
 
+  const [errs, errs_label] = validateReturn(form);
+
   // Handle Execute Action button click
-  const handleExecuteAction = async () => {
+  const handleExecuteAction = async (e) => {
+    e.preventDefault();
+    setError("");
+    setShowToast(false);
+    if (errs.length > 0) {
+      setError({
+        message: errs[0],
+        type: "warning",
+      });
+      setShowToast(true);
+      return;
+    }
+    const { valid, message } = validateReturnQuantities(data);
+    if (!valid) {
+      setError({ message, type: "warning" });
+      setShowToast(true);
+      return;
+    }
+
     setUpdating(true);
     setError("");
     try {
@@ -126,19 +183,6 @@ const GRCCGCELReturnSparePage = () => {
       } else if (form.action_type === "Finalize") {
         // Finalize logic with correct payload structure
         if (data.length === 0) {
-          return;
-        }
-        if (!form.docket_number || form.docket_number.trim() === "") {
-          setShowToast(true);
-          setError({ message: "Consignment No. is required", type: "warning" });
-          return;
-        }
-        if (!form.sent_through || form.sent_through.trim() === "") {
-          setShowToast(true);
-          setError({
-            message: "Returned Through is required",
-            type: "warning",
-          });
           return;
         }
         const payload = {
@@ -356,7 +400,7 @@ const GRCCGCELReturnSparePage = () => {
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, sent_through: e.target.value }))
                 }
-                className={`w-full px-2 py-1 rounded-lg border border-gray-300 font-small focus:outline-none focus:ring-2 focus:ring-blue-400 `}
+                className={`w-full px-2 py-1 rounded-lg border ${errs_label.sent_through ? "border-red-300" : "border-gray-300"} font-small focus:outline-none focus:ring-2 focus:ring-blue-400 `}
                 style={{ minWidth: 140 }}
                 autoComplete="off"
                 maxLength={20}
@@ -436,7 +480,7 @@ const GRCCGCELReturnSparePage = () => {
                     docket_number: e.target.value,
                   }))
                 }
-                className={`w-full px-2 py-1 rounded-lg border border-gray-300 font-small focus:outline-none focus:ring-2 focus:ring-blue-400 `}
+                className={`w-full px-2 py-1 rounded-lg border ${errs_label.docket_number ? "border-red-300" : "border-gray-300"} font-small focus:outline-none focus:ring-2 focus:ring-blue-400 `}
                 style={{ minWidth: 140 }}
                 autoComplete="off"
                 maxLength={8}
@@ -551,57 +595,18 @@ const GRCCGCELReturnSparePage = () => {
                             {row.invoice === "Y" ? "Yes" : "No"}
                           </button>
                         ) : ["good_qty", "defective_qty"].includes(col.key) ? (
-                          <input
-                            type={"number"}
-                            value={row[col.key] ?? ""}
-                            min={col.key.includes("qty") ? 0 : undefined}
-                            style={{
-                              width: col.key.includes("qty") ? 70 : 180,
-                              textAlign: "center",
-                              border: "1px solid #7c9ccbff",
-                              borderRadius: 6,
-                              padding: "4px 6px",
-                              background:
-                                row.invoice === "Y" ? "#e5e7eb" : "#f8fafc",
-                              fontWeight: 500,
-                              color:
-                                row.invoice === "Y" ? "#9ca3af" : undefined,
-                              cursor:
-                                row.invoice === "Y" ? "not-allowed" : undefined,
-                            }}
-                            disabled={row.invoice === "Y"}
-                            onChange={(e) => {
-                              const value = col.key.includes("qty")
-                                ? e.target.value === ""
-                                  ? ""
-                                  : Number(e.target.value)
-                                : e.target.value;
-                              setData((prev) =>
-                                prev.map((r, i) => {
-                                  if (i !== idx) return r;
-                                  // Calculate the other value
-                                  const otherKey =
-                                    col.key === "good_qty"
-                                      ? "defective_qty"
-                                      : "good_qty";
-                                  const otherValue = Number(r[otherKey] ?? 0);
-                                  const newValue = Number(value ?? 0);
-                                  const total =
-                                    col.key === "good_qty"
-                                      ? newValue + otherValue
-                                      : otherValue + newValue;
-                                  const maxAllowed = Number(
-                                    r.actual_pending_qty ?? 0,
-                                  );
-                                  if (total > maxAllowed) {
-                                    // Prevent update if sum exceeds actual_pending_qty
-                                    return r;
-                                  }
-                                  return { ...r, [col.key]: value };
-                                }),
-                              );
-                            }}
-                          />
+                          <QtyInput
+  value={row[col.key]}
+  disabled={row.invoice === "Y"}
+  onCommit={(val) => {
+    setData((prev) =>
+      prev.map((r, i) =>
+        i === idx ? { ...r, [col.key]: val } : r
+      )
+    );
+  }}
+/>
+
                         ) : row[col.key] !== null &&
                           row[col.key] !== undefined ? (
                           row[col.key]
