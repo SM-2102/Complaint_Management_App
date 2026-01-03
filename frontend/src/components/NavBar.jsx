@@ -101,11 +101,16 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
       });
     }
   });
-  // Add 'Add Dealer Record' as the last menu item
+
+  // Add 'Dealer' menu with two submenus
   menuItems.push({
-    title: "Add Dealer Record",
-    path: "/DealerCreate",
-    isDirect: true,
+    title: "Dealer",
+    submenus: [
+      { title: "Add Dealer Record", path: "/DealerCreate" },
+      { title: "Update Dealer Record", path: "/DealerUpdate" },
+    ],
+    isDirect: false,
+    disabled: false,
   });
 
   // Close on outside click
@@ -159,9 +164,8 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
       <div className="flex-1 overflow-y-auto py-4">
         {menuItems.map((item, idx) =>
           item.isDirect ? (
-            <div className="mb-2">
+            <div className="mb-2" key={item.title}>
               <Link
-                key={item.title}
                 to={item.path}
                 className="flex items-center text-black font-semibold px-6 py-3 rounded-md cursor-pointer hover:bg-blue-900/30 transition select-none"
                 onClick={() => setOpen(false)}
@@ -196,6 +200,7 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
 
               {!item.disabled &&
                 submenuOpen.includes(idx) &&
+                item.submenus &&
                 item.submenus.length > 0 && (
                   <div className="ml-4 mt-1 flex flex-col">
                     {item.submenus.map((sub) => (

@@ -1,14 +1,14 @@
-# Complaint Management System  
+# Complaint Management System
+
 ## Unique Services
+
 ---
+
 ## To Do List
 
+- Stock field
+- Dealer Module
 
- - GRC CGCEL
-  - Enquiry spare code route
-  - Spare Teturn very slow
- - Spare Return mismatch - red
- - GRC Report
 
 - Dealer - 27/12
 - Email - 28/12
@@ -16,12 +16,14 @@
 - Pending - 30/12
 
 ---
+
 ## Database Tables
+
 - [x] **User**
 - [x] **Employee**
 - [x] **Notification**
 - [x] **Holiday**
-- [ ] **ComplaintNumber**	
+- [ ] **ComplaintNumber**
 - [x] **StockCGPISL**
 - [x] **StockCGCEL**
 - [ ] **GRCCGPISL**
@@ -29,51 +31,61 @@
 - [ ] **Dealer**
 
 ---
+
 ## Frontend Pages
 
 ### Auth Module
+
 - [x] **LoginPage** – User authentication
 - [x] **ChangePasswordPage** – Change password
 
 ### Employee Module
+
 - [x] **EmployeeCreatePage** – Create Employee [ADMIN]
 - [x] **EmployeeDeletePage** – Delete Employee [ADMIN]
 - [x] **EmployeeShowAllPage** – View All Users [ADMIN]
 - [x] **EmployeeShowStandardPage** - View Standard Users
 
 ### Notification Module
+
 - [x] **NotificationCreatePage** - Add notification [ADMIN]
 
 ### Dashboard Module
+
 - [ ] **MenuDashboardPage** – Main dashboard for menu navigation
 - [x] **PageNotFound** – 404 error page
 - [x] **PageNotAvailable** – Maintenance/feature unavailable page
 
 ### Pending Module
+
 - [ ] **PendingListPage** - Main Pending Page
 
 ### ComplaintNumber Module
+
 - [ ] **ComplaintNumberUploadPage** - Upload complaint number file .xlxs [ADMIN]
 - Admin can upload a new complaint file with the following logic:
+
 1. **If complaint exists in both old and new file**
    - No action taken
 2. **If complaint exists in new file but not in old**
    - Insert as new complaint
 3. **If complaint exists in old file but not in new**
    - Update complaint status to **Cancelled**
+
 - [ ] **ComplaintNumberCreatePage** - Create Complaint Number
 - Create new complaint records
 - Auto-generate complaint number
 - [ ] **ComplaintNumberUpdatePage** - Update Complaint Number
 - Update complaint details and status
 - **Visit Later Option**
-  - If selected:  
+  - If selected:
     - A new complaint is automatically created
     - Original complaint status updated accordingly
 - [ ] **ComplaintNumberSendPage** - Send pending pdf to technician
 - Generate pdf, either download or send to e-mail
 
 ### Stock CGCEL Module
+
 - [x] **StockCGCELUploadPage** - Upload stock file .xlxs [ADMIN]
 - [x] **StockCGCELEnquiryPage** - Stock Enquiry and Print
 - [x] **StockCGCELSpareIndentPage** - Raise Spare Indent
@@ -82,6 +94,7 @@
 - [x] **StockCGCELUpdateRecordPage** - Update CGCEL Stock
 
 ### Stock CGPISL Module
+
 - [x] **StockCGPISLUploadPage** - Upload stock file .xlxs [ADMIN]
 - [x] **StockCGPSILEnquiryPage** - Stock Enquiry and Print
 - [x] **StockCGPSILSpareIndentPage** - Raise Spare Indent
@@ -89,6 +102,7 @@
 - [x] **StockCGPSILIndentDetailsPage** - Indent Details
 
 ### GRC CGCEL Module
+
 - [x] **GRCCGCELUploadPage** - Upload GRC file .xlxs [ADMIN]
 - [x] **GRCCGCELReceivePage** - GRC Receive Material
 - [x] **GRCCGCELReturnPage** - GRC Return Material
@@ -96,6 +110,7 @@
 - [x] **GRCCGCELReportPage** - GRC Print
 
 ### GRC CGPISL Module
+
 - [x] **GRCCGPISLUploadPage** - Upload GRC file .xlxs [ADMIN]
 - [ ] **GRCCGPISLReceivePage** - GRC Receive Material
 - [ ] **GRCCGPISLReturnPage** - GRC Return Material
@@ -103,13 +118,16 @@
 - [ ] **GRCCGPISLReportPage** - GRC Print
 
 ### Dealer Module
+### Master Module
+- [x] **MasterCreatePage** - Create Master record
+- [x] **MasterUpdatePage** - Update Master record
 
 ---
-
 
 ## Backend Routes
 
 ### Auth Module
+
 - [x] **/auth/login**
 - [x] **/auth/logout**
 - [x] **/auth/me**
@@ -117,12 +135,14 @@
 - [x] **/auth/refresh_token**
 
 ### Employee Module
+
 - [x] **/employee/all_employees** - [ADMIN]
-- [x] **/employee/standard_employees** 
+- [x] **/employee/standard_employees**
 - [x] **/employee/create_employees** - [ADMIN]
 - [x] **/employee/delete_employees** - [ADMIN]
 
 ### Notification Module
+
 - [x] **/notification/create_notification** - [ADMIN]
 - [x] **/notification/notifications** - [ADMIN]
 - [x] **/notification/count_notifications** - [ADMIN]
@@ -130,11 +150,13 @@
 - [x] **/notification/resolve_notification**
 
 ### Menu Module
+
 - [ ] **/menu/dashboard**
 
 ### Pending Module
 
 ### StockCGCEL Module
+
 - [x] **/stock_cgcel/upload** - [ADMIN]
 - [x] **/stock_cgcel/enquiry{params}**
 - [x] **/stock_cgcel/spare_list**
@@ -149,6 +171,7 @@
 - [x] **/stock_cgcel/indent_enquiry{params}**
 
 ### StockCGPISL Module
+
 - [x] **/stock_cgpisl/upload** - [ADMIN]
 - [x] **/stock_cgpisl/enquiry{params}**
 - [x] **/stock_cgcel/spare_list**
@@ -161,8 +184,8 @@
 - [x] **/stock_cgcel/generate_indent**
 - [x] **/stock_cgcel/indent_enquiry{params}**
 
-
 ### GRCCGCEL Module
+
 - [x] **/grc_cgcel/upload** - [ADMIN]
 - [x] **/grc_cgcel/not_received_grc**
 - [x] **/grc_cgcel/not_received_by_grc_number/{grc_number}**
@@ -174,9 +197,16 @@
 - [x] **/grc_cgcel/finalize_grc_return**
 - [x] **/grc_cgcel/enquiry/{params}**
 
-
 ### GRCCGPISL Module
 
+### Master Module
+- [x] **/master/create**
+- [x] **/master/next_code**
+- [x] **/master/list_names** 
+- [x] **/master/by_code** 
+- [x] **/master/by_name**
+- [x] **/master/update{code}**
+- [x] **/master/fetch_address**
 
 ---
 
@@ -201,8 +231,3 @@
 - [ ] **Final Deployment**
 
 ---
-
-
-
-
-

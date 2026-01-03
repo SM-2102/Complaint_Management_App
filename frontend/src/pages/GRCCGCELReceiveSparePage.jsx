@@ -331,7 +331,7 @@ const GRCCGCELReceiveSparePage = () => {
                       )
                   ).map((grc, idx) => (
                     <li
-                    key={grc}
+                      key={grc}
                       style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
                       onMouseDown={() => {
                         setForm((prev) => ({ ...prev, grc_number: grc }));
@@ -345,7 +345,7 @@ const GRCCGCELReceiveSparePage = () => {
               )}
             </div>
           </div>
-           <div
+          <div
             className="flex items-center gap-3 justify-center mb-3"
             style={{ position: "relative" }}
           >
@@ -449,7 +449,12 @@ const GRCCGCELReceiveSparePage = () => {
                           "alt_spare_qty",
                         ].includes(col.key) ? (
                           col.key === "alt_spare_code" ? (
-                            <div style={{ position: "relative", display: "inline-block" }}>
+                            <div
+                              style={{
+                                position: "relative",
+                                display: "inline-block",
+                              }}
+                            >
                               <input
                                 type="text"
                                 value={row[col.key] ?? ""}
@@ -467,7 +472,9 @@ const GRCCGCELReceiveSparePage = () => {
                                   const value = e.target.value;
                                   setData((prev) =>
                                     prev.map((r, i) =>
-                                      i === idx ? { ...r, [col.key]: value } : r,
+                                      i === idx
+                                        ? { ...r, [col.key]: value }
+                                        : r,
                                     ),
                                   );
                                 }}
@@ -475,22 +482,35 @@ const GRCCGCELReceiveSparePage = () => {
                                   setFocusedAltIndex(idx);
                                   setAltSpareAnchorEl(e.target);
                                 }}
-                                onBlur={() => setTimeout(() => {
-                                  setFocusedAltIndex(null);
-                                  setAltSpareAnchorEl(null);
-                                }, 150)}
+                                onBlur={() =>
+                                  setTimeout(() => {
+                                    setFocusedAltIndex(null);
+                                    setAltSpareAnchorEl(null);
+                                  }, 150)
+                                }
                               />
                               <Popper
-                                open={focusedAltIndex === idx && stockList && stockList.length > 0}
+                                open={
+                                  focusedAltIndex === idx &&
+                                  stockList &&
+                                  stockList.length > 0
+                                }
                                 anchorEl={altSpareAnchorEl}
                                 placement="bottom-start"
                                 style={{ zIndex: 1300 }}
                               >
                                 {(() => {
-                                  const query = String(row.alt_spare_code ?? "").toLowerCase();
-                                  const filtered = stockList.filter((s) =>
-                                    s.spare_code.toLowerCase().includes(query) ||
-                                    (s.spare_description || "").toLowerCase().includes(query),
+                                  const query = String(
+                                    row.alt_spare_code ?? "",
+                                  ).toLowerCase();
+                                  const filtered = stockList.filter(
+                                    (s) =>
+                                      s.spare_code
+                                        .toLowerCase()
+                                        .includes(query) ||
+                                      (s.spare_description || "")
+                                        .toLowerCase()
+                                        .includes(query),
                                   );
                                   return filtered.length > 0 ? (
                                     <ul
@@ -507,25 +527,41 @@ const GRCCGCELReceiveSparePage = () => {
                                         listStyle: "none",
                                       }}
                                     >
-                                      {filtered.slice(0, 20).map((spare, sidx) => (
-                                        <li
-                                          key={spare.spare_code}
-                                          style={{ padding: "6px 10px", cursor: "pointer" }}
-                                          onMouseDown={() => {
-                                            setData((prev) =>
-                                              prev.map((r, i) =>
-                                                i === idx
-                                                  ? { ...r, alt_spare_code: spare.spare_code }
-                                                  : r,
-                                              ),
-                                            );
-                                            setFocusedAltIndex(null);
-                                            setAltSpareAnchorEl(null);
-                                          }}
-                                        >
-                                          <div style={{ fontSize: 10, fontWeight: 600 }}>{spare.spare_code}</div>
-                                        </li>
-                                      ))}
+                                      {filtered
+                                        .slice(0, 20)
+                                        .map((spare, sidx) => (
+                                          <li
+                                            key={spare.spare_code}
+                                            style={{
+                                              padding: "6px 10px",
+                                              cursor: "pointer",
+                                            }}
+                                            onMouseDown={() => {
+                                              setData((prev) =>
+                                                prev.map((r, i) =>
+                                                  i === idx
+                                                    ? {
+                                                        ...r,
+                                                        alt_spare_code:
+                                                          spare.spare_code,
+                                                      }
+                                                    : r,
+                                                ),
+                                              );
+                                              setFocusedAltIndex(null);
+                                              setAltSpareAnchorEl(null);
+                                            }}
+                                          >
+                                            <div
+                                              style={{
+                                                fontSize: 10,
+                                                fontWeight: 600,
+                                              }}
+                                            >
+                                              {spare.spare_code}
+                                            </div>
+                                          </li>
+                                        ))}
                                     </ul>
                                   ) : null;
                                 })()}
@@ -537,9 +573,7 @@ const GRCCGCELReceiveSparePage = () => {
                               value={row[col.key] ?? ""}
                               min={col.key.includes("qty") ? 0 : undefined}
                               maxLength={
-                                col.key === "dispute_remark"
-                                  ? 40
-                                  : undefined
+                                col.key === "dispute_remark" ? 40 : undefined
                               }
                               style={{
                                 width: col.key.includes("qty") ? 70 : 180,

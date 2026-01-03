@@ -1,6 +1,12 @@
 import React from "react";
 import CountUp from "react-countup";
-import { FaClipboardList, FaExclamationTriangle, FaUserTie, FaStar, FaTools } from "react-icons/fa";
+import {
+  FaClipboardList,
+  FaExclamationTriangle,
+  FaUserTie,
+  FaStar,
+  FaTools,
+} from "react-icons/fa";
 
 const cardMeta = [
   {
@@ -38,7 +44,10 @@ const cardMeta = [
 const ComplaintStatCard = ({ title, value, icon: Icon, colorClass }) => (
   <div
     className={`flex flex-col items-center justify-start rounded-2xl border px-5 py-4 min-w-[140px] min-h-[100px] ${colorClass} transition-all duration-300 hover:scale-[1.04] hover:shadow-2xl shadow-lg animate-fadeIn border-solid border-black/70 hover:border-primary-400`}
-    style={{ backdropFilter: "blur(2px)", boxShadow: "0 6px 32px 0 rgba(0,0,0,0.10)" }}
+    style={{
+      backdropFilter: "blur(2px)",
+      boxShadow: "0 6px 32px 0 rgba(0,0,0,0.10)",
+    }}
   >
     <span className="text-sm font-bold mb-2 opacity-90 tracking-wide text-center">
       {title}
@@ -56,9 +65,7 @@ const ComplaintStatCard = ({ title, value, icon: Icon, colorClass }) => (
 
 const ComplaintStatsCards = ({ stats }) => {
   return (
-    <div
-      className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-6"
-    >
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-6">
       {stats.map((stat, idx) => {
         const meta = cardMeta[idx];
         return (

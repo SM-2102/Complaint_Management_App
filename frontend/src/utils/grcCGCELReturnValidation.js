@@ -11,7 +11,7 @@ function validateReturn(form) {
       errs.push("Returned Through is required");
       errors_label.sent_through = true;
     }
-     if (!form.docket_number) {
+    if (!form.docket_number) {
       errs.push("Consignment No. is required");
       errors_label.docket_number = true;
     }

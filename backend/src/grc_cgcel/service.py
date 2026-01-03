@@ -449,7 +449,7 @@ class GRCCGCELService:
             can = canvas.Canvas(packet, pagesize=A4)
             width, height = A4
 
-            def draw_centered(can, text, x_start, x_end, y, font="Helvetica", size=8):
+            def draw_centered(can, text, x_start, x_end, y, font="Helvetica", size=9):
                 text = "" if text is None else str(text)
                 can.setFont(font, size)
                 text_width = can.stringWidth(text, font, size)
@@ -460,46 +460,46 @@ class GRCCGCELService:
                 # Header
                 can.setFont("Helvetica-Bold", 10)
                 can.drawString(
-                    105, 722 - start_y_offset, f"{data.get('challan_number', '')}"
+                    88, 740 - start_y_offset, f"{data.get('challan_number', '')}"
                 )
                 can.drawString(
-                    260, 722 - start_y_offset, date.today().strftime("%d-%m-%Y")
+                    250, 740 - start_y_offset, date.today().strftime("%d-%m-%Y")
                 )
-                can.drawString(432, 722 - start_y_offset, f"{data.get('division', '')}")
+                can.drawString(476, 740 - start_y_offset, f"{data.get('division', '')}")
                 can.drawString(
-                    440, 687 - start_y_offset, f"{data.get('docket_number', '')}"
+                    476, 704 - start_y_offset, f"{data.get('docket_number', '')}"
                 )
                 can.drawString(
-                    173, 687 - start_y_offset, f"{data.get('sent_through', '')}"
+                    144, 704 - start_y_offset, f"{data.get('sent_through', '')}"
                 )
-                can.drawString(438, 56 - start_y_offset, f"{token['user']['username']}")
+                can.drawString(474, 36 - start_y_offset, f"{token['user']['username']}")
 
                 can.setFont("Helvetica", 11)
-                y = 642 - start_y_offset
+                y = 660 - start_y_offset
                 items = data.get("grc_rows", [])
                 for idx, item in enumerate(items, 1):
                     if report_type == "Defective":
-                        draw_centered(can, item.get("grc_number"), 18, 95, y)
-                        draw_centered(can, item.get("grc_date"), 98, 160, y)
-                        draw_centered(can, item.get("spare_code"), 165, 250, y)
-                        draw_centered(can, item.get("spare_description"), 250, 480, y)
-                        draw_centered(can, item.get("defective_qty") or 0, 480, 560, y)
+                        draw_centered(can, item.get("grc_number"), 15, 80, y)
+                        draw_centered(can, item.get("grc_date"), 80, 135, y)
+                        draw_centered(can, item.get("spare_code"), 135, 240, y)
+                        draw_centered(can, item.get("spare_description"), 240, 545, y)
+                        draw_centered(can, item.get("defective_qty") or 0, 545, 580, y)
                     elif report_type == "Good":
-                        draw_centered(can, item.get("grc_number"), 18, 95, y)
-                        draw_centered(can, item.get("grc_date"), 98, 160, y)
-                        draw_centered(can, item.get("spare_code"), 165, 250, y)
-                        draw_centered(can, item.get("spare_description"), 250, 430, y)
-                        can.drawString(390, y, str(item.get("good_qty") or 0))
+                        draw_centered(can, item.get("grc_number"), 15, 80, y)
+                        draw_centered(can, item.get("grc_date"), 80, 135, y)
+                        draw_centered(can, item.get("spare_code"), 135, 240, y)
+                        draw_centered(can, item.get("spare_description"), 240, 545, y)
+                        draw_centered(can, item.get("good_qty") or 0, 545, 580, y)
                     else:
-                        draw_centered(can, item.get("grc_number"), 18, 98, y)
-                        draw_centered(can, item.get("grc_date"), 98, 160, y)
-                        draw_centered(can, item.get("spare_code"), 165, 250, y)
-                        draw_centered(can, item.get("spare_description"), 250, 430, y)
+                        draw_centered(can, item.get("grc_number"), 15, 80, y)
+                        draw_centered(can, item.get("grc_date"), 80, 135, y)
+                        draw_centered(can, item.get("spare_code"), 135, 240, y)
+                        draw_centered(can, item.get("spare_description"), 240, 467, y)
                         draw_centered(
-                            can, item.get("actual_pending_qty") or 0, 430, 480, y
+                            can, item.get("actual_pending_qty") or 0, 467, 510, y
                         )
-                        draw_centered(can, item.get("good_qty") or 0, 484, 510, y)
-                        draw_centered(can, item.get("defective_qty") or 0, 510, 560, y)
+                        draw_centered(can, item.get("good_qty") or 0, 510, 545, y)
+                        draw_centered(can, item.get("defective_qty") or 0, 545, 580, y)
                     y -= 19
                     if y < 100:
                         break  # Avoid overflow for now
@@ -549,6 +549,7 @@ class GRCCGCELService:
         self,
         statement,
         division=None,
+        spare_code=None,
         from_grc_date=None,
         to_grc_date=None,
         grc_number=None,
@@ -558,6 +559,10 @@ class GRCCGCELService:
         if division:
             statement = statement.where(model.division == division)
 
+        if spare_code:
+            statement = statement.where(
+                model.spare_code.ilike(f"{spare_code}")
+            )
 
         if from_grc_date:
             statement = statement.where(
@@ -585,6 +590,7 @@ class GRCCGCELService:
         self,
         session: AsyncSession,
         division: Optional[str] = None,
+        spare_code: Optional[str] = None,
         from_grc_date: Optional[date] = None,
         to_grc_date: Optional[date] = None,
         grc_number: Optional[str] = None,
@@ -601,6 +607,7 @@ class GRCCGCELService:
         statement = self._apply_cgcel_filters(
             statement,
             division,
+            spare_code,
             from_grc_date,
             to_grc_date,
             grc_number,
@@ -619,6 +626,7 @@ class GRCCGCELService:
             count_query = self._apply_cgcel_filters(
                 count_query,
                 division,
+                spare_code,
                 from_grc_date,
                 to_grc_date,
                 grc_number,

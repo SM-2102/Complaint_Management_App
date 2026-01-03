@@ -119,7 +119,7 @@ const GRCBarChart = ({ data, className = "" }) => {
   const maxHeight = 500;
   const dynamicHeight = Math.min(
     Math.max(chartData.length * barHeight, minHeight),
-    maxHeight
+    maxHeight,
   );
 
   return (
@@ -129,18 +129,21 @@ const GRCBarChart = ({ data, className = "" }) => {
         padding: 0,
         height: dynamicHeight,
         fontFamily: "'Poppins', 'Inter', 'Segoe UI', 'Arial', sans-serif",
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
       }}
     >
       <div
         className="relative w-full flex justify-center items-center overflow-hidden min-w-0 min-h-0 flex-1"
-        style={{ maxWidth: "100%", maxHeight: "100%", padding: 0, margin: 0, height: '100%' }}
+        style={{
+          maxWidth: "100%",
+          maxHeight: "100%",
+          padding: 0,
+          margin: 0,
+          height: "100%",
+        }}
       >
-        <Bar
-          data={chartDataObj}
-          options={options}
-        />
+        <Bar data={chartDataObj} options={options} />
       </div>
     </div>
   );

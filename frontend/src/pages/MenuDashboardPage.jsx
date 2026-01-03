@@ -116,7 +116,6 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     navigate({ search: params.toString() }, { replace: true });
   };
 
-
   // Stock division data
   const divisionData = useMemo(() => {
     const donut = data?.stock?.division_wise_donut;
@@ -161,10 +160,12 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     if (selectedCompany === "ALL") {
       // Merge CGCEL and CGPISL arrays by type
       const merged = {};
-      [...(typeData.CGCEL || []), ...(typeData.CGPISL || [])].forEach(({ type, count }) => {
-        if (!merged[type]) merged[type] = { type, count: 0 };
-        merged[type].count += count || 0;
-      });
+      [...(typeData.CGCEL || []), ...(typeData.CGPISL || [])].forEach(
+        ({ type, count }) => {
+          if (!merged[type]) merged[type] = { type, count: 0 };
+          merged[type].count += count || 0;
+        },
+      );
       return Object.values(merged);
     }
     return typeData[selectedCompany] || [];
@@ -352,7 +353,10 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
                       <SpinnerLoading text={`Error Loading ...`} />
                     </div>
                   ) : (
-                    <GRCBarChart data={grcDivisionData} className="flex-1 h-full" />
+                    <GRCBarChart
+                      data={grcDivisionData}
+                      className="flex-1 h-full"
+                    />
                   ))}
               </MenuCard>
             ),

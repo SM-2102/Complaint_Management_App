@@ -30,7 +30,7 @@ import StockCGPISLIndentEnquiryPage from "./pages/StockCGPISLIndentEnquiryPage.j
 import GRCCGCELReceiveSparePage from "./pages/GRCCGCELReceiveSparePage.jsx";
 import GRCCGCELReturnSparePage from "./pages/GRCCGCELReturnSparePage.jsx";
 import GRCCGCELEnquiryPage from "./pages/GRCCGCELEnquiryPage.jsx";
-import  ComplaintPendingPage from "./pages/ComplaintPendingPage.jsx";
+import ComplaintPendingPage from "./pages/ComplaintPendingPage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (

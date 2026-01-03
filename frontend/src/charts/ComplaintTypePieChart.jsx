@@ -6,12 +6,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const COLORS = [
-  "#f5e20bff",
-  "#d50505ff",
-  "#f59e42",
-  "#f472b6",
-];
+const COLORS = ["#f5e20bff", "#d50505ff", "#f59e42", "#f472b6"];
 
 const ComplaintTypePieChart = ({ data }) => {
   // expects: [{ type, count }, ...]
@@ -110,7 +105,12 @@ const ComplaintTypePieChart = ({ data }) => {
                 border: "1px solid #ccc",
               }}
             ></span>
-            <span className="text-xs font-medium text-gray-700" style={{ minWidth: 60 }}>{label}</span>
+            <span
+              className="text-xs font-medium text-gray-700"
+              style={{ minWidth: 60 }}
+            >
+              {label}
+            </span>
           </div>
         ))}
       </div>

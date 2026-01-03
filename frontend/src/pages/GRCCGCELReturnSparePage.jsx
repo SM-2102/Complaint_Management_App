@@ -34,16 +34,27 @@ const columns = [
 ];
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
-const QtyInput = React.memo(function QtyInput({
-  value,
-  disabled,
-  onCommit,
-}) {
+const QtyInput = React.memo(function QtyInput({ value, disabled, onCommit, hasError }) {
   const [local, setLocal] = useState(value ?? "");
-
   useEffect(() => {
-    setLocal(value ?? "");
+    // Only update local if value changed from parent (not while editing)
+    if (String(value ?? "") !== String(local)) {
+      setLocal(value ?? "");
+    }
+    // eslint-disable-next-line
   }, [value]);
+
+  const handleBlur = () => {
+    if (String(local) !== String(value ?? "")) {
+      onCommit(local === "" ? "" : Number(local));
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.target.blur();
+    }
+  };
 
   return (
     <input
@@ -51,13 +62,12 @@ const QtyInput = React.memo(function QtyInput({
       value={local}
       disabled={disabled}
       onChange={(e) => setLocal(e.target.value)}
-      onBlur={() =>
-        onCommit(local === "" ? "" : Number(local))
-      }
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
       style={{
         width: 70,
         textAlign: "center",
-        border: "1px solid #7c9ccbff",
+        border: hasError ? "1px solid #fca5a5" : "1px solid #7c9ccbff",
         borderRadius: 6,
         padding: "4px 6px",
         background: disabled ? "#e5e7eb" : "#f8fafc",
@@ -69,6 +79,73 @@ const QtyInput = React.memo(function QtyInput({
   );
 });
 
+const Row = React.memo(function Row({
+  row,
+  rowIndex,
+  columns,
+  onToggleInvoice,
+  onCommitQty,
+  qtyErrors,
+}) {
+  const hasQtyError = !!(qtyErrors && qtyErrors[rowIndex]);
+  return (
+    <TableRow
+      key={`${row.spare_code}-${row.grc_number}`}
+      sx={{
+        background: rowIndex % 2 === 0 ? "#f4f8ff" : "#fff",
+        height: 38,
+      }}
+    >
+      {columns.map((col) => (
+        <TableCell
+          key={col.key}
+          sx={{
+            fontWeight: 500,
+            textAlign: "center",
+            py: 0.5,
+            ...(col.label.toLowerCase().includes("date") && {
+              whiteSpace: "nowrap",
+            }),
+          }}
+        >
+          {col.key === "invoice" ? (
+            <button
+              type="button"
+              style={{
+                borderRadius: "6px",
+                border: "none",
+                background: row.invoice === "Y" ? "#e3fcec" : "#ffe3e3",
+                color: row.invoice === "Y" ? "#388e3c" : "#d32f2f",
+                fontWeight: 700,
+                fontSize: "15px",
+                padding: "4px 12px",
+                cursor: "pointer",
+                boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
+                transition: "background 0.2s, color 0.2s",
+                width: 60,
+              }}
+              aria-label="Toggle Invoice"
+              onClick={() => onToggleInvoice(rowIndex)}
+            >
+              {row.invoice === "Y" ? "Yes" : "No"}
+            </button>
+          ) : ["good_qty", "defective_qty"].includes(col.key) ? (
+            <QtyInput
+              value={row[col.key]}
+              disabled={row.invoice === "Y"}
+              onCommit={(val) => onCommitQty(rowIndex, col.key, val)}
+              hasError={hasQtyError}
+            />
+          ) : row[col.key] !== null && row[col.key] !== undefined ? (
+            row[col.key]
+          ) : (
+            "-"
+          )}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+});
 
 const reportTypeOptions = ["All", "Good", "Defective"];
 const actionTypeOptions = ["Save as Draft", "Report", "Finalize"];
@@ -93,10 +170,55 @@ const GRCCGCELReturnSparePage = () => {
   const tableRef = useRef();
   const [updating, setUpdating] = useState(false);
   const [form, setForm] = useState(initialForm);
+  const [qtyErrors, setQtyErrors] = useState({});
   // Track if report_type should be enabled
   const isReportTypeEnabled = form.action_type === "Report";
 
   const [errs, errs_label] = validateReturn(form);
+
+  const handleToggleInvoice = React.useCallback((index) => {
+    setData((prev) =>
+      prev.map((r, i) => {
+        if (i !== index) return r;
+        const newInvoice = r.invoice === "Y" ? "N" : "Y";
+        if (newInvoice === "Y") {
+          return {
+            ...r,
+            invoice: newInvoice,
+            good_qty: null,
+            defective_qty: null,
+          };
+        }
+        return { ...r, invoice: newInvoice };
+      }),
+    );
+    // Clear any qty error on toggling invoice
+    setQtyErrors((errs) => {
+      const next = { ...errs };
+      delete next[index];
+      return next;
+    });
+  }, []);
+
+  const handleCommitQty = React.useCallback((index, field, val) => {
+    setData((prev) => {
+      if (prev[index][field] === val) return prev;
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: val };
+      // Live-check for quantity mismatch on this row
+      const good = Number(updated[index].good_qty) || 0;
+      const defective = Number(updated[index].defective_qty) || 0;
+      const pending = Number(updated[index].actual_pending_qty) || 0;
+      const isError = good + defective > pending;
+      setQtyErrors((errs) => {
+        const next = { ...errs };
+        if (isError) next[index] = true;
+        else delete next[index];
+        return next;
+      });
+      return updated;
+    });
+  }, []);
 
   // Handle Execute Action button click
   const handleExecuteAction = async (e) => {
@@ -111,10 +233,17 @@ const GRCCGCELReturnSparePage = () => {
       setShowToast(true);
       return;
     }
-    const { valid, message } = validateReturnQuantities(data);
+    setQtyErrors({});
+    const { valid, message, failingIndices } = validateReturnQuantities(data);
     if (!valid) {
       setError({ message, type: "warning" });
       setShowToast(true);
+      // Highlight all failing rows
+      const errMap = (failingIndices || []).reduce((acc, i) => {
+        acc[i] = true;
+        return acc;
+      }, {});
+      setQtyErrors(errMap);
       return;
     }
 
@@ -258,14 +387,16 @@ const GRCCGCELReturnSparePage = () => {
         if (mounted) {
           // Normalize invoice value to 'N' if not 'Y' or 'N'
           const normalized = Array.isArray(result)
-            ? result.map(row => ({
+            ? result.map((row) => ({
                 ...row,
-                invoice: row.invoice && ["Y", "N"].includes(row.invoice.trim())
-                  ? row.invoice.trim()
-                  : "N"
+                invoice:
+                  row.invoice && ["Y", "N"].includes(row.invoice.trim())
+                    ? row.invoice.trim()
+                    : "N",
               }))
             : [];
           setData(normalized);
+          setQtyErrors({});
           if (normalized.length > 0) {
             setForm((prev) => ({
               ...prev,
@@ -533,89 +664,15 @@ const GRCCGCELReturnSparePage = () => {
                 </TableRow>
               ) : (
                 data.map((row, idx) => (
-                  <TableRow
+                  <Row
                     key={`${row.spare_code}-${row.grc_number}`}
-                    sx={{
-                      background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
-                      height: 38,
-                    }}
-                  >
-                    {columns.map((col) => (
-                      <TableCell
-                        key={col.key}
-                        sx={{
-                          fontWeight: 500,
-                          textAlign: "center",
-                          py: 0.5,
-                          ...(col.label.toLowerCase().includes("date") && {
-                            whiteSpace: "nowrap",
-                          }),
-                        }}
-                      >
-                        {/* Editable columns */}
-                        {col.key === "invoice" ? (
-                          <button
-                            type="button"
-                            style={{
-                              borderRadius: "6px",
-                              border: "none",
-                              background:
-                                row.invoice === "Y" ? "#e3fcec" : "#ffe3e3",
-                              color:
-                                row.invoice === "Y" ? "#388e3c" : "#d32f2f",
-                              fontWeight: 700,
-                              fontSize: "15px",
-                              padding: "4px 12px",
-                              cursor: "pointer",
-                              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
-                              transition: "background 0.2s, color 0.2s",
-                              width: 60,
-                            }}
-                            aria-label="Toggle Invoice"
-                            onClick={() => {
-                              setData((prev) =>
-                                prev.map((r, i) => {
-                                  if (i !== idx) return r;
-                                  const newInvoice =
-                                    r.invoice === "Y" ? "N" : "Y";
-                                  // If disabling, set good_qty and defective_qty to null
-                                  if (newInvoice === "Y") {
-                                    return {
-                                      ...r,
-                                      invoice: newInvoice,
-                                      good_qty: null,
-                                      defective_qty: null,
-                                    };
-                                  }
-                                  return { ...r, invoice: newInvoice };
-                                }),
-                              );
-                            }}
-                          >
-                            {row.invoice === "Y" ? "Yes" : "No"}
-                          </button>
-                        ) : ["good_qty", "defective_qty"].includes(col.key) ? (
-                          <QtyInput
-  value={row[col.key]}
-  disabled={row.invoice === "Y"}
-  onCommit={(val) => {
-    setData((prev) =>
-      prev.map((r, i) =>
-        i === idx ? { ...r, [col.key]: val } : r
-      )
-    );
-  }}
-/>
-
-                        ) : row[col.key] !== null &&
-                          row[col.key] !== undefined ? (
-                          row[col.key]
-                        ) : (
-                          "-"
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+                    row={row}
+                    rowIndex={idx}
+                    columns={columns}
+                    onToggleInvoice={handleToggleInvoice}
+                    onCommitQty={handleCommitQty}
+                    qtyErrors={qtyErrors}
+                  />
                 ))
               )}
             </TableBody>

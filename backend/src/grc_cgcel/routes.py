@@ -226,6 +226,7 @@ GRC CGCEL enquiry using query parameters.
 )
 async def enquiry_grc_cgcel(
     division: Optional[str] = None,
+    spare_code: Optional[str] = None,
     from_grc_date: Optional[date] = None,
     to_grc_date: Optional[date] = None,
     grc_number: Optional[str] = None,
@@ -240,6 +241,7 @@ async def enquiry_grc_cgcel(
         result, total_records = await grc_cgcel_service.enquiry_grc_cgcel(
             session,
             division,
+            spare_code,
             from_grc_date,
             to_grc_date,
             grc_number,

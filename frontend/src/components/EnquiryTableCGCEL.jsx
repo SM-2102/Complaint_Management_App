@@ -19,7 +19,6 @@ import {
  * @param {integer} total_records - total records count.
  */
 
-
 import { useState } from "react";
 
 const EnquiryTableCGCEL = ({
@@ -180,8 +179,17 @@ const EnquiryTableCGCEL = ({
               overflowY: "auto",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-              <span style={{ fontWeight: 700, fontSize: 20, color: "#1976d2" }}>Export Data</span>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 18,
+              }}
+            >
+              <span style={{ fontWeight: 700, fontSize: 20, color: "#1976d2" }}>
+                Export Data
+              </span>
               <button
                 onClick={() => setShowExportModal(false)}
                 style={{
@@ -198,7 +206,13 @@ const EnquiryTableCGCEL = ({
                 Close
               </button>
             </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 8 }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                marginBottom: 8,
+              }}
+            >
               <thead>
                 <tr>
                   {exportColumns.map((col) => (
@@ -222,7 +236,14 @@ const EnquiryTableCGCEL = ({
               <tbody>
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={exportColumns.length} style={{ textAlign: "center", padding: 12, color: "#888" }}>
+                    <td
+                      colSpan={exportColumns.length}
+                      style={{
+                        textAlign: "center",
+                        padding: 12,
+                        color: "#888",
+                      }}
+                    >
                       No data to export
                     </td>
                   </tr>
@@ -239,7 +260,9 @@ const EnquiryTableCGCEL = ({
                             fontSize: 14,
                           }}
                         >
-                          {row[col.key] !== null && row[col.key] !== undefined ? row[col.key] : "-"}
+                          {row[col.key] !== null && row[col.key] !== undefined
+                            ? row[col.key]
+                            : "-"}
                         </td>
                       ))}
                     </tr>
