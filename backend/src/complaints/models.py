@@ -22,7 +22,7 @@ class Complaint(SQLModel, table=True):
     complaint_priority: str = Field(sa_column=Column(pg.VARCHAR(15), nullable=False))
 
     # Action details
-    action_head: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=False))
+    action_head: str = Field(sa_column=Column(pg.VARCHAR(40), ForeignKey("action.action_head"), nullable=False))
     action_by: str = Field(
         sa_column=Column(
             pg.VARCHAR(30),
@@ -40,16 +40,16 @@ class Complaint(SQLModel, table=True):
 
     # Customer details
     customer_type: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=False))
-    dealer_code: str = Field(
+    customer_code: str = Field(
         sa_column=Column(pg.VARCHAR(5), nullable=True)
     )
     customer_name: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     customer_address1: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     customer_address2: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     customer_city: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    customer_pincode: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    customer_contact1: int = Field(sa_column=Column(pg.BIGINT, nullable=True))
-    customer_contact2: int = Field(sa_column=Column(pg.BIGINT, nullable=True))
+    customer_pincode: str = Field(sa_column=Column(pg.VARCHAR(6), nullable=True))
+    customer_contact1: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=True))
+    customer_contact2: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=True))
 
     # Product details
     product_division: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=False))
@@ -63,29 +63,8 @@ class Complaint(SQLModel, table=True):
     # Spare details (up to 6)
     spare_pending: str = Field(sa_column=Column(pg.CHAR(1), nullable=False))
 
-    spare1: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    qty1: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    indent_date1: date = Field(sa_column=Column(pg.DATE, nullable=True))
-
-    spare2: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    qty2: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    indent_date2: date = Field(sa_column=Column(pg.DATE, nullable=True))
-
-    spare3: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    qty3: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    indent_date3: date = Field(sa_column=Column(pg.DATE, nullable=True))
-
-    spare4: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    qty4: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    indent_date4: date = Field(sa_column=Column(pg.DATE, nullable=True))
-
-    spare5: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    qty5: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    indent_date5: date = Field(sa_column=Column(pg.DATE, nullable=True))
-
-    spare6: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    qty6: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
-    indent_date6: date = Field(sa_column=Column(pg.DATE, nullable=True))
+    spare: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
+    indent_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
 
     # Status & replacement
     current_status: str = Field(sa_column=Column(pg.VARCHAR(50), nullable=False))
@@ -126,3 +105,9 @@ class Complaint(SQLModel, table=True):
 
     def __repr__(self):
         return f"<Complaint {self.complaint_number}>"
+
+
+class ActionTable(SQLModel, table=True):
+    __tablename__ = "action"
+
+    action_head: str = Field(sa_column=Column(pg.VARCHAR(40), primary_key=True))
