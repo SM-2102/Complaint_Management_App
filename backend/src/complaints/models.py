@@ -99,6 +99,7 @@ class Complaint(SQLModel, table=True):
     payment_details: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     amount_sc: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     amount_spare: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
+    appoint_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
 
     # Final status
     final_status: str = Field(sa_column=Column(pg.CHAR(1), nullable=False, default='N'))
