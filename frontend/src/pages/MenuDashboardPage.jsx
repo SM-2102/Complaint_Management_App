@@ -39,20 +39,26 @@ const mergeDivisionData = (...arrays) => {
 };
 
 const getFilteredCards = (company) =>
-  menuConfig
-    .map(({ actions, ...rest }) => {
-      const filteredActions = filterActionsByCompany(actions, company);
-      return filteredActions.length > 0
-        ? {
-            ...rest,
-            actions: filteredActions,
-            dashboardActions: filteredActions.filter(
-              (a) => a.showInDashboard !== false,
-            ),
-          }
-        : null;
-    })
-    .filter(Boolean);
+  menuConfig.map(({ key, actions = [], ...rest }) => {
+    let filteredActions;
+
+    if (company === "ALL" && ["stock", "grc"].includes(key)) {
+      filteredActions = actions.filter((a) => a.company === "ALL");
+    } else {
+      filteredActions = filterActionsByCompany(actions, company);
+    }
+
+    return {
+      key,
+      ...rest,
+      actions: filteredActions, // may be empty — that's OK
+      dashboardActions: filteredActions.filter(
+        (a) => a.showInDashboard !== false
+      ),
+    };
+  });
+
+
 
 const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
   const { data, loading, error, refetch } = useDashboardData();

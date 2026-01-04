@@ -30,7 +30,11 @@ import StockCGPISLIndentEnquiryPage from "./pages/StockCGPISLIndentEnquiryPage.j
 import GRCCGCELReceiveSparePage from "./pages/GRCCGCELReceiveSparePage.jsx";
 import GRCCGCELReturnSparePage from "./pages/GRCCGCELReturnSparePage.jsx";
 import GRCCGCELEnquiryPage from "./pages/GRCCGCELEnquiryPage.jsx";
+import GRCCGPISLReceiveSparePage from "./pages/GRCCGPISLReceiveSparePage.jsx";
+import GRCCGPISLReturnSparePage from "./pages/GRCCGPISLReturnSparePage.jsx";
+import GRCCGPISLEnquiryPage from "./pages/GRCCGPISLEnquiryPage.jsx";
 import ComplaintPendingPage from "./pages/ComplaintPendingPage.jsx";
+import PageNotAvailable from "./pages/PageNotAvailable.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -202,14 +206,14 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
               </PrivateRoute>
             }
           />
-          {/* <Route
+          <Route
             path="/IndentDetailsCGPISL"
             element={
               <PrivateRoute>
                 <StockCGPISLIndentEnquiryPage />
               </PrivateRoute>
             }
-          /> */}
+          />
           <Route
             path="/ReceiveCGCELGRCRecords"
             element={
@@ -235,6 +239,30 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             }
           />
           <Route
+            path="/ReceiveCGPISLGRCRecords"
+            element={
+              <PrivateRoute>
+                <GRCCGPISLReceiveSparePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/GRCCGPISLSpareReturn"
+            element={
+              <PrivateRoute>
+                <GRCCGPISLReturnSparePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/GRCCGPISLEnquiry"
+            element={
+              <PrivateRoute>
+                <GRCCGPISLEnquiryPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/ComplaintEnquiry"
             element={
               <PrivateRoute>
@@ -242,6 +270,38 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
                   selectedCompany={selectedCompany}
                   setSelectedCompany={setSelectedCompany}
                 />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/AddCGCELInvoiceRecord"
+            element={
+              <PrivateRoute>
+                <PageNotAvailable />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/AddCGPISLInvoiceRecord"
+            element={
+              <PrivateRoute>
+                <PageNotAvailable />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/PrintCGCELInvoiceRecord"
+            element={
+              <PrivateRoute>
+                <PageNotAvailable />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/PrintCGPISLInvoiceRecord"
+            element={
+              <PrivateRoute>
+                <PageNotAvailable />
               </PrivateRoute>
             }
           />

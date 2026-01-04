@@ -16,8 +16,8 @@ import { fetchNextCGCELGRCChallanCode } from "../services/grcCGCELNextChallanCod
 import { grcCGCELListByDivision } from "../services/grcCGCELReturnListByDivisionService";
 import { printGRCReturn } from "../services/grcCGCELReturnPrintService";
 import { updateCGCELReturnFinalize } from "../services/grcCGCELReturnFinalizeService";
-import { validateReturn } from "../utils/grcCGCELReturnValidation";
-import { validateReturnQuantities } from "../utils/grcCGCELQuantityValidation";
+import { validateReturn } from "../utils/grcReturnValidation";
+import { validateReturnQuantities } from "../utils/grcQuantityValidation";
 
 const columns = [
   { key: "grc_number", label: "GRC Number" },

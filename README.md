@@ -24,10 +24,10 @@
 - [x] **Notification**
 - [x] **Holiday**
 - [ ] **ComplaintNumber**
-- [x] **StockCGPISL**
-- [x] **StockCGCEL**
-- [ ] **GRCCGPISL**
-- [ ] **GRCCGCEL**
+- [ ] **StockCGPISL**
+- [ ] **StockCGCEL**
+- [x] **GRCCGPISL**
+- [x] **GRCCGCEL**
 - [ ] **Dealer**
 
 ---
@@ -112,15 +112,15 @@
 ### GRC CGPISL Module
 
 - [x] **GRCCGPISLUploadPage** - Upload GRC file .xlxs [ADMIN]
-- [ ] **GRCCGPISLReceivePage** - GRC Receive Material
-- [ ] **GRCCGPISLReturnPage** - GRC Return Material
-- [ ] **GRCCGPISLEnquiryPage** - GRC Enquiry and Print
-- [ ] **GRCCGPISLReportPage** - GRC Print
+- [x] **GRCCGPISLReceivePage** - GRC Receive Material
+- [x] **GRCCGPISLReturnPage** - GRC Return Material
+- [x] **GRCCGPISLEnquiryPage** - GRC Enquiry and Print
+- [x] **GRCCGPISLReportPage** - GRC Print
 
 ### Dealer Module
 ### Master Module
-- [x] **MasterCreatePage** - Create Master record
-- [x] **MasterUpdatePage** - Update Master record
+- [ ] **MasterCreatePage** - Create Master record
+- [ ] **MasterUpdatePage** - Update Master record
 
 ---
 
@@ -198,15 +198,25 @@
 - [x] **/grc_cgcel/enquiry/{params}**
 
 ### GRCCGPISL Module
+- [x] **/grc_cgpisl/upload** - [ADMIN]
+- [x] **/grc_cgpisl/not_received_grc**
+- [x] **/grc_cgpisl/not_received_by_grc_number/{grc_number}**
+- [x] **/grc_cgpisl/update_receive**
+- [x] **/grc_cgpisl/grc_return_by_division/{division}**
+- [x] **/grc_cgpisl/next_challan_code**
+- [x] **/grc_cgpisl/save_grc_return**
+- [x] **/grc_cgpisl/print_report/{report_type}**
+- [x] **/grc_cgpisl/finalize_grc_return**
+- [x] **/grc_cgpisl/enquiry/{params}**
 
 ### Master Module
-- [x] **/master/create**
-- [x] **/master/next_code**
-- [x] **/master/list_names** 
-- [x] **/master/by_code** 
-- [x] **/master/by_name**
-- [x] **/master/update{code}**
-- [x] **/master/fetch_address**
+- [ ] **/master/create**
+- [ ] **/master/next_code**
+- [ ] **/master/list_names** 
+- [ ] **/master/by_code** 
+- [ ] **/master/by_name**
+- [ ] **/master/update{code}**
+- [ ] **/master/fetch_address**
 
 ---
 

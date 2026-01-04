@@ -143,23 +143,23 @@ const StockDivisionDonutChart = ({ data, meta }) => {
     letterSpacing: "1px",
   };
   const labelStyle = {
-    fontSize: "0.7rem",
+    fontSize: "0.75rem",
     fontWeight: 400,
     opacity: 0.85,
     letterSpacing: "0.5px",
   };
 
   return (
-    <div className=" rounded-lg flex flex-row items-center w-full min-w-0 overflow-hidden max-h-full">
+    <div className=" rounded-lg flex flex-row items-center w-full min-w-0 overflow-hidden max-h-full mt-3 ">
       {/* Donut Chart */}
       <div
         ref={chartRef}
         className="relative flex items-center justify-center overflow-hidden min-w-0 min-h-0"
         style={{
-          width: 260,
-          height: 260,
-          maxWidth: 260,
-          maxHeight: 260,
+          width: 246,
+          height: 246,
+          maxWidth: 246,
+          maxHeight: 246,
         }}
       >
         <Doughnut
@@ -180,7 +180,7 @@ const StockDivisionDonutChart = ({ data, meta }) => {
             </span>
             {/* Subtext */}
             <span className="text-sm md:text-base font-medium text-gray-600 tracking-wider">
-              Items
+              Spare Records
             </span>
           </div>
         )}
@@ -195,7 +195,6 @@ const StockDivisionDonutChart = ({ data, meta }) => {
           gap: "0.8rem",
           marginLeft: "1rem",
           minWidth: 150,
-          marginTop: 8,
         }}
       >
         <div style={{ ...cardStyle, minWidth: 150, marginBottom: 0 }}>

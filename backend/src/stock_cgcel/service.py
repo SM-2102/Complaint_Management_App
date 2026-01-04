@@ -101,13 +101,14 @@ class StockCGCELService:
 
             division = row.get("division")
             spare_description = row.get("spare_description")
+            hsn_code = row.get("hsn_code")
 
             # Enforce mandatory fields ONLY for inserts
             if is_new:
-                if not division or not spare_description:
+                if not division or not spare_description or not hsn_code:
                     return {
                         "message": f"Missing mandatory fields for {spare_code}",
-                        "resolution": "Division and Description are required",
+                        "resolution": "Division, Description and HSN Code",
                         "type": "warning",
                     }
 
@@ -117,6 +118,7 @@ class StockCGCELService:
                 "spare_description": (
                     spare_description.upper() if spare_description else None
                 ),
+                "hsn_code": hsn_code.upper() if hsn_code else None,
             }
 
             for field in int_fields:
@@ -176,6 +178,7 @@ class StockCGCELService:
                 # Strip master fields for UPDATE
                 data.pop("division", None)
                 data.pop("spare_description", None)
+                data.pop("hsn_code", None)
                 to_update[r.spare_code] = data
 
         inserted = 0
@@ -201,7 +204,7 @@ class StockCGCELService:
                 inserted = len(to_insert)
 
             if to_update:
-                update_fields = present_fields - {"division", "spare_description"}
+                update_fields = present_fields - {"division", "spare_description", "hsn_code"}
 
                 values_dict = {}
                 for field in update_fields:

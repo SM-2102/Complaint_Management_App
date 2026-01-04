@@ -85,6 +85,26 @@ export const menuConfig = [
         path: "/UpdateCGCELStock",
         company: "CGCEL",
       },
+      {
+        label: "Create Invoice Record",
+        path: "/AddCGCELInvoiceRecord",
+        company: "CGCEL",
+      },
+      {
+        label: "Create Invoice Record",
+        path: "/AddCGPISLInvoiceRecord",
+        company: "CGPISL",
+      },
+      {
+        label: "Print Invoice Record",
+        path: "/PrintCGCELInvoiceRecord",
+        company: "CGCEL",
+      },
+      {
+        label: "Print Invoice Record",
+        path: "/PrintCGPISLInvoiceRecord",
+        company: "CGPISL",
+      },
     ],
   },
   {

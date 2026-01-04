@@ -57,8 +57,16 @@ const API_ENDPOINTS = {
   GRC_CGCEL_REPORT_PRINT: `${BASE_API_URL}grc_cgcel/print_report`,
   GRC_CGCEL_ENQUIRY: `${BASE_API_URL}grc_cgcel/enquiry`,
 
-
   GRC_CGPISL_UPLOAD: `${BASE_API_URL}grc_cgpisl/upload`,
+  GRC_CGPISL_NOT_RECEIVED_NUMBERS: `${BASE_API_URL}grc_cgpisl/not_received_grc`,
+  GRC_CGPISL_NOT_RECEIVED_BY_GRC_NUMBER: `${BASE_API_URL}grc_cgpisl/not_received_by_grc_number`,
+  GRC_CGPISL_UPDATE_RECEIVE: `${BASE_API_URL}grc_cgpisl/update_receive`,
+  GRC_CGPISL_NEXT_CHALLAN_CODE: `${BASE_API_URL}grc_cgpisl/next_challan_code`,
+  GRC_CGPISL_LIST_BY_DIVISION: `${BASE_API_URL}grc_cgpisl/grc_return_by_division`, // append division param
+  GRC_CGPISL_SAVE_RETURN: `${BASE_API_URL}grc_cgpisl/save_grc_return`,
+  GRC_CGPISL_FINALIZE_RETURN: `${BASE_API_URL}grc_cgpisl/finalize_grc_return`,
+  GRC_CGPISL_REPORT_PRINT: `${BASE_API_URL}grc_cgpisl/print_report`,
+  GRC_CGPISL_ENQUIRY: `${BASE_API_URL}grc_cgpisl/enquiry`,
 
   COMPLAINT_UPLOAD: `${BASE_API_URL}complaint/upload`,
 };

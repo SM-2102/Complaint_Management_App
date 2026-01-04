@@ -102,12 +102,12 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
     }
   });
 
-  // Add 'Dealer' menu with two submenus
+  // Add 'Customer Entry' menu with two submenus
   menuItems.push({
-    title: "Dealer",
+    title: "Customer Entry",
     submenus: [
-      { title: "Add Dealer Record", path: "/DealerCreate" },
-      { title: "Update Dealer Record", path: "/DealerUpdate" },
+      { title: "Add Customer Record", path: "/CustomerCreate" },
+      { title: "Update Customer Record", path: "/CustomerUpdate" },
     ],
     isDirect: false,
     disabled: false,

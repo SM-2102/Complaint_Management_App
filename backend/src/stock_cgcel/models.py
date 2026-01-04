@@ -22,6 +22,7 @@ class StockCGCEL(SQLModel, table=True):
     order_number: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
     order_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
     remark: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
+    hsn_code: str = Field(sa_column=Column(pg.VARCHAR(8), nullable=False))
 
     def __repr__(self):
         return f"<SpareCGCEL {self.spare_code}>"

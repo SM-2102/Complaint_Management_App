@@ -14,6 +14,7 @@ class StockCGCELSchema(BaseModel):
     own_qty: Optional[int] = None
     alp: Optional[float] = None
     indent_qty: Optional[int] = None
+    hsn_code: str = Field(..., max_length=8)
 
 
 class StockCGCELEnquiry(BaseModel):
