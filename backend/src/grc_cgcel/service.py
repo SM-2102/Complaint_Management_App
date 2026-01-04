@@ -623,23 +623,44 @@ class GRCCGCELService:
         total_records = None
         if return_total:
             model = GRCCGCEL if grc_status == "N" else GRCCGCELReturnHistory
+
             if model == GRCCGCELReturnHistory:
+                # Simple row count
                 count_query = select(func.count(model.id))
+                count_query = self._apply_cgcel_filters(
+                    count_query,
+                    division,
+                    spare_code,
+                    from_grc_date,
+                    to_grc_date,
+                    grc_number,
+                    challan_number,
+                    model,
+                )
             else:
-                subq = select(model.spare_code, model.grc_number).distinct().subquery()
+                # IMPORTANT: apply filters FIRST, then distinct
+                base_query = select(
+                    model.spare_code,
+                    model.grc_number
+                )
+
+                base_query = self._apply_cgcel_filters(
+                    base_query,
+                    division,
+                    spare_code,
+                    from_grc_date,
+                    to_grc_date,
+                    grc_number,
+                    challan_number,
+                    model,
+                )
+
+                subq = base_query.distinct().subquery()
                 count_query = select(func.count()).select_from(subq)
-            count_query = self._apply_cgcel_filters(
-                count_query,
-                division,
-                spare_code,
-                from_grc_date,
-                to_grc_date,
-                grc_number,
-                challan_number,
-                model,
-            )
+
             total_result = await session.execute(count_query)
             total_records = total_result.scalar() or 0
+
         model = GRCCGCEL if grc_status == "N" else GRCCGCELReturnHistory
         statement = statement.order_by(model.grc_number)
         statement = statement.limit(limit).offset(offset)
