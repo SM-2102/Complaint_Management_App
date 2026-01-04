@@ -12,6 +12,7 @@ from menu.routes import menu_router
 from middleware.middleware import register_middleware
 from notification.routes import notification_router
 from stock_cgcel.routes import stock_cgcel_router
+from complaints.routes import complaints_router
 
 version = "v1"
 
@@ -67,3 +68,4 @@ app.include_router(stock_cgcel_router, prefix="/stock_cgcel", tags=["Stock CGCEL
 app.include_router(stock_cgpisl_router, prefix="/stock_cgpisl", tags=["Stock CGPISL"])
 app.include_router(grc_cgcel_router, prefix="/grc_cgcel", tags=["GRC CGCEL"])
 app.include_router(grc_cgpisl_router, prefix="/grc_cgpisl", tags=["GRC CGPISL"])
+app.include_router(complaints_router, prefix="/complaints", tags=["Complaints"])

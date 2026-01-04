@@ -68,7 +68,7 @@ const API_ENDPOINTS = {
   GRC_CGPISL_REPORT_PRINT: `${BASE_API_URL}grc_cgpisl/print_report`,
   GRC_CGPISL_ENQUIRY: `${BASE_API_URL}grc_cgpisl/enquiry`,
 
-  COMPLAINT_UPLOAD: `${BASE_API_URL}complaint/upload`,
+  COMPLAINT_UPLOAD: `${BASE_API_URL}complaints/upload`,
 };
 
 export default API_ENDPOINTS;

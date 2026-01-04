@@ -43,7 +43,6 @@ class ComplaintsService:
             # Normalize CSV headers to snake_case-like keys
             row = {}
             for k, v in raw_row.items():
-                key = (k or "").strip().lower().replace(" ", "_")
                 val = v.strip() if v else ""
                 row[key] = val if val != "" else None
 

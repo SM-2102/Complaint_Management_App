@@ -35,6 +35,7 @@ import GRCCGPISLReturnSparePage from "./pages/GRCCGPISLReturnSparePage.jsx";
 import GRCCGPISLEnquiryPage from "./pages/GRCCGPISLEnquiryPage.jsx";
 import ComplaintPendingPage from "./pages/ComplaintPendingPage.jsx";
 import PageNotAvailable from "./pages/PageNotAvailable.jsx";
+import ComplaintUploadPage from "./pages/ComplaintUploadPage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -302,6 +303,14 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             element={
               <PrivateRoute>
                 <PageNotAvailable />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/UploadComplaints"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <ComplaintUploadPage />
               </PrivateRoute>
             }
           />
