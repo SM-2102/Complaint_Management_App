@@ -641,7 +641,7 @@ class GRCCGCELService:
             total_result = await session.execute(count_query)
             total_records = total_result.scalar() or 0
         model = GRCCGCEL if grc_status == "N" else GRCCGCELReturnHistory
-        statement = statement.order_by(model.spare_code)
+        statement = statement.order_by(model.grc_number)
         statement = statement.limit(limit).offset(offset)
 
         result = await session.execute(statement)
