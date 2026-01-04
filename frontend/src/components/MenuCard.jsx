@@ -204,6 +204,7 @@ const MenuCard = ({
               alignItems: "center",
               width: "100%",
               textAlign: "left",
+              marginLeft:10,
             }}
             title={title}
           >

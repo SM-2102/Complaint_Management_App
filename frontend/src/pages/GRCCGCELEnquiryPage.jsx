@@ -23,6 +23,7 @@ const columns = [
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
 
+
 const Filter = ({
   open = false,
   onToggle,
@@ -48,6 +49,11 @@ const Filter = ({
     const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
       useState(false);
     const isTypingSpareCodeRef = React.useRef(false);
+    useEffect(() => {
+  if (GRCStatus === "N") {
+    setChallanNumber("");
+  }
+}, [GRCStatus]);
     useEffect(() => {
         if (!isTypingSpareCodeRef.current) {
           setShowSpareCodeSuggestions(false);
@@ -245,22 +251,29 @@ const Filter = ({
               Challan No.
             </label>
             <input
-                id="challanNumber"
-                name="challanNumber"
-                value={challanNumber}
-                type="text"
-                onChange={(e) => setChallanNumber(e.target.value)}
-                style={{
-                  padding: "4px 8px",
-                  border: "1px solid #d1d5db",
-                  borderRadius: 6,
-                  fontSize: 13,
-                  background: "#f7f9fc",
-                  outline: "none",
-                  boxShadow: "0 1px 2px rgba(25, 118, 210, 0.04)",
-                  width: "100%",
-                }}
-              />
+  id="challanNumber"
+  name="challanNumber"
+  value={challanNumber}
+  type="text"
+  disabled={GRCStatus === "N"}
+  onChange={(e) => setChallanNumber(e.target.value)}
+  style={{
+    padding: "4px 8px",
+    border: "1px solid #d1d5db",
+    borderRadius: 6,
+    fontSize: 13,
+    background: GRCStatus === "N" ? "#e5e7eb" : "#f7f9fc",
+    color: GRCStatus === "N" ? "#6b7280" : "#111827",
+    cursor: GRCStatus === "N" ? "not-allowed" : "text",
+    outline: "none",
+    boxShadow:
+      GRCStatus === "N"
+        ? "none"
+        : "0 1px 2px rgba(25, 118, 210, 0.04)",
+    width: "100%",
+  }}
+/>
+
           </div>
           <div style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
              <label
@@ -443,7 +456,7 @@ const GRCCGCELEnquiryPage = () => {
   const [GRCNumber, setGRCNumber] = useState("");
   const [challanNumber, setChallanNumber] = useState("");
   const [spareCodes, setSpareCodes] = useState([]);
-  const [GRCStatus, setGRCStatus] = useState("");
+  const [GRCStatus, setGRCStatus] = useState("N");
 
   // Pagination states
   const [page, setPage] = useState(1);

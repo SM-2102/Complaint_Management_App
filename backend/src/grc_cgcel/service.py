@@ -490,6 +490,11 @@ class GRCCGCELService:
                         draw_centered(can, item.get("spare_code"), 135, 240, y)
                         draw_centered(can, item.get("spare_description"), 240, 545, y)
                         draw_centered(can, item.get("good_qty") or 0, 545, 580, y)
+                    elif report_type == "Blank":
+                        draw_centered(can, item.get("grc_number"), 15, 80, y)
+                        draw_centered(can, item.get("grc_date"), 80, 135, y)
+                        draw_centered(can, item.get("spare_code"), 135, 240, y)
+                        draw_centered(can, item.get("spare_description"), 240, 467, y)
                     else:
                         draw_centered(can, item.get("grc_number"), 15, 80, y)
                         draw_centered(can, item.get("grc_date"), 80, 135, y)
@@ -501,7 +506,7 @@ class GRCCGCELService:
                         draw_centered(can, item.get("good_qty") or 0, 510, 545, y)
                         draw_centered(can, item.get("defective_qty") or 0, 545, 580, y)
                     y -= 19
-                    if y < 100:
+                    if y < 50:
                         break  # Avoid overflow for now
 
             # Draw only one block (single copy)
@@ -653,9 +658,15 @@ class GRCCGCELService:
             record['grc_pending_qty'] = getattr(row, 'grc_pending_qty', None)
             record['returning_qty'] = getattr(row, 'returning_qty', None)
             record['dispute_remark'] = getattr(row, 'dispute_remark', None)
-            record['challan_number'] = getattr(row, 'challan_number', None)
-            record['challan_date'] = format_date_ddmmyyyy(getattr(row, 'challan_date', None))
-            record['docket_number'] = getattr(row, 'docket_number', None)
+            if grc_status == "N":
+                # Enforce business rule: Pending GRC must not expose challan details
+                record['challan_number'] = None
+                record['challan_date'] = None
+                record['docket_number'] = None
+            else:
+                record['challan_number'] = getattr(row, 'challan_number', None)
+                record['challan_date'] = format_date_ddmmyyyy(getattr(row, 'challan_date', None))
+                record['docket_number'] = getattr(row, 'docket_number', None)
             records.append(GRCCGCELEnquiry(**record))
         if return_total:
             return records, total_records

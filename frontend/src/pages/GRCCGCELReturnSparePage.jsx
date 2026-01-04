@@ -147,13 +147,13 @@ const Row = React.memo(function Row({
   );
 });
 
-const reportTypeOptions = ["All", "Good", "Defective"];
+const reportTypeOptions = ["All", "Good", "Defective", "Blank"];
 const actionTypeOptions = ["Save as Draft", "Report", "Finalize"];
 
 const initialForm = {
   division: "",
   challan_number: "",
-  report_type: "ALL",
+  report_type: "All",
   action_type: "Save as Draft",
   sent_through: "",
   docket_number: "",
@@ -280,6 +280,10 @@ const GRCCGCELReturnSparePage = () => {
             .filter((row) => {
               const good = Number(row.good_qty) || 0;
               const defective = Number(row.defective_qty) || 0;
+
+              if (reportType === "Blank") {
+                return true;
+              }
 
               if (reportType === "All") {
                 return good + defective > 0;
