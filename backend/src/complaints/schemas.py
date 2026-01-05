@@ -28,6 +28,6 @@ class ComplaintsSchema(BaseModel):
     product_division: str = Field(..., max_length=20)
     current_status: str = Field(..., max_length=50)
     spare_pending: str
-    status: str
+    complaint_status: str
     created_by: str 
     final_status: str

@@ -49,7 +49,7 @@ class ComplaintsService:
 
             # Override / ensure defaults required by the user
             row["spare_pending"] = "N"
-            row["status"] = "FRESH"
+            row["complaint_status"] = "FRESH"
             row["created_by"] = "D Manna"
             row["final_status"] = "N"
 
