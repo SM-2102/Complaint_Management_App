@@ -80,6 +80,7 @@ const GRCCGPISLUploadPage = () => {
           message={error.message}
           resolution={error.resolution}
           type={error.type}
+          duration={12000}
           onClose={() => setShowToast(false)}
         />
       )}
