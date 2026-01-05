@@ -1,0 +1,9 @@
+id,username,password,role,phone_number,is_active
+6,Milan Majhi,$2b$12$RJnauzr4jJ1QVK01yH/1oO7UhQ51RLVHQEmyHQuHOS/dC3JPF4mKC,USER,8346002157,Y
+7,Palan Naskar,$2b$12$/tow4t/KDWcqEadwxt.uQOt0xjd5dPEA9IU5HpDt/YXfGCMErAp6S,USER,7501202584,Y
+8,Bhaskar Naskar,$2b$12$eo/fcFwxamaPJYZW1Io3F.dfipzQUu4JYdXlyJt7ZeJpPJY.ZhQfy,USER,9064039834,Y
+9,Bikash Naskar,$2b$12$cmvb38p.xlGjKFirXPOBMeZDzmuzAS4JUe2l7wxN5BxJkeQIp3JQe,USER,9932090422,Y
+10,Dipendu Adhikary,$2b$12$A32Pxcp1eIvTDfFkvtd5cOw8e2tvdVqBfezeW2ZUHnsBnAyN8xX/O,USER,9007003976,Y
+11,Sajal Mondal,$2b$12$J3LD4H20nA94ye7mr7az6.zloTxd18Clt59iVLlVC6Qm620BaeBo2,USER,8420050858,Y
+4,Sukanya Manna,$2b$12$DcWxMhYo6nNEdi3U5buf5eEe9OKzZBjN8ZXuxflaXHpyhjEI68k26,ADMIN,8420050848,Y
+5,D Manna,$2b$12$T4gEyLqCw4WvNKMj6WalJeZX65L1FqbONg2u8CAK9zjMQq0nmzEIi,ADMIN,8420050850,Y
