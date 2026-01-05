@@ -1,17 +1,17 @@
 from datetime import date, timedelta
 
-from sqlalchemy import case, func, literal, select, union_all
+from sqlalchemy import case, func, literal, select, union_all, and_, or_
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from grc_cgcel.models import GRCCGCEL
 from grc_cgpisl.models import GRCCGPISL
 from stock_cgcel.models import StockCGCEL
 from stock_cgpisl.models import StockCGPISL
+from complaints.models import Complaint
 
 
 class MenuService:
     @classmethod
-
     async def complaint_overview(
         cls,
         session: AsyncSession,
@@ -30,32 +30,157 @@ class MenuService:
             }
         }
         """
-        # Static data for demonstration
-        division_wise_status_cgcel = [
-            {"division": "FANS", "Y": 10, "N": 5},
-            {"division": "MOTOR", "Y": 7, "N": 3},
-            {"division": "PUMP", "Y": 12, "N": 2},
-        ]
-        division_wise_status_cgpisl = [
-            {"division": "FANS", "Y": 8, "N": 4},
-            {"division": "LIGHT", "Y": 6, "N": 1},
-        ]
-        complaint_type_cgcel = [
-            {"type": "SERVICE", "count": 12},
-            {"type": "INSTALL", "count": 8},
-            {"type": "SALE", "count": 4},
-        ]
-        complaint_type_cgpisl = [
-            {"type": "SERVICE", "count": 9},
-            {"type": "INSTALL", "count": 5},
-            {"type": "SALE", "count": 3},
-        ]
-        # New static counts for demonstration
-        crm_open_complaints = {"CGCEL": 5, "CGPISL": 3}
-        crm_escalation_complaints = {"CGCEL": 2, "CGPISL": 1}
-        md_escalation_complaints = {"CGCEL": 1, "CGPISL": 2}
-        spare_pending_complaints = {"CGCEL": 4, "CGPISL": 2}
-        high_priority_complaints = {"CGCEL": 3, "CGPISL": 1}
+        # Aggregate division-wise final_status counts (Y/N) and complaint_type
+        # We compute both aggregates with as few queries as practical.
+        # Division-wise: one query grouping by complaint_head and product_division
+        division_expr = case(
+    (
+        Complaint.product_division.in_(["CG-FANS", "FANS"]),
+        "FANS",
+    ),
+    (
+        Complaint.product_division.in_(["CG-PUMP", "PUMP"]),
+        "PUMP",
+    ),
+    (
+        Complaint.product_division == "CG-APP",
+        "APP",
+    ),
+    (
+        Complaint.product_division == "CG-FHP",
+        "FHP",
+    ),
+    (
+        Complaint.product_division == "CG-LT",
+        "LT",
+    ),
+    else_=Complaint.product_division,
+)
+
+        division_stmt = (
+    select(
+        Complaint.complaint_head.label("head"),
+        division_expr.label("division"),
+        func.sum(case((Complaint.final_status == "Y", 1), else_=0)).label("Y"),
+        func.sum(case((Complaint.final_status == "N", 1), else_=0)).label("N"),
+    )
+    .where(Complaint.product_division.isnot(None))
+    .group_by(
+        Complaint.complaint_head,
+        division_expr,
+    )
+    .order_by(Complaint.complaint_head, division_expr)
+)
+
+
+
+        division_rows = (await session.execute(division_stmt)).all()
+
+        # complaint_type: counts grouped by complaint_head and complaint_type
+        type_stmt = (
+            select(
+                Complaint.complaint_head.label("head"),
+                Complaint.complaint_type.label("type"),
+                func.count().label("count"),
+            )
+            .group_by(Complaint.complaint_head, Complaint.complaint_type)
+            .order_by(Complaint.complaint_head, Complaint.complaint_type)
+        )
+        type_rows = (await session.execute(type_stmt)).all()
+
+        # Prepare result containers for the two heads we return
+        heads = ["CGCEL", "CGPISL"]
+        division_wise_status_cgcel = []
+        division_wise_status_cgpisl = []
+        complaint_type_cgcel = []
+        complaint_type_cgpisl = []
+
+        # Populate division-wise lists
+        for row in division_rows:
+            item = {"division": row.division, "Y": int(row.Y), "N": int(row.N)}
+            if row.head == "CGCEL":
+                division_wise_status_cgcel.append(item)
+            elif row.head == "CGPISL":
+                division_wise_status_cgpisl.append(item)
+
+        # Populate complaint-type lists
+        for row in type_rows:
+            item = {"type": row.type, "count": int(row.count)}
+            if row.head == "CGCEL":
+                complaint_type_cgcel.append(item)
+            elif row.head == "CGPISL":
+                complaint_type_cgpisl.append(item)
+
+        # Compute multiple complaint counts per head in a single grouped query
+        # Definitions (per request):
+        # - CRM OPEN: complaint_number NOT STARTS WITH 'N' AND complaint_status NOT IN ('CANCEL','CLOSED','NEW') AND final_status = 'N'
+        # - SPARE PENDING: spare_pending = 'Y' AND final_status = 'N'
+        # - ESCALATION: final_status = 'N' AND complaint_status IN ('ESCALATION','MD-ESCALATION','HO-ESCALATION')
+        # - HIGH PRIORITY: final_status = 'N' AND complaint_priority = 'URGENT'
+        # - MAIL TO BE SENT: final_status = 'N' AND action_head = 'MAIL TO BE SENT'
+
+        counts_stmt = (
+            select(
+                Complaint.complaint_head.label("head"),
+                func.sum(
+                    case(
+                        (
+                            and_(
+                                Complaint.final_status == "N",
+                                Complaint.complaint_number.like("N%"),
+                                func.upper(Complaint.complaint_status).in_(["CANCEL", "CLOSED", "NEW"]),
+                            ),
+                            1,
+                        ),
+                        else_=0,
+                    )
+                ).label("crm_open"),
+                func.sum(
+                    case((and_(Complaint.final_status == "N", Complaint.spare_pending == "Y"), 1), else_=0)
+                ).label("spare_pending"),
+                func.sum(
+                    case(
+                        (
+                            and_(
+                                Complaint.final_status == "N",
+                                func.upper(Complaint.complaint_priority).in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION"]),
+                            ),
+                            1,
+                        ),
+                        else_=0,
+                    )
+                ).label("escalation"),
+                func.sum(
+                    case((and_(Complaint.final_status == "N", func.upper(Complaint.complaint_priority) == "URGENT"), 1), else_=0)
+                ).label("high_priority"),
+                func.sum(
+                    case((and_(Complaint.final_status == "N", func.upper(Complaint.action_head) == "Mail to be Sent To HO"), 1), else_=0)
+                ).label("mail_to_be_sent"),
+            )
+            .group_by(Complaint.complaint_head)
+            .order_by(Complaint.complaint_head)
+        )
+
+        counts_rows = (await session.execute(counts_stmt)).all()
+
+        # Default zeros for expected heads
+        crm_open_complaints = {"CGCEL": 0, "CGPISL": 0}
+        escalation_complaints = {"CGCEL": 0, "CGPISL": 0}
+        spare_pending_complaints = {"CGCEL": 0, "CGPISL": 0}
+        high_priority_complaints = {"CGCEL": 0, "CGPISL": 0}
+        mail_to_be_sent_complaints = {"CGCEL": 0, "CGPISL": 0}
+
+        for row in counts_rows:
+            head = row.head
+            if head not in crm_open_complaints:
+                # Skip any unexpected heads but don't fail
+                continue
+            crm_open_complaints[head] = int(row.crm_open or 0)
+            escalation_complaints[head] = int(row.escalation or 0)
+            spare_pending_complaints[head] = int(row.spare_pending or 0)
+            high_priority_complaints[head] = int(row.high_priority or 0)
+            mail_to_be_sent_complaints[head] = int(row.mail_to_be_sent or 0)
+
         return {
             "complaint": {
                 "division_wise_status": {
@@ -67,10 +192,10 @@ class MenuService:
                     "CGPISL": complaint_type_cgpisl,
                 },
                 "crm_open_complaints": crm_open_complaints,
-                "crm_escalation_complaints": crm_escalation_complaints,
-                "md_escalation_complaints": md_escalation_complaints,
+                "escalation_complaints": escalation_complaints,
                 "high_priority_complaints": high_priority_complaints,
                 "spare_pending_complaints": spare_pending_complaints,
+                "mail_to_be_sent_complaints": mail_to_be_sent_complaints,
             }
         }
     

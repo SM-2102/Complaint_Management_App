@@ -6,7 +6,13 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const COLORS = ["#f5e20bff", "#d50505ff", "#f59e42", "#f472b6"];
+const COLORS = [
+  "#0d1d39ff", // Blue
+  "#2ec693ff", // Emerald
+  "#f97316", // Orange
+  "#ec4899", // Pink
+];
+
 
 const ComplaintTypePieChart = ({ data }) => {
   // expects: [{ type, count }, ...]
@@ -72,11 +78,10 @@ const ComplaintTypePieChart = ({ data }) => {
 
   return (
     <div
-      style={{ background: "#e7d7f8ff" }}
-      className="p-3 rounded-lg flex flex-col items-center w-full h-full min-h-0 min-w-0 overflow-hidden"
+      className="p-1 rounded-lg flex flex-col items-center w-full h-full min-h-0 min-w-0 overflow-hidden"
     >
       <div
-        className="relative w-full aspect-square max-w-full flex items-center justify-center overflow-hidden"
+        className="relative w-full aspect-square max-w-full flex items-center justify-center overflow-hidden mt-5"
         style={{ maxWidth: "100%", maxHeight: "100%" }}
       >
         <Pie
@@ -89,30 +94,6 @@ const ComplaintTypePieChart = ({ data }) => {
             maxHeight: "100%",
           }}
         />
-      </div>
-      {/* Custom legend below the chart, left-aligned, only color and label */}
-      <div className="w-full mt-2 flex flex-col items-start">
-        {pieData.labels.map((label, idx) => (
-          <div key={label} className="flex items-center mb-1">
-            <span
-              style={{
-                display: "inline-block",
-                width: 16,
-                height: 16,
-                backgroundColor: COLORS[idx % COLORS.length],
-                borderRadius: 4,
-                marginRight: 8,
-                border: "1px solid #ccc",
-              }}
-            ></span>
-            <span
-              className="text-xs font-medium text-gray-700"
-              style={{ minWidth: 60 }}
-            >
-              {label}
-            </span>
-          </div>
-        ))}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 // Warranty Division Bar Chart
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 // Accepts: [{ division, Y, N }, ...]
 const ComplaintStatusChart = ({ data }) => {
   // Directly use the data prop as chartData
@@ -47,37 +47,60 @@ const ComplaintStatusChart = ({ data }) => {
   // Animation state for each bar: animate purple first, then red
   const [barStates, setBarStates] = useState([]);
   const animationRanRef = React.useRef("");
-  useEffect(() => {
-    const chartKey = JSON.stringify(chartData);
-    if (animationRanRef.current === chartKey) return;
-    animationRanRef.current = chartKey;
-    setBarStates(chartData.map(() => ({ purple: false, yellow: false })));
-    chartData.forEach((_, idx) => {
-      setTimeout(() => {
-        setBarStates((prev) => {
-          const next = [...prev];
-          if (next[idx]) next[idx] = { ...next[idx], purple: true };
-          return next;
-        });
-        setTimeout(() => {
-          setBarStates((prev) => {
-            const next = [...prev];
-            if (next[idx]) next[idx] = { ...next[idx], yellow: true };
-            return next;
-          });
-        }, 700);
-      }, idx * 200);
-    });
-  }, [chartData]);
+useLayoutEffect(() => {
+  const chartKey = JSON.stringify(chartData);
+  if (animationRanRef.current === chartKey) return;
+
+  animationRanRef.current = chartKey;
+
+  // Reset before paint
+  setBarStates(chartData.map(() => ({ purple: false, yellow: false })));
+
+  // Start all purple together
+  const purpleTimer = setTimeout(() => {
+    setBarStates((prev) =>
+      prev.map((s) => (s ? { ...s, purple: true } : s)),
+    );
+  }, 50);
+
+  // Then all yellow together
+  const yellowTimer = setTimeout(() => {
+    setBarStates((prev) =>
+      prev.map((s) => (s ? { ...s, yellow: true } : s)),
+    );
+  }, 700);
+
+  return () => {
+    clearTimeout(purpleTimer);
+    clearTimeout(yellowTimer);
+  };
+}, [chartData]);
+
+
+const rows = chartData.length || 1;
+const containerHeight = 235;
+
+const MIN_BAR = 18;
+const MAX_BAR = 35;
+const MIN_GAP = 2;
+const MAX_GAP = 20;
+
+const idealBar = Math.min(Math.max(containerHeight / rows * 0.6, MIN_BAR), MAX_BAR);
+let remaining = containerHeight - idealBar * rows;
+
+let gap = rows > 1 ? remaining / (rows - 1) : 0;
+gap = Math.min(Math.max(gap, MIN_GAP), MAX_GAP);
+
+
 
   return (
     <div
       className="relative w-full overflow-hidden"
       style={{
-        marginTop: "15px",
+        marginTop: 10,
         padding: "0 8px 12px 0",
         width: "100%",
-        height: 200,
+        height: 250,
         minWidth: 0,
         minHeight: 0,
         boxSizing: "border-box",
@@ -110,10 +133,14 @@ const ComplaintStatusChart = ({ data }) => {
 
       <div className="flex flex-row items-start justify-start gap-0 w-full h-full">
         {/* Horizontal bars and labels */}
-        <div
-          className="flex flex-col gap-2 w-full min-w-0 overflow-y-auto"
-          style={{ height: "100%" }}
-        >
+  <div
+  className="flex flex-col w-full min-w-0 overflow-hidden"
+  style={{
+    height: "100%",
+    rowGap: `${gap}px`,
+  }}
+>
+
           {chartData.map((item, idx) => {
             const total = (item.Y || 0) + (item.N || 0);
             const yPercentage = total > 0 ? (item.Y / total) * 100 : 0;
@@ -123,9 +150,9 @@ const ComplaintStatusChart = ({ data }) => {
               <div key={item.division} className="flex items-center">
                 {/* Fixed width label */}
                 <span
-                  className="text-[10px] font-medium text-gray-700 text-right mr-1"
+                  className="text-[10px] font-semibold text-gray-700 text-right mr-1"
                   style={{
-                    width: "57px",
+                    width: "42px",
                     flexShrink: 0,
                     display: "inline-block",
                     overflow: "hidden",
@@ -136,7 +163,12 @@ const ComplaintStatusChart = ({ data }) => {
                   {item.division}
                 </span>
                 {/* Stacked horizontal bar: purple left, red right */}
-                <div className="relative flex flex-row h-6 w-full rounded overflow-hidden">
+                <div
+  className="relative flex flex-row w-full rounded overflow-hidden"
+  style={{ height: `${idealBar}px` }}
+>
+
+
                   {/* Completed (Y) - purple left */}
                   <div
                     className="bg-purple-500 h-full transition-all duration-700 cursor-pointer relative"

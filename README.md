@@ -6,8 +6,9 @@
 
 ## To Do List
 
-- Stock field
 - Dealer Module
+- Capitalization
+- Count Notif twice
 
 
 - Dealer - 27/12

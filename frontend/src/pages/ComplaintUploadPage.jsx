@@ -94,7 +94,7 @@ const ComplaintUploadPage = () => {
         <Box
           sx={{
             border: "2px dashed",
-            borderColor: file ? "#17c958ff" : "grey.300",
+            borderColor: file ? "#8b5cf6" : "grey.300",
             borderRadius: 2,
             p: 3,
             textAlign: "center",
@@ -103,7 +103,7 @@ const ComplaintUploadPage = () => {
           }}
         >
           <Stack spacing={2} alignItems="center">
-            <UploadFileIcon sx={{ fontSize: 40, color: "#06a842ff" }} />
+            <UploadFileIcon sx={{ fontSize: 40, color: "#7c3aed" }} />
 
             {!file ? (
               <>
@@ -118,12 +118,12 @@ const ComplaintUploadPage = () => {
                   variant="outlined"
                   component="label"
                   sx={{
-                    color: "#0ec04fff",
-                    borderColor: "#29bd5fff",
+                    color: "#7c3aed",
+                    borderColor: "#8b5cf6",
                     "&:hover": {
-                      backgroundColor: "#40ce7422",
-                      borderColor: "#22c55e",
-                    },
+    backgroundColor: "#8b5cf622",
+    borderColor: "#7c3aed",
+  },
                   }}
                 >
                   Browse File
@@ -153,18 +153,18 @@ const ComplaintUploadPage = () => {
                   disabled={uploading}
                   startIcon={
                     uploading ? (
-                      <CircularProgress size={18} sx={{ color: "#0bcf53ff" }} />
+                      <CircularProgress size={18} sx={{ color: "#8b5cf6" }} />
                     ) : (
                       <UploadFileIcon />
                     )
                   }
                   sx={{
-                    backgroundColor: "#09c24dff",
-                    color: "#fff",
-                    "&:hover": {
-                      backgroundColor: "#16a34a",
-                    },
-                  }}
+  backgroundColor: "#7c3aed",
+  color: "#fff",
+  "&:hover": {
+    backgroundColor: "#6d28d9",
+  },
+}}
                 >
                   {uploading ? "Uploading..." : "Upload File"}
                 </Button>

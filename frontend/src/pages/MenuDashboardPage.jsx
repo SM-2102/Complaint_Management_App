@@ -194,12 +194,8 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
         value: getVal(c.crm_open_complaints),
       },
       {
-        title: "CRM Escalation Complaints",
-        value: getVal(c.crm_escalation_complaints),
-      },
-      {
-        title: "MD Escalation Complaints",
-        value: getVal(c.md_escalation_complaints),
+        title: "Escalation Complaints",
+        value: getVal(c.escalation_complaints),
       },
       {
         title: "High Priority Complaints",
@@ -208,6 +204,10 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
       {
         title: "Spare Pending Complaints",
         value: getVal(c.spare_pending_complaints),
+      },
+      {
+        title: "Mails to be Sent",
+        value: getVal(c.mail_to_be_sent_complaints),
       },
     ];
   }, [data, selectedCompany]);
@@ -329,7 +329,7 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
                     </div>
                   ) : (
                     <div className="flex flex-row gap-2 w-full items-stretch">
-                      <div className="flex-1 min-w-0 flex items-center justify-center">
+                      <div className="flex-1 h-full items-center justify-center">
                         <ComplaintStatusChart data={complaintDivisionStatus} />
                       </div>
                       <div className="flex-1 min-w-0 flex items-center justify-center">

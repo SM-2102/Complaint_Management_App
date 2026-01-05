@@ -3,9 +3,9 @@ import CountUp from "react-countup";
 import {
   FaClipboardList,
   FaExclamationTriangle,
-  FaUserTie,
   FaStar,
   FaTools,
+  FaEnvelope,
 } from "react-icons/fa";
 
 const cardMeta = [
@@ -19,13 +19,7 @@ const cardMeta = [
     icon: FaExclamationTriangle,
     colorClass:
       "bg-gradient-to-br from-yellow-100 via-yellow-50 to-yellow-200 border-yellow-300 text-yellow-900",
-    title: "CRM Escalation Complaints",
-  },
-  {
-    icon: FaUserTie,
-    colorClass:
-      "bg-gradient-to-br from-purple-100 via-purple-50 to-purple-200 border-purple-300 text-purple-900",
-    title: "MD Escalation Complaints",
+    title: "Escalation Complaints",
   },
   {
     icon: FaStar,
@@ -38,6 +32,12 @@ const cardMeta = [
     colorClass:
       "bg-gradient-to-br from-green-100 via-green-50 to-green-200 border-green-300 text-green-900",
     title: "Spare Pending Complaints",
+  },
+  {
+    icon: FaEnvelope,
+    colorClass:
+      "bg-gradient-to-br from-purple-100 via-purple-50 to-purple-200 border-purple-300 text-purple-900",
+    title: "Mails to be Sent",
   },
 ];
 

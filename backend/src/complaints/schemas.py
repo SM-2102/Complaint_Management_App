@@ -26,7 +26,8 @@ class ComplaintsSchema(BaseModel):
     customer_contact1: str = Field(..., min_length=10, max_length=10, pattern=r"^\d{10}$")
     customer_contact2: Optional[str] = Field(None, pattern=r"^\d{10}$")
     product_division: str = Field(..., max_length=20)
+    current_status: str = Field(..., max_length=50)
     spare_pending: str
-    current_status: str
+    status: str
     created_by: str 
     final_status: str
