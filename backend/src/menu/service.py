@@ -154,7 +154,7 @@ class MenuService:
                     case((and_(Complaint.final_status == "N", func.upper(Complaint.complaint_priority) == "URGENT"), 1), else_=0)
                 ).label("high_priority"),
                 func.sum(
-                    case((and_(Complaint.final_status == "N", func.upper(Complaint.action_head) == "Mail to be Sent To HO"), 1), else_=0)
+                    case((and_(Complaint.final_status == "N", func.upper(Complaint.action_head) == "MAIL TO BE SENT TO HO"), 1), else_=0)
                 ).label("mail_to_be_sent"),
             )
             .group_by(Complaint.complaint_head)
