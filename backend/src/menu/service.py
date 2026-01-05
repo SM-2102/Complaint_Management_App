@@ -127,8 +127,8 @@ class MenuService:
                         (
                             and_(
                                 Complaint.final_status == "N",
-                                Complaint.complaint_number.like("N%"),
-                                func.upper(Complaint.complaint_status).in_(["CANCEL", "CLOSED", "NEW"]),
+                                ~Complaint.complaint_number.like("N%"),
+                                ~func.upper(Complaint.complaint_status).in_(["CANCEL", "CLOSED", "NEW"]),
                             ),
                             1,
                         ),
