@@ -11,8 +11,10 @@ const submenuOrder = {
     "Report Generation",
     "Add New Complaint",
     "Update Complaint",
-    "Create RFR Record",
     "Upload Complaints",
+    "Complaint Reallocation",
+    "Create RFR Record",
+    "Generate RFR Record",
   ],
 };
 
@@ -104,7 +106,7 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
 
   // Add 'Customer Entry' menu with two submenus
   menuItems.push({
-    title: "Customer Entry",
+    title: "Customer Entry for Invoice",
     submenus: [
       { title: "Add Customer Record", path: "/CustomerCreate" },
       { title: "Update Customer Record", path: "/CustomerUpdate" },

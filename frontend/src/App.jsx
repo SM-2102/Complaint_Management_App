@@ -36,6 +36,11 @@ import GRCCGPISLEnquiryPage from "./pages/GRCCGPISLEnquiryPage.jsx";
 import ComplaintPendingPage from "./pages/ComplaintPendingPage.jsx";
 import PageNotAvailable from "./pages/PageNotAvailable.jsx";
 import ComplaintUploadPage from "./pages/ComplaintUploadPage.jsx";
+import ComplaintReallocationPage from "./pages/ComplaintReallocationPage.jsx";
+import CustomerCreatePage from "./pages/CustomerCreatePage.jsx";
+import CustomerUpdatePage from "./pages/CustomerUpdatePage.jsx";
+import ComplaintCreatePage from "./pages/ComplaintCreatePage.jsx";
+import ComplaintUpdatePage from "./pages/ComplaintUpdatePage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -311,6 +316,46 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             element={
               <PrivateRoute requiredRole="ADMIN">
                 <ComplaintUploadPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ComplaintReallocation"
+            element={
+              <PrivateRoute>
+                <ComplaintReallocationPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/CustomerCreate"
+            element={
+              <PrivateRoute>
+                <CustomerCreatePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="CustomerUpdate"
+            element={
+              <PrivateRoute>
+                <CustomerUpdatePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/CreateComplaint"
+            element={
+              <PrivateRoute>
+                <ComplaintCreatePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/UpdateComplaint"
+            element={
+              <PrivateRoute>
+                <ComplaintUpdatePage />
               </PrivateRoute>
             }
           />

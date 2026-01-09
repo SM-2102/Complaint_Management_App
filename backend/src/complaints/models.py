@@ -40,15 +40,12 @@ class Complaint(SQLModel, table=True):
 
     # Customer details
     customer_type: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=False))
-    customer_code: str = Field(
-        sa_column=Column(pg.VARCHAR(5), nullable=True)
-    )
-    customer_name: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
-    customer_address1: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
+    customer_name: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=False))
+    customer_address1: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=False))
     customer_address2: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
-    customer_city: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
-    customer_pincode: str = Field(sa_column=Column(pg.VARCHAR(6), nullable=True))
-    customer_contact1: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=True))
+    customer_city: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=False))
+    customer_pincode: str = Field(sa_column=Column(pg.VARCHAR(6), nullable=False))
+    customer_contact1: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=False))
     customer_contact2: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=True))
 
     # Product details
@@ -91,7 +88,7 @@ class Complaint(SQLModel, table=True):
             nullable=True,
         )
     )
-    updated_time: time = Field(sa_column=Column(pg.TIME, nullable=True))
+    updated_time: str = Field(sa_column=Column(pg.VARCHAR(7), nullable=True))
 
     # Payment
     payment_collected: str = Field(sa_column=Column(pg.CHAR(1), nullable=True, default='N'))

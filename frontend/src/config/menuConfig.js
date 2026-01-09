@@ -16,10 +16,16 @@ export const menuConfig = [
       { label: "Add New Complaint", path: "/CreateComplaint", company: "ALL" },
       { label: "Update Complaint", path: "/UpdateComplaint", company: "ALL" },
       { label: "Report Generation", path: "/ReportGeneration", company: "ALL" },
+      { label: "Complaint Reallocation", path: "/ComplaintReallocation", company: "ALL" },
       { label: "Upload Complaints", path: "/UploadComplaints", company: "ALL" },
       {
         label: "Create RFR Record",
         path: "/CreateRFRRecord",
+        company: "CGCEL",
+      },
+      {
+        label: "Generate RFR Record",
+        path: "/GenerateRFRRecord",
         company: "CGCEL",
       },
     ],

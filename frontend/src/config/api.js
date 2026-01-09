@@ -69,6 +69,25 @@ const API_ENDPOINTS = {
   GRC_CGPISL_ENQUIRY: `${BASE_API_URL}grc_cgpisl/enquiry`,
 
   COMPLAINT_UPLOAD: `${BASE_API_URL}complaints/upload`,
+  COMPLAINT_ENQUIRY: `${BASE_API_URL}complaints/enquiry`, //append query params as needed
+  COMPLAINT_STATS_ENQUIRY: `${BASE_API_URL}complaints/complaint_stats_enquiry`, //append card name
+  COMPLAINT_FILTER_DATA: `${BASE_API_URL}complaints/complaint_filter_data`,
+  COMPLAINT_EMPLOYEES: `${BASE_API_URL}complaints/employees`,
+  COMPLAINT_ALLOCATION_DATA: `${BASE_API_URL}complaints/complaint_allocation_data`, //append allocated_to param
+  COMPLAINT_REALLOCATE: `${BASE_API_URL}complaints/reallocate_complaints`,
+  COMPLAINT_CREATE: `${BASE_API_URL}complaints/create`,
+  COMPLAINT_CREATE_DATA: `${BASE_API_URL}complaints/complaint_create_data`,
+  COMPLAINT_UPDATE_DATA: `${BASE_API_URL}complaints/complaint_update_data`,
+  COMPLAINT_SEARCH_NUMBER: `${BASE_API_URL}complaints/by_complaint_number`,
+  COMPLAINT_UPDATE: `${BASE_API_URL}complaints/update`, //append complaint number
+
+  CUSTOMER_CREATE: `${BASE_API_URL}customer/create`,
+  CUSTOMER_NEXT_CODE: `${BASE_API_URL}customer/next_code`,
+  CUSTOMER_LIST_NAMES: `${BASE_API_URL}customer/list_names`,
+  CUSTOMER_UPDATE: `${BASE_API_URL}customer/update/`, //append code
+  CUSTOMER_SEARCH_CODE: `${BASE_API_URL}customer/by_code`,
+  CUSTOMER_SEARCH_NAME: `${BASE_API_URL}customer/by_name`,
+  CUSTOMER_SEARCH_NAME_FOR_COMPLAINT: `${BASE_API_URL}customer/by_name_for_complaint`, //append complaint number
 };
 
 export default API_ENDPOINTS;

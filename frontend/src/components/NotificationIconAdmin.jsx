@@ -20,7 +20,7 @@ const NotificationIconAdmin = () => {
   }, []);
 
   return (
-    <div className="relative inline-flex items-center align-middle">
+    <div className="relative inline-flex items-center align-middle mr-4">
       <button
         className="relative flex items-center justify-center w-10 h-10 rounded-full bg-blue-900 hover:bg-blue-700 border-none outline-none cursor-pointer p-0"
         onClick={() => navigate("/CreateNotification")}

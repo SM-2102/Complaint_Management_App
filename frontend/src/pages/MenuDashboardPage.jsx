@@ -192,22 +192,27 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
       {
         title: "CRM Open Complaints",
         value: getVal(c.crm_open_complaints),
+        cardKey: "crm_open_complaints"
       },
       {
         title: "Escalation Complaints",
         value: getVal(c.escalation_complaints),
+        cardKey: "escalation_complaints"
       },
       {
         title: "High Priority Complaints",
         value: getVal(c.high_priority_complaints),
+        cardKey: "high_priority_complaints"
       },
       {
         title: "Spare Pending Complaints",
         value: getVal(c.spare_pending_complaints),
+        cardKey: "spare_pending_complaints"
       },
       {
         title: "Mails to be Sent",
         value: getVal(c.mail_to_be_sent_complaints),
+        cardKey: "mail_to_be_sent_complaints"
       },
     ];
   }, [data, selectedCompany]);
@@ -232,6 +237,20 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
 
   // Get filtered cards based on selected company
   const filteredCards = getFilteredCards(selectedCompany);
+
+  // Handler for ComplaintStatsCards click
+  const handleComplaintStatCardClick = async (cardKey) => {
+    const params = new URLSearchParams();
+    if (cardKey) {
+      params.set(cardKey, "Y");
+    }
+    if (selectedCompany) {
+      params.set("complaint_head", selectedCompany);
+    } else {
+      params.delete("complaint_head");
+    }
+    navigate({ pathname: "/ComplaintEnquiry", search: params.toString() });
+  };
 
   return (
     <>
@@ -300,7 +319,7 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
             </button>
           </div>
         </div>
-        <ComplaintStatsCards stats={complaintStats} />
+        <ComplaintStatsCards stats={complaintStats} onCardClick={handleComplaintStatCardClick} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 flex-grow min-w-0 w-full mt-2">
           {filteredCards.map(

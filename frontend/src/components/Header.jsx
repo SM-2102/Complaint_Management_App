@@ -50,32 +50,44 @@ const Header = ({ selectedCompany }) => {
               </div>
             )}
           </div>
-          <div className="flex items-center justify-center w-18 h-18 ml-20">
+          {/* <div className="flex items-center justify-center w-18 h-18 ml-20">
             <img
               src={logo}
               alt="Logo"
               className="h-16 w-16 sm:h-16 sm:w-16 sm:mb-0"
             />
-          </div>
+          </div> */}
         </div>
         <div className="flex flex-col justify-center items-center sm:items-start text-center sm:text-left w-full">
           <span
             className="text-white text-2xl sm:text-4xl font-semibold tracking-wide leading-tight mt-1"
             style={{ fontFamily: "Times New Roman, Times, serif" }}
           >
-            Unique Services
+            {/* Unique Services */}
           </span>
           <span
             className="text-blue-50 text-sm sm:text-lg font-medium mb-1"
             style={{ fontFamily: "Montserrat, sans-serif" }}
           >
-            12, Sakharitola Street, Kolkata - 700014
+            {/* 12, Sakharitola Street, Kolkata - 700014 */}
           </span>
         </div>
       </div>
       {!isLoginPage && (
-        <div className="flex items-center space-x-2 sm:space-x-4 mt-2 sm:mt-0 mr-0 sm:mr-14">
-          {/* Reserved space for GoBack button */}
+        <div className="flex items-center space-x-2 sm:space-x-4 mt-2 sm:mt-0 ml-auto">
+          <div className="flex items-center justify-center w-10 h-10 mr-2">
+            {isMenuPage ? (
+              isAdmin ? (
+                <NotificationIconAdmin />
+              ) : isUser ? (
+                <NotificationIconUser />
+              ) : (
+                <div className="w-10 h-10" />
+              )
+            ) : (
+              <div className="w-10 h-10" />
+            )}
+          </div>
           <div className="flex items-center gap-3 mt-2 sm:mt-0 mr-0 sm:mr-4">
             {showGoBackIcon && <GoBackIcon onClick={() => navigate(-1)} />}
 
@@ -97,8 +109,6 @@ const Header = ({ selectedCompany }) => {
               </button>
             )}
           </div>
-          {isAdmin && <NotificationIconAdmin />}
-          {isUser && <NotificationIconUser />}
           <DashboardButton />
           <EmployeeMenu />
           <Logout />

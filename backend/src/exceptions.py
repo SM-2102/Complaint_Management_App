@@ -61,6 +61,26 @@ class SpareNotFound(BaseException):
 class StockNotAvailable(BaseException):
     """Stock Not Available"""
 
+class CustomerAlreadyExists(BaseException):
+    """Customer Already Exists"""
+
+class CustomerNotFound(BaseException):
+    """Customer Not Found"""
+
+class CannotChangeCustomerName(BaseException):
+    """Cannot change the customer name"""
+
+class ComplaintNumberAlreadyExists(BaseException):
+    """Complaint Number Already Exists"""
+
+class ComplaintNotFound(BaseException):
+    """Complaint Not Found"""
+
+class ComplaintNumberGenerationFailed(BaseException):
+    """Failed to generate a unique complaint number after retries"""
+
+class UpdateFailed(BaseException):
+    """Failed to update the complaint"""
 
 def create_exception_handler(
     status_code: int, initial_detail: Any
@@ -217,6 +237,90 @@ def register_exceptions(app: FastAPI):
         ),
     )
 
+    app.add_exception_handler(
+        CustomerAlreadyExists,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "Customer Already Exists",
+                "resolution": "Please use a different customer name",
+                "error_code": "customer_already_exists",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        CustomerNotFound,
+        create_exception_handler(
+            status_code=status.HTTP_404_NOT_FOUND,
+            initial_detail={
+                "message": "Customer Not Found",
+                "resolution": "Please check the customer code or name",
+                "error_code": "customer_not_found",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        CannotChangeCustomerName,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "Cannot change the customer name",
+                "resolution": "Customer name is immutable once created",
+                "error_code": "cannot_change_customer_name",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        ComplaintNumberAlreadyExists,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "Complaint Number Already Exists",
+                "resolution": "Please use a different complaint number",
+                "error_code": "complaint_number_already_exists",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        ComplaintNumberGenerationFailed,
+        create_exception_handler(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            initial_detail={
+                "message": "Unable to generate unique complaint number",
+                "resolution": "Please retry the request or contact support",
+                "error_code": "complaint_number_generation_failed",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        ComplaintNotFound,
+        create_exception_handler(
+            status_code=status.HTTP_404_NOT_FOUND,
+            initial_detail={
+                "message": "Complaint Not Found",
+                "resolution": "Please check the complaint number",
+                "error_code": "complaint_not_found",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        UpdateFailed,
+        create_exception_handler(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            initial_detail={
+                "message": "Failed to update",
+                "resolution": "Please retry the request or contact support",
+                "error_code": "update_failed",
+            },
+        ),
+    )
+
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request, exc):
         # Customize the error message here
@@ -228,6 +332,8 @@ def register_exceptions(app: FastAPI):
                 "error_code": "validation_error",
             },
         )
+    
+
 
     # @app.exception_handler(500)
     # async def internal_server_error(request, exc):

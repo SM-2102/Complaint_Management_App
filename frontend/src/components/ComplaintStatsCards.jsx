@@ -63,19 +63,24 @@ const ComplaintStatCard = ({ title, value, icon: Icon, colorClass }) => (
 
 // Add fadeIn and countUp animations via Tailwind (custom classes can be added in tailwind.config.js)
 
-const ComplaintStatsCards = ({ stats }) => {
+const ComplaintStatsCards = ({ stats, onCardClick }) => {
   return (
     <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-6">
       {stats.map((stat, idx) => {
         const meta = cardMeta[idx];
         return (
-          <ComplaintStatCard
+          <div
             key={meta.title}
-            title={meta.title}
-            value={stat.value}
-            icon={meta.icon}
-            colorClass={meta.colorClass}
-          />
+            style={{ cursor: onCardClick ? "pointer" : undefined }}
+            onClick={() => onCardClick && onCardClick(stat.cardKey)}
+          >
+            <ComplaintStatCard
+              title={meta.title}
+              value={stat.value}
+              icon={meta.icon}
+              colorClass={meta.colorClass}
+            />
+          </div>
         );
       })}
     </div>

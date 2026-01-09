@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+/* Prevent overly long option text from disfiguring select width.
+	 Options will show full text on hover via title attribute. */
+select option {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
+
+/* On platforms where option styling varies, also limit select display */
+select {
+	max-width: 100%;
+}

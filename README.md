@@ -6,15 +6,14 @@
 
 ## To Do List
 
-- Dealer Module
-- Capitalization
-- Count Notif twice
+- Action Head - capitalize
+- Complaint Create
+- Complaint Update
+- Create RFR Record
+- Print RFR Record
+- Send Complaint Number via Email
+- Backup System
 
-
-- Dealer - 27/12
-- Email - 28/12
-- Complaint Pages - 29/12
-- Pending - 30/12
 
 ---
 
@@ -24,12 +23,12 @@
 - [x] **Employee**
 - [x] **Notification**
 - [x] **Holiday**
-- [ ] **ComplaintNumber**
-- [ ] **StockCGPISL**
-- [ ] **StockCGCEL**
+- [x] **ComplaintNumber**
+- [x] **StockCGPISL**
+- [x] **StockCGCEL**
 - [x] **GRCCGPISL**
 - [x] **GRCCGCEL**
-- [ ] **Dealer**
+- [x] **Customer**
 
 ---
 
@@ -53,41 +52,22 @@
 
 ### Dashboard Module
 
-- [ ] **MenuDashboardPage** – Main dashboard for menu navigation
+- [x] **MenuDashboardPage** – Main dashboard for menu navigation
 - [x] **PageNotFound** – 404 error page
 - [x] **PageNotAvailable** – Maintenance/feature unavailable page
 
-### Pending Module
+### Complaint Module
 
-- [ ] **PendingListPage** - Main Pending Page
-
-### ComplaintNumber Module
-
-- [ ] **ComplaintNumberUploadPage** - Upload complaint number file .xlxs [ADMIN]
-- Admin can upload a new complaint file with the following logic:
-
-1. **If complaint exists in both old and new file**
-   - No action taken
-2. **If complaint exists in new file but not in old**
-   - Insert as new complaint
-3. **If complaint exists in old file but not in new**
-   - Update complaint status to **Cancelled**
-
+- [x] **ComplaintPendingPage** - Main Pending Page
+- [x] **ComplaintNumberUploadPage** - Upload complaint number file .csv [ADMIN]
+- [x] **ComplaintReallocationPage** - Reallocate Complaints
 - [ ] **ComplaintNumberCreatePage** - Create Complaint Number
-- Create new complaint records
-- Auto-generate complaint number
 - [ ] **ComplaintNumberUpdatePage** - Update Complaint Number
-- Update complaint details and status
-- **Visit Later Option**
-  - If selected:
-    - A new complaint is automatically created
-    - Original complaint status updated accordingly
-- [ ] **ComplaintNumberSendPage** - Send pending pdf to technician
-- Generate pdf, either download or send to e-mail
+- [ ] **ComplaintNumberSendPage** - Send Complaint Number via Email
 
 ### Stock CGCEL Module
 
-- [x] **StockCGCELUploadPage** - Upload stock file .xlxs [ADMIN]
+- [x] **StockCGCELUploadPage** - Upload stock file .csv [ADMIN]
 - [x] **StockCGCELEnquiryPage** - Stock Enquiry and Print
 - [x] **StockCGCELSpareIndentPage** - Raise Spare Indent
 - [x] **StockCGCELGenerateIndentPage** - Generate Spare Indent
@@ -96,7 +76,7 @@
 
 ### Stock CGPISL Module
 
-- [x] **StockCGPISLUploadPage** - Upload stock file .xlxs [ADMIN]
+- [x] **StockCGPISLUploadPage** - Upload stock file .csv [ADMIN]
 - [x] **StockCGPSILEnquiryPage** - Stock Enquiry and Print
 - [x] **StockCGPSILSpareIndentPage** - Raise Spare Indent
 - [x] **StockCGPSILGenerateIndentPage** - Generate Spare Indent
@@ -104,7 +84,7 @@
 
 ### GRC CGCEL Module
 
-- [x] **GRCCGCELUploadPage** - Upload GRC file .xlxs [ADMIN]
+- [x] **GRCCGCELUploadPage** - Upload GRC file .csv [ADMIN]
 - [x] **GRCCGCELReceivePage** - GRC Receive Material
 - [x] **GRCCGCELReturnPage** - GRC Return Material
 - [x] **GRCCGCELEnquiryPage** - GRC Enquiry and Print
@@ -112,16 +92,15 @@
 
 ### GRC CGPISL Module
 
-- [x] **GRCCGPISLUploadPage** - Upload GRC file .xlxs [ADMIN]
+- [x] **GRCCGPISLUploadPage** - Upload GRC file .csv [ADMIN]
 - [x] **GRCCGPISLReceivePage** - GRC Receive Material
 - [x] **GRCCGPISLReturnPage** - GRC Return Material
 - [x] **GRCCGPISLEnquiryPage** - GRC Enquiry and Print
 - [x] **GRCCGPISLReportPage** - GRC Print
 
-### Dealer Module
-### Master Module
-- [ ] **MasterCreatePage** - Create Master record
-- [ ] **MasterUpdatePage** - Update Master record
+### Customer Module
+- [x] **CustomerCreatePage** - Create Customer record
+- [x] **CustomerUpdatePage** - Update Customer record
 
 ---
 
@@ -152,9 +131,18 @@
 
 ### Menu Module
 
-- [ ] **/menu/dashboard**
+- [x] **/menu/dashboard**
 
-### Pending Module
+### Complaint Module
+- [x] **/complaints/upload** - [ADMIN]
+- [x] **/complaints/action_heads**
+- [x] **/complaints/enquiry{params}**
+- [x] **/complaints/complaint_filter_data**
+- [x] **/complaints//employees**
+- [x] **/complaints/reallocate_complaints**
+- [x] **/complaints/complaint_allocation_data/{allocated_to}**
+- [ ] **/complaints/create**
+- [ ] **/complaints/complaint_create_data**
 
 ### StockCGCEL Module
 
@@ -210,14 +198,13 @@
 - [x] **/grc_cgpisl/finalize_grc_return**
 - [x] **/grc_cgpisl/enquiry/{params}**
 
-### Master Module
-- [ ] **/master/create**
-- [ ] **/master/next_code**
-- [ ] **/master/list_names** 
-- [ ] **/master/by_code** 
-- [ ] **/master/by_name**
-- [ ] **/master/update{code}**
-- [ ] **/master/fetch_address**
+### Customer Module
+- [x] **/customer/create**
+- [x] **/customer/next_code**
+- [x] **/customer/list_names** 
+- [x] **/customer/by_code** 
+- [x] **/customer/by_name**
+- [x] **/customer/update{code}**
 
 ---
 
@@ -225,10 +212,10 @@
 
 - [x] **Authorization**
 - [x] **Database Schema**
-- [ ] **Initial Deployment**
+- [x] **Initial Deployment**
 - [ ] **Backup**
 - [x] **Login**
-- [ ] **Menu**
+- [x] **Menu**
 - [x] **Wishes**
 - [x] **Notification**
 - [x] **Employee**
@@ -237,8 +224,8 @@
 - [ ] **Complaint Number**
 - [x] **Spare_CGCEL**
 - [x] **Spare_CGPISL**
-- [ ] **GRC_CGCEL**
-- [ ] **GRC_CGPISL**
+- [x] **GRC_CGCEL**
+- [x] **GRC_CGPISL**
 - [ ] **Final Deployment**
 
 ---

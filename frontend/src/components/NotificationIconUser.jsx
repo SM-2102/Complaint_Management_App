@@ -9,7 +9,6 @@ const NotificationIconUser = () => {
   const [swipedId, setSwipedId] = useState(null);
   const [resolving, setResolving] = useState(false);
   const ref = useRef();
-  console.log("[NotificationIconUser] Mounted");
 
   useEffect(() => {
     fetchUserNotifications()
@@ -34,7 +33,7 @@ const NotificationIconUser = () => {
   }, []);
 
   return (
-    <div className="relative inline-flex items-center align-middle" ref={ref}>
+    <div className="relative inline-flex items-center align-middle mr-4" ref={ref}>
       <button
         className="relative flex items-center justify-center w-10 h-10 rounded-full bg-blue-900 hover:bg-blue-700 border-none outline-none cursor-pointer p-0"
         onClick={() => setOpen((o) => !o)}
