@@ -14,8 +14,6 @@ async function printGRCReturn(payload) {
   const { report_type, ...restPayload } = payload;
   // Compose the endpoint with report type as path param
   const endpoint = `${API_ENDPOINTS.GRC_CGPISL_REPORT_PRINT}/${reportType}`;
-  console.log("Printing GRC Return with endpoint:", endpoint);
-  console.log("Payload:", restPayload);
   const response = await authFetch(endpoint, {
     method: "POST",
     headers: {

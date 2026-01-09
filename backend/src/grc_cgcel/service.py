@@ -15,7 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
 
-from exceptions import SpareNotFound
+from exceptions import SpareNotFound, UpdateFailed
 from grc_cgcel.models import GRCCGCEL, GRCCGCELDispute, GRCCGCELReturnHistory
 from grc_cgcel.schemas import (
     GRCCGCELDisputeCreate,
@@ -418,7 +418,7 @@ class GRCCGCELService:
         try:
             await session.commit()
         except Exception as e:
-            print("Commit error:", e)
+            raise UpdateFailed()
 
     async def next_cgcel_challan_code(self, session: AsyncSession):
         statement = (

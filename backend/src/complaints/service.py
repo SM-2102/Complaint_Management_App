@@ -402,7 +402,6 @@ class ComplaintsService:
                 complaint_data_dict["created_by"] = token["user"]["username"]
                 complaint_data_dict["action_by"] = capital_to_proper_case(complaint_data_dict["action_by"])
                 complaint_data_dict["technician"] = capital_to_proper_case(complaint_data_dict["technician"])
-                complaint_data_dict["action_head"] = capital_to_proper_case(complaint_data_dict["action_head"])
                 complaint_data_dict["complaint_date"] = date.today()
                 complaint_data_dict["complaint_status"] = "NEW"
                 complaint_data_dict["complaint_time"] = datetime.now().time().replace(microsecond=0)
@@ -547,7 +546,6 @@ class ComplaintsService:
         existing_complaint.updated_by = token["user"]["username"]
         existing_complaint.action_by = capital_to_proper_case(existing_complaint.action_by)
         existing_complaint.technician = capital_to_proper_case(existing_complaint.technician)
-        existing_complaint.action_head = capital_to_proper_case(existing_complaint.action_head)
         try:
             await session.commit()
         except Exception as e:

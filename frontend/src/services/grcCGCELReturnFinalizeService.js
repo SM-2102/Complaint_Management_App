@@ -7,7 +7,6 @@ import { authFetch } from "./authFetchService";
  * @returns {Promise<void>} Throws on error
  */
 async function updateCGCELReturnFinalize(grcData) {
-  console.log("Finalizing GRC CGCEL Return with data:", grcData);
   const response = await authFetch(API_ENDPOINTS.GRC_CGCEL_FINALIZE_RETURN, {
     method: "POST",
     headers: {
