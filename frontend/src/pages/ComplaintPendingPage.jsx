@@ -148,15 +148,6 @@ const productDivisionConfig = useMemo(
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const PAGE_SIZE = 25;
-  // Suggestion state for customer name & complaint number
-  const [allCustomerNames, setAllCustomerNames] = useState([]);
-  const [allComplaintNumbers, setAllComplaintNumbers] = useState([]);
-  const [customerNameSuggestions, setCustomerNameSuggestions] = useState([]);
-  const [complaintNumberSuggestions, setComplaintNumberSuggestions] = useState([]);
-  const [showCustomerNameSuggestions, setShowCustomerNameSuggestions] = useState(false);
-  const [showComplaintNumberSuggestions, setShowComplaintNumberSuggestions] = useState(false);
-  const isTypingCustomerNameRef = useRef(false);
-  const isTypingComplaintNumberRef = useRef(false);
   // Fetch filter options for action_head and action_by
   // Track if filter options are loaded
   const [filterOptionsLoaded, setFilterOptionsLoaded] = useState(false);
@@ -177,12 +168,6 @@ const productDivisionConfig = useMemo(
             ? filterData.action_by.map((v) => ({ value: v, label: v }))
             : []),
         ];
-        if (Array.isArray(filterData.customer_name)) {
-          setAllCustomerNames(filterData.customer_name);
-        }
-        if (Array.isArray(filterData.complaint_number)) {
-          setAllComplaintNumbers(filterData.complaint_number);
-        }
         setFilterConfig((prev) =>
           prev.map((f) => {
             if (f.name === "action_head") return { ...f, options: actionHeadOptions };
@@ -199,38 +184,6 @@ const productDivisionConfig = useMemo(
       isMounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    if (!isTypingCustomerNameRef.current) {
-      setShowCustomerNameSuggestions(false);
-      return;
-    }
-    if (filters.customer_name && allCustomerNames.length > 0) {
-      const filtered = allCustomerNames.filter((n) =>
-        (n || "").toLowerCase().includes(filters.customer_name.toLowerCase())
-      );
-      setCustomerNameSuggestions(filtered);
-      setShowCustomerNameSuggestions(filtered.length > 0);
-    } else {
-      setShowCustomerNameSuggestions(false);
-    }
-  }, [filters.customer_name, allCustomerNames]);
-
-  useEffect(() => {
-    if (!isTypingComplaintNumberRef.current) {
-      setShowComplaintNumberSuggestions(false);
-      return;
-    }
-    if (filters.complaint_number && allComplaintNumbers.length > 0) {
-      const filtered = allComplaintNumbers.filter((n) =>
-        (n || "").toLowerCase().includes(filters.complaint_number.toLowerCase())
-      );
-      setComplaintNumberSuggestions(filtered);
-      setShowComplaintNumberSuggestions(filtered.length > 0);
-    } else {
-      setShowComplaintNumberSuggestions(false);
-    }
-  }, [filters.complaint_number, allComplaintNumbers]);
 
   const handleChange = useCallback((eOrName, valueOverride) => {
     if (typeof eOrName === "string") {
@@ -412,61 +365,10 @@ const productDivisionConfig = useMemo(
                           config={config}
                           value={filters[config.name]}
                           onChange={(eOrName, valueOverride) => {
-                            if (name === "customer_name") {
-                              isTypingCustomerNameRef.current = true;
-                            } else if (name === "complaint_number") {
-                              isTypingComplaintNumberRef.current = true;
-                            }
+                        
                             handleChange(eOrName, valueOverride);
                           }}
-                          onBlur={() => {
-                            if (name === "customer_name") {
-                              isTypingCustomerNameRef.current = false;
-                              setShowCustomerNameSuggestions(false);
-                            } else if (name === "complaint_number") {
-                              isTypingComplaintNumberRef.current = false;
-                              setShowComplaintNumberSuggestions(false);
-                            }
-                          }}
                         />
-                        {name === "customer_name" && showCustomerNameSuggestions && (
-                          <ul
-                            className="absolute top-full left-0 z-20 mt-0.2 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto text-xs"
-                          >
-                            {customerNameSuggestions.map((n) => (
-                              <li
-                                key={n}
-                                className="px-2 py-1 cursor-pointer hover:bg-purple-50 text-gray-900"
-                                onMouseDown={() => {
-                                  isTypingCustomerNameRef.current = false;
-                                  setFilters((prev) => ({ ...prev, customer_name: n }));
-                                  setShowCustomerNameSuggestions(false);
-                                }}
-                              >
-                                {n}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {name === "complaint_number" && showComplaintNumberSuggestions && (
-                          <ul
-                            className="absolute top-full left-0 z-20 mt-0.2 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto text-xs"
-                          >
-                            {complaintNumberSuggestions.map((n) => (
-                              <li
-                                key={n}
-                                className="px-2 py-1 cursor-pointer hover:bg-purple-50 text-gray-900"
-                                onMouseDown={() => {
-                                  isTypingComplaintNumberRef.current = false;
-                                  setFilters((prev) => ({ ...prev, complaint_number: n }));
-                                  setShowComplaintNumberSuggestions(false);
-                                }}
-                              >
-                                {n}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
                       </div>
                     );
                   })}

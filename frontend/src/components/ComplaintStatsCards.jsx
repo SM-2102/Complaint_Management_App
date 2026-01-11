@@ -12,6 +12,12 @@ const cardMeta = [
   {
     icon: FaClipboardList,
     colorClass:
+      "bg-gradient-to-br from-pink-100 via-pink-50 to-pink-200 border-pink-300 text-pink-900",
+    title: "All Complaints",
+  },
+  {
+    icon: FaStar,
+    colorClass:
       "bg-gradient-to-br from-blue-100 via-blue-50 to-blue-200 border-blue-300 text-blue-900",
     title: "CRM Open Complaints",
   },
@@ -20,12 +26,6 @@ const cardMeta = [
     colorClass:
       "bg-gradient-to-br from-yellow-100 via-yellow-50 to-yellow-200 border-yellow-300 text-yellow-900",
     title: "Escalation Complaints",
-  },
-  {
-    icon: FaStar,
-    colorClass:
-      "bg-gradient-to-br from-pink-100 via-pink-50 to-pink-200 border-pink-300 text-pink-900",
-    title: "High Priority Complaints",
   },
   {
     icon: FaTools,

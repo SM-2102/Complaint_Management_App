@@ -6,13 +6,13 @@
 
 ## To Do List
 
-- Action Head - capitalize
-- Complaint Create
-- Complaint Update
+- Menu Dashboard
+
 - Create RFR Record
 - Print RFR Record
-- Send Complaint Number via Email
 - Backup System
+- Invoice Create
+- Invoice Update
 
 
 ---
@@ -138,11 +138,16 @@
 - [x] **/complaints/action_heads**
 - [x] **/complaints/enquiry{params}**
 - [x] **/complaints/complaint_filter_data**
-- [x] **/complaints//employees**
-- [x] **/complaints/reallocate_complaints**
+- [x] **/complaints/employees**
 - [x] **/complaints/complaint_allocation_data/{allocated_to}**
-- [ ] **/complaints/create**
-- [ ] **/complaints/complaint_create_data**
+- [x] **/complaints/reallocate_complaints**
+- [x] **/complaints/create**
+- [x] **/complaints/complaint_create_data**
+- [x] **/by_complaint_number/{complaint_number}**
+- [x] **/complaint_update_data**
+- [x] **/update/{complaint_number}**
+- [x] **/send_email**
+- [ ] **/mail_technician_list**
 
 ### StockCGCEL Module
 

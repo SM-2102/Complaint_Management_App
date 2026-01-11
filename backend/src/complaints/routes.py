@@ -277,9 +277,23 @@ Send pending emails for complaints.
 """
 @complaints_router.post("/send_email", status_code=status.HTTP_200_OK)
 async def send_pending_emails(
-    recipients: EmailSchema,
+    recipients: List[EmailSchema],
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    await complaints_service.send_pending_emails(session, recipients.emails)
+    await complaints_service.send_pending_emails(session, recipients)
     return JSONResponse(content={"message": f"Emails sent successfully."})
+
+"""
+List technicians and emails
+"""
+@complaints_router.get(
+    "/mail_technician_list",
+    response_model=List[EmailSchema],
+    status_code=status.HTTP_200_OK)
+async def get_technician_email_list(
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    result = await complaints_service.get_technician_email_list(session)
+    return result

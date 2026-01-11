@@ -80,6 +80,8 @@ const API_ENDPOINTS = {
   COMPLAINT_UPDATE_DATA: `${BASE_API_URL}complaints/complaint_update_data`,
   COMPLAINT_SEARCH_NUMBER: `${BASE_API_URL}complaints/by_complaint_number`,
   COMPLAINT_UPDATE: `${BASE_API_URL}complaints/update`, //append complaint number
+  COMPLAINT_MAIL_TECHNICIAN: `${BASE_API_URL}complaints/mail_technician_list`,
+  COMPLAINT_SEND_EMAIL: `${BASE_API_URL}complaints/send_email`,
 
   CUSTOMER_CREATE: `${BASE_API_URL}customer/create`,
   CUSTOMER_NEXT_CODE: `${BASE_API_URL}customer/next_code`,

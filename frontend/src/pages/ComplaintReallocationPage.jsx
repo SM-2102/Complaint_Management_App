@@ -192,7 +192,7 @@ const ComplaintReallocationPage = () => {
           overflowX: "auto",
         }}
       >
-        <h2 className="text-xl font-semibold text-blue-800 mb-4 pb-2 border-b border-blue-500 justify-center flex items-center gap-2">
+        <h2 className="text-xl font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-500 justify-center flex items-center gap-2">
           Complaint Reallocation
         </h2>
 
@@ -212,7 +212,7 @@ const ComplaintReallocationPage = () => {
                 value={form.allocated_to}
                 onChange={handleAllocatedToChange}
                 required
-                className="w-full px-2 py-1 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-2 py-1 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-purple-400"
                 style={{ minWidth: 160 }}
               >
                 <option value="" disabled>
@@ -240,7 +240,7 @@ const ComplaintReallocationPage = () => {
                 name="reallocate_to"
                 value={form.reallocate_to}
                 onChange={handleReallocateToChange}
-                className="w-full px-2 py-1 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-2 py-1 rounded-lg border border-gray-300 text-gray-900 font-small focus:outline-none focus:ring-2 focus:ring-purple-400"
                 style={{ minWidth: 160 }}
               >
                 <option value="" disabled>
@@ -264,7 +264,7 @@ const ComplaintReallocationPage = () => {
         >
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ background: "#e3eafc" }}>
+              <TableRow sx={{ background: "#ede9fe" }}>
                 <TableCell sx={{ width: 20, textAlign: "center" }}>
                   <Checkbox
                     size="small"
@@ -313,7 +313,7 @@ const ComplaintReallocationPage = () => {
                   <TableRow
                     key={row.complaint_number || idx}
                     sx={{
-                      background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
+                      background: idx % 2 === 0 ? "#f5f3ff" : "#fff",
                       height: 32,
                     }}
                   >
@@ -347,7 +347,7 @@ const ComplaintReallocationPage = () => {
                   <TableRow
                     key={idx}
                     sx={{
-                      background: idx % 2 === 0 ? "#f4f8ff" : "#fff",
+                      background: idx % 2 === 0 ? "#f5f3ff" : "#fff",
                       height: 32,
                     }}
                   >
@@ -403,19 +403,19 @@ const ComplaintReallocationPage = () => {
           <Typography
             variant="subtitle1"
             sx={{
-              color: "#1976d2",
+              color: "#7c3aed",
               fontWeight: 700,
               fontSize: 17,
-              background: "#e3eafc",
+              background: "#ede9fe",
               px: 2,
               py: 0.5,
               borderRadius: 2,
-              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
+              boxShadow: "0 1px 4px rgba(124,58,237,0.07)",
               display: "inline-block",
             }}
           >
             <span style={{ letterSpacing: 0.5 }}>Selected Records:</span>{" "}
-            <span style={{ color: "#0d47a1", fontWeight: 600 }}>
+            <span style={{ color: "#5b21b6", fontWeight: 600 }}>
               {selected.length}
             </span>
           </Typography>
@@ -424,7 +424,7 @@ const ComplaintReallocationPage = () => {
             onClick={handleReallocate}
             disabled={updating || selected.length === 0}
             style={{
-              background: "#1976d2",
+              background: "#7c3aed",
               color: "#fff",
               fontWeight: 700,
               fontSize: "16px",
@@ -432,7 +432,7 @@ const ComplaintReallocationPage = () => {
               borderRadius: "6px",
               padding: "8px 24px",
               cursor: updating ? "not-allowed" : "pointer",
-              boxShadow: "0 1px 4px rgba(25,118,210,0.07)",
+              boxShadow: "0 1px 4px rgba(124,58,237,0.07)",
               opacity: updating ? 0.7 : 1,
               transition: "background 0.2s, color 0.2s",
             }}

@@ -218,7 +218,7 @@ const ComplaintCreatePage = () => {
         className="bg-[#f8fafc] shadow-lg rounded-lg p-6 w-full max-w-190 border border-gray-200"
         noValidate
       >
-        <h2 className="text-xl font-semibold text-blue-800 mb-4 pb-2 border-b border-blue-500 justify-center flex items-center gap-2">
+        <h2 className="text-xl font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-500 justify-center flex items-center gap-2">
           Create Complaint Record
         </h2>
         <div className="flex flex-col gap-4">      
@@ -241,7 +241,7 @@ const ComplaintCreatePage = () => {
               </select>
             </div>
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="complaint_number" className="w-60 text-md font-medium text-blue-700">
+              <label htmlFor="complaint_number" className="w-60 text-md font-medium text-purple-700">
                 Complaint No.<span className="text-red-500">*</span>
               </label>
               {entryType === "NEW" ? (
@@ -346,14 +346,14 @@ const ComplaintCreatePage = () => {
             </div>
           </div>
            <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               CUSTOMER DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
            <div
                        className="flex items-center gap-2 w-full"
@@ -373,7 +373,7 @@ const ComplaintCreatePage = () => {
                              type="text"
                              value={form.customer_name}
                              onChange={handleChange}
-                             className={`w-full px-3 py-1 rounded-lg border ${errs_label.customer_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                             className={`w-full px-3 py-1 rounded-lg border ${errs_label.customer_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                              minLength={3}
                              maxLength={40}
                              required
@@ -425,7 +425,7 @@ const ComplaintCreatePage = () => {
                          <button
                            type="button"
                            title="Search by name"
-                           className="p-1 rounded-full bg-gradient-to-tr from-blue-200 to-blue-500 text-white shadow-md hover:scale-105 hover:from-blue-600 hover:to-blue-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
+                           className="p-1 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
                            disabled={submitting || !form.customer_name}
                            onClick={() => handleSearch("customer_name")}
                            tabIndex={0}
@@ -447,7 +447,7 @@ const ComplaintCreatePage = () => {
               name="customer_address1"
               value={form.customer_address1}
               onChange={handleChange}
-              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address1 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address1 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
               maxLength={40}
               required
               autoComplete="street-address"
@@ -466,7 +466,7 @@ const ComplaintCreatePage = () => {
               name="customer_address2"
               value={form.customer_address2}
               onChange={handleChange}
-              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
               maxLength={40}
               autoComplete="street-address"
               disabled={submitting}
@@ -486,7 +486,7 @@ const ComplaintCreatePage = () => {
                 type="text"
                 value={form.customer_city}
                 onChange={handleChange}
-                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_city ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_city ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                 maxLength={30}
                 required
                 autoComplete="address-level2"
@@ -506,7 +506,7 @@ const ComplaintCreatePage = () => {
                 type="text"
                 value={form.customer_pincode}
                 onChange={handleChange}
-                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_pincode ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_pincode ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                 maxLength={6}
                 pattern="\d{6}"
                 autoComplete="postal-code"
@@ -528,7 +528,7 @@ const ComplaintCreatePage = () => {
                 type="text"
                 value={form.customer_contact1}
                 onChange={handleChange}
-                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_contact1 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_contact1 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                 maxLength={10}
                 pattern="\d{10}"
                 required
@@ -551,7 +551,7 @@ const ComplaintCreatePage = () => {
                     type="text"
                     value={form.contact2}
                     onChange={handleChange}
-                    className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.contact2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                    className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.contact2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                     maxLength={10}
                     pattern="\d{10}"
                     autoComplete="tel"
@@ -560,7 +560,7 @@ const ComplaintCreatePage = () => {
                 </>
               ) : (
                 <button
-                  className="text-blue-600 font-semibold hover:underline focus:outline-none text-left"
+                  className="text-purple-600 font-semibold hover:underline focus:outline-none text-left"
                   onClick={handleAddContact2}
                   type="button"
                   tabIndex={0}
@@ -572,14 +572,14 @@ const ComplaintCreatePage = () => {
             </div>
           </div>
           <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               PRODUCT DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-2/5">
@@ -687,14 +687,14 @@ const ComplaintCreatePage = () => {
             </div>
           </div>
           <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               COMPLAINT STATUS DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center flex-1 gap-2 w-2/5">
@@ -786,7 +786,7 @@ const ComplaintCreatePage = () => {
         <div className="flex justify-center mt-6">
           <button
             type="submit"
-            className="py-1.5 px-6 rounded-lg bg-blue-600 text-white font-bold text-base shadow hover:bg-blue-900 transition-colors duration-200 w-fit disabled:opacity-60"
+            className="py-1.5 px-6 rounded-lg bg-purple-600 text-white font-bold text-base shadow hover:bg-purple-900 transition-colors duration-200 w-fit disabled:opacity-60"
             disabled={submitting}
           >
             {submitting ? "Creating..." : "Create Record"}

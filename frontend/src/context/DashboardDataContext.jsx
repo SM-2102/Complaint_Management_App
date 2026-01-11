@@ -47,9 +47,9 @@ export const DashboardDataProvider = ({ children }) => {
         complaint: {
           division_wise_status: [],
           complaint_type: {},
+          all_complaints: 0,
           crm_open_complaints: 0,
           escalation_complaints: 0,
-          high_priority_complaints: 0,
           spare_pending_complaints: 0,
           mail_to_be_sent_complaints: 0,
         },

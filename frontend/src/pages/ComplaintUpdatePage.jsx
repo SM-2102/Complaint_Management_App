@@ -50,6 +50,15 @@ const initialForm = {
   payment_details: "",
   final_status: "N",
 };
+const ALL_STATUSES = [
+  "NEW",
+  "FRESH",
+  "PENDING",
+  "ESCALATION",
+  "OW",
+  "CANCEL",
+  "CLOSED",
+];
 
 const ComplaintUpdatePage = () => {
   const location = useLocation();
@@ -71,6 +80,8 @@ const ComplaintUpdatePage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showContact2, setShowContact2] = useState(false);
   const [showRevisitModal, setShowRevisitModal] = useState(false);
+  const [initialComplaintStatus, setInitialComplaintStatus] = useState("");
+
   // entryType removed: always allow manual complaint_number input
   const [nameInputWidth, setNameInputWidth] = useState("100%");
     useEffect(() => {
@@ -128,7 +139,7 @@ const ComplaintUpdatePage = () => {
     }, []);
 
   const handleSearch = async () => {
-    setError("");
+    setError({});
     setShowToast(false);
     try {
       const data = await searchCustomerByNameForComplaint(form.customer_name);
@@ -152,9 +163,31 @@ const ComplaintUpdatePage = () => {
       setShowToast(true);
     }
   };
+  const allowedComplaintStatuses = React.useMemo(() => {
+  const current = form.complaint_status;
+  const initial = initialComplaintStatus;
+
+  return ALL_STATUSES.filter((status) => {
+    // Rule 2: NEW cannot be selected unless it's already the current value
+    if (status === "NEW" && current !== "NEW") {
+      return false;
+    }
+
+    // Rule 3: If originally NEW, block FRESH and PENDING
+    if (
+      initial === "NEW" &&
+      (status === "FRESH" || status === "PENDING")
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+}, [form.complaint_status, initialComplaintStatus]);
+
 
   const handleSearchByNumber = async () => {
-    setError("");
+    setError({});
     setShowToast(false);
     try {
       const data = await searchComplaintByNumber(form.complaint_number);
@@ -197,6 +230,7 @@ const ComplaintUpdatePage = () => {
             final_status: data.final_status ?? "N",
       }));
       setShowContact2(!!data.customer_contact2);
+      setInitialComplaintStatus(data.complaint_status ?? "");
     } catch (err) {
       setError({
         message: err?.message || "Not found",
@@ -235,7 +269,7 @@ const ComplaintUpdatePage = () => {
     if (!q) return;
     let mounted = true;
     (async () => {
-      setError("");
+      setError({});
       setShowToast(false);
       try {
         const data = await searchComplaintByNumber(q);
@@ -347,7 +381,7 @@ const ComplaintUpdatePage = () => {
 
   const submitUpdate = async (revisitValue = null) => {
     setSubmitting(true);
-    setError("");
+    setError({});
     setShowToast(false);
     try {
       let payload = {
@@ -397,9 +431,7 @@ const ComplaintUpdatePage = () => {
         type: "success",
       });
       setShowToast(true);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      setForm(initialForm);
     } catch (err) {
       setError({
         message: err?.message || "Failed to update complaint.",
@@ -452,7 +484,7 @@ const ComplaintUpdatePage = () => {
         className="bg-[#f8fafc] shadow-lg rounded-lg p-6 w-full max-w-190 border border-gray-200"
         noValidate
       >
-        <h2 className="text-xl font-semibold text-blue-800 mb-4 pb-2 border-b border-blue-500 justify-center flex items-center gap-2">
+        <h2 className="text-xl font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-500 justify-center flex items-center gap-2">
           Update Complaint Record
         </h2>
         <div className="flex flex-col gap-4">      
@@ -475,7 +507,7 @@ const ComplaintUpdatePage = () => {
           />
            <div className="flex items-center w-full gap-7">
             <div className="flex items-center gap-2">
-              <label htmlFor="complaint_number" className="w-50 text-md font-medium text-blue-700">
+              <label htmlFor="complaint_number" className="w-50 text-md font-medium text-purple-700">
                 Complaint No.<span className="text-red-500">*</span>
               </label>
               <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
@@ -534,7 +566,7 @@ const ComplaintUpdatePage = () => {
                 <button
                   type="button"
                   title="Search by complaint number"
-                  className="p-1 rounded-full bg-gradient-to-tr from-blue-200 to-blue-500 text-white shadow-md hover:scale-105 hover:from-blue-600 hover:to-blue-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
+                  className="p-1 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
                   disabled={submitting || !form.complaint_number}
                   onClick={handleSearchByNumber}
                   tabIndex={0}
@@ -602,14 +634,14 @@ const ComplaintUpdatePage = () => {
             </div>
           </div>
           <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               PRODUCT DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
           
           <div className="flex items-center w-full gap-7">
@@ -716,14 +748,14 @@ const ComplaintUpdatePage = () => {
             </div>
           
            <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               CUSTOMER DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
            <div
                        className="flex items-center gap-2 w-full"
@@ -743,7 +775,7 @@ const ComplaintUpdatePage = () => {
                              type="text"
                              value={form.customer_name}
                              onChange={handleChange}
-                             className={`w-full px-3 py-1 rounded-lg border ${errs_label.customer_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                             className={`w-full px-3 py-1 rounded-lg border ${errs_label.customer_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                              minLength={3}
                              maxLength={40}
                              required
@@ -795,9 +827,9 @@ const ComplaintUpdatePage = () => {
                          <button
                            type="button"
                            title="Search by name"
-                           className="p-1 rounded-full bg-gradient-to-tr from-blue-200 to-blue-500 text-white shadow-md hover:scale-105 hover:from-blue-600 hover:to-blue-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
+                           className="p-1 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
                            disabled={submitting || !form.customer_name}
-                           onClick={() => handleSearch("customer_name")}
+                           onClick={() => handleSearch()}
                            tabIndex={0}
                            style={{ width: 32, height: 32 }}
                          >
@@ -817,7 +849,7 @@ const ComplaintUpdatePage = () => {
               name="customer_address1"
               value={form.customer_address1}
               onChange={handleChange}
-              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address1 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address1 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
               maxLength={40}
               required
               autoComplete="street-address"
@@ -836,7 +868,7 @@ const ComplaintUpdatePage = () => {
               name="customer_address2"
               value={form.customer_address2}
               onChange={handleChange}
-              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
               maxLength={40}
               autoComplete="street-address"
               disabled={submitting}
@@ -856,7 +888,7 @@ const ComplaintUpdatePage = () => {
                 type="text"
                 value={form.customer_city}
                 onChange={handleChange}
-                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_city ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_city ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                 maxLength={30}
                 required
                 autoComplete="address-level2"
@@ -876,7 +908,7 @@ const ComplaintUpdatePage = () => {
                 type="text"
                 value={form.customer_pincode}
                 onChange={handleChange}
-                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_pincode ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_pincode ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                 maxLength={6}
                 pattern="\d{6}"
                 autoComplete="postal-code"
@@ -898,7 +930,7 @@ const ComplaintUpdatePage = () => {
                 type="text"
                 value={form.customer_contact1}
                 onChange={handleChange}
-                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_contact1 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_contact1 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                 maxLength={10}
                 pattern="\d{10}"
                 required
@@ -910,18 +942,18 @@ const ComplaintUpdatePage = () => {
               {showContact2 ? (
                 <>
                   <label
-                    htmlFor="contact2"
+                    htmlFor="customer_contact2"
                     className="w-26 text-md font-medium text-gray-700"
                   >
                     Contact 2
                   </label>
                   <input
-                    id="contact2"
-                    name="contact2"
+                    id="customer_contact2"
+                    name="customer_contact2"
                     type="text"
-                    value={form.contact2}
+                    value={form.customer_contact2}
                     onChange={handleChange}
-                    className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.contact2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+                    className={`flex-1 w-full px-3 py-1 rounded-lg border ${errs_label.customer_contact2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
                     maxLength={10}
                     pattern="\d{10}"
                     autoComplete="tel"
@@ -930,7 +962,7 @@ const ComplaintUpdatePage = () => {
                 </>
               ) : (
                 <button
-                  className="text-blue-600 font-semibold hover:underline focus:outline-none text-left"
+                  className="text-purple-600 font-semibold hover:underline focus:outline-none text-left"
                   onClick={handleAddContact2}
                   type="button"
                   tabIndex={0}
@@ -943,14 +975,14 @@ const ComplaintUpdatePage = () => {
           </div>
         
           <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               COMPLAINT STATUS DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center flex-1 gap-2 w-1/2">
@@ -1016,22 +1048,22 @@ const ComplaintUpdatePage = () => {
                 Complaint Status<span className="text-red-500">*</span>
               </label>
               <select
-                id="complaint_status"
-                name="complaint_status"
-                value={form.complaint_status}
-                onChange={handleChange}
-                disabled={submitting}
-                className={`flex-1 min-w-0 px-3 py-1 rounded-lg border ${errs_label.complaint_status ? "border-red-300" : "border-gray-300"} text-gray-900 truncate`}
-              >
-                <option value="" disabled></option>
-                <option value="NEW">NEW</option>
-                <option value="FRESH">FRESH</option>
-                <option value="PENDING">PENDING</option>
-                <option value="ESCALATION">ESCALATION</option>
-                <option value="OW">OW</option>
-                <option value="CANCEL">CANCEL</option>
-                <option value="CLOSED">CLOSED</option>
-              </select>
+  id="complaint_status"
+  name="complaint_status"
+  value={form.complaint_status}
+  onChange={handleChange}
+  disabled={submitting}
+  className={`flex-1 min-w-0 px-3 py-1 rounded-lg border ${
+    errs_label.complaint_status ? "border-red-300" : "border-gray-300"
+  } text-gray-900`}
+>
+  <option value="" disabled></option>
+  {allowedComplaintStatuses.map((s) => (
+    <option key={s} value={s}>
+      {s}
+    </option>
+  ))}
+</select>
             </div>
             
           </div>
@@ -1114,14 +1146,14 @@ const ComplaintUpdatePage = () => {
               </select>
           </div>
            <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               SPARE DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-1/6">
@@ -1200,14 +1232,14 @@ const ComplaintUpdatePage = () => {
             </div>
           </div>
         <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               PAYMENT DETAILS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
           {/* Payment rows: editable only when complaint_status === 'OW' */}
           <div className="flex items-center w-full gap-7">
@@ -1288,19 +1320,19 @@ const ComplaintUpdatePage = () => {
               value={form.payment_details}
               onChange={handleChange}
               disabled={form.complaint_status !== "OW" || submitting}
-              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.payment_details ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 font-small`}
+              className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.payment_details ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
               maxLength={40}
             />
           </div>
           <div className="w-full flex items-center">
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
-              className="mx-3 text-blue-400 font-semibold text-xs tracking-widest select-none"
+              className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
               style={{ letterSpacing: 2 }}
             >
               FINAL STATUS
             </span>
-            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-blue-200 via-blue-400 to-blue-200 opacity-80 shadow-sm"></div>
+            <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
            <div className="flex items-center w-full">
             <div className="flex-1" />
@@ -1319,7 +1351,7 @@ const ComplaintUpdatePage = () => {
         <div className="flex justify-center mt-6">
           <button
             type="submit"
-            className="py-1.5 px-6 rounded-lg bg-blue-600 text-white font-bold text-base shadow hover:bg-blue-900 transition-colors duration-200 w-fit disabled:opacity-60"
+            className="py-1.5 px-6 rounded-lg bg-purple-600 text-white font-bold text-base shadow hover:bg-purple-900 transition-colors duration-200 w-fit disabled:opacity-60"
             disabled={submitting}
           >
             {submitting ? "Updating..." : "Update Record"}
@@ -1340,7 +1372,7 @@ const ComplaintUpdatePage = () => {
             <div className="text-lg font-semibold mb-4">Revisit ?</div>
             <div className="flex gap-4">
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800"
+                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-800"
                 onClick={() => handleRevisitChoice(true)}
               >
                 Yes

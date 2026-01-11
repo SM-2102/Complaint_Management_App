@@ -14,7 +14,7 @@ from mail import mail, create_email_message
 
 from utils.date_utils import format_date_ddmmyyyy
 from utils.file_utils import capital_to_proper_case
-from complaints.schemas import ComplaintReallocateRequestSchema, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, ComplaintsSchema, ComplaintFilterData, ComplaintEnquiryResponseSchema, CreateComplaint, ComplaintCreateData, UpdateComplaint
+from complaints.schemas import ComplaintReallocateRequestSchema, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, ComplaintsSchema, ComplaintFilterData, ComplaintEnquiryResponseSchema, CreateComplaint, ComplaintCreateData, EmailSchema, UpdateComplaint
 from complaints.models import Complaint, ActionTable
 from employee.models import Employee 
 from customer.models import Customer
@@ -180,17 +180,6 @@ class ComplaintsService:
         return action_heads
     
     async def get_complaint_filter_data(self, session: AsyncSession) -> ComplaintFilterData:
-        # Fetch complaint_number and customer_name together
-        result = await session.execute(
-            select(Complaint.complaint_number, Complaint.customer_name)
-        )
-        complaint_numbers_set = set()
-        customer_names_set = set()
-        for complaint_number, customer_name in result.all():
-            if complaint_number:
-                complaint_numbers_set.add(complaint_number)
-            if customer_name:
-                customer_names_set.add(customer_name)
 
         # Fetch all action_head from ActionTable
         action_head_result = await session.execute(select(ActionTable.action_head).order_by(ActionTable.action_head))
@@ -206,8 +195,6 @@ class ComplaintsService:
         action_bys = action_by_result.scalars().all()
 
         return ComplaintFilterData(
-            complaint_number=list(complaint_numbers_set),
-            customer_name=list(customer_names_set),
             action_head=action_heads,
             action_by=action_bys
         )
@@ -248,14 +235,14 @@ class ComplaintsService:
         if action_by:
             statement = statement.where(model.action_by == action_by)
         if complaint_number:
-            statement = statement.where(model.complaint_number == complaint_number)
+            statement = statement.where(model.complaint_number.ilike(f"%{complaint_number}%"))
         if customer_contact:
             statement = statement.where(
                 (model.customer_contact1 == customer_contact) |
                 (model.customer_contact2 == customer_contact)
             )
         if customer_name:
-            statement = statement.where(model.customer_name == customer_name)
+            statement = statement.where(model.customer_name.ilike(f"%{customer_name}%"))
         if complaint_head and complaint_head != "ALL":
             statement = statement.where(model.complaint_head == complaint_head)
         if spare_pending_complaints == "Y":
@@ -297,7 +284,7 @@ class ComplaintsService:
             statement, product_division, complaint_type, complaint_priority, action_head, spare_pending, final_status, action_by, complaint_number, customer_contact, customer_name, complaint_head, spare_pending_complaints, crm_open_complaints, escalation_complaints, high_priority_complaints, mail_to_be_sent_complaints 
         )
 
-        statement = statement.order_by(Complaint.complaint_number)
+        statement = statement.order_by(Complaint.complaint_date, Complaint.complaint_number)
         statement = statement.limit(limit).offset(offset)
         result = await session.execute(statement)
         rows = result.scalars().all()
@@ -554,35 +541,151 @@ class ComplaintsService:
         await session.refresh(existing_complaint)
         return existing_complaint
     
+ 
     async def send_pending_emails(
         self,
         session: AsyncSession,
-        recipients: List[str],
+        recipients: List[EmailSchema],
     ):
-        statement = select(Complaint).where(
-            (Complaint.final_status == "N") & 
-            (func.upper(Complaint.action_head) == "MAIL TO BE SENT TO HO")
-        ).order_by(Complaint.complaint_number)
-        result = await session.execute(statement)
-        rows = result.scalars().all()
-        if not rows:
-            return 0  # No pending emails to send
+        ESCALATION_STATUSES = {
+            "ESCALATION",
+            "CRM-ESCALATION",
+            "MD-ESCALATION",
+            "URGENT",
+        }
 
-
-        for row in rows:
-            body = f"""
-            <p>Complaint Number: {row.complaint_number}</p>
-            <p>Customer Name: {row.customer_name}</p>
-            <p>Current Status: {row.current_status}</p>
-            <p>Product Division: {row.product_division}</p>
-            <p>Action By: {row.action_by}</p>
-            <p>Please take the necessary action.</p>
-            """
-            message = create_email_message(
-                subject=f"Latest Job List",
-                recipients=recipients,
-                body=body
+        for recipient in recipients:
+            statement = (
+                select(Complaint)
+                .where(
+                    Complaint.final_status == "N",
+                    func.upper(Complaint.complaint_status) != "CLOSED",
+                    Complaint.action_by == recipient.name,
+                )
+                .order_by(Complaint.complaint_number)
             )
+
+            result = await session.execute(statement)
+            complaints = result.scalars().all()
+
+            if not complaints:
+                continue  # No pending complaints for this recipient
+
+            # Build table rows
+            table_rows = ""
+
+            for row in complaints:
+                complaint_datetime = " ".join(
+                    filter(None, [
+                        row.complaint_date.strftime("%d-%m-%y") if row.complaint_date else "",
+                        str(row.complaint_time) if row.complaint_time else "",
+                    ])
+                )
+
+                customer_address = ", ".join(
+                    filter(None, [
+                        row.customer_address1,
+                        row.customer_address2,
+                        row.customer_city,
+                        row.customer_pincode,
+                    ])
+                )
+
+                customer_contact = " / ".join(
+                    filter(None, [
+                        row.customer_contact1,
+                        row.customer_contact2,
+                    ])
+                )
+
+                # Days difference
+                days_old = (date.today() - row.complaint_date).days if row.complaint_date else 0
+
+                # Escalation logic
+                is_escalated = (
+                    days_old > 5
+                    or (row.complaint_priority and row.complaint_priority.upper() in ESCALATION_STATUSES)
+                )
+
+                row_style = (
+                    "background-color:#fde2e2;color:#7a1f1f;"
+                    if is_escalated
+                    else ""
+                )
+
+                table_rows += f"""
+                    <tr style="{row_style}">
+                        <td>{row.complaint_number}</td>
+                        <td>{complaint_datetime}</td>
+                        <td>{row.complaint_type}</td>
+                        <td>{row.complaint_status}</td>
+                        <td>{row.customer_name}</td>
+                        <td>{customer_address}</td>
+                        <td>{customer_contact}</td>
+                        <td>{row.product_division}</td>
+                        <td>{row.product_model or ""}</td>
+                        <td>{row.product_serial_number or ""}</td>
+                        <td>{row.current_status}</td>
+                    </tr>
+                """
+
+            # Email body (HTML table)
+            body = f"""
+            <p>Dear {recipient.name},</p>
+
+            <p>The following complaints are pending for your action:</p>
+
+            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+                <thead style="background-color: #d6c1f0;">
+                    <tr>
+                        <th>Number</th>
+                        <th>DateTime</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Customer Name</th>
+                        <th>Customer Address</th>
+                        <th>Contact</th>
+                        <th>Div</th>
+                        <th>Model</th>
+                        <th>Serial No</th>
+                        <th>Current Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {table_rows}
+                </tbody>
+            </table>
+
+            <p style="color:#7a1f1f;font-weight:bold;">
+                Rows highlighted in red indicate escalated or overdue complaints.
+            </p>
+            """
+
+            message = create_email_message(
+                subject="Latest Complaints List",
+                recipients=[recipient.email],  # single recipient per mail
+                body=body,
+            )
+
             await mail.send_message(message)
 
         return
+
+    
+    async def get_technician_email_list(
+        self,
+        session: AsyncSession,
+    ) -> List[EmailSchema]:
+        statement = (
+            select(Employee.name, Employee.email)
+            .where(Employee.is_active == 'Y')
+            .where(Employee.role == 'TECHNICIAN')
+            .order_by(Employee.name)
+        )
+        result = await session.execute(statement)
+        rows = result.all()
+        email_list = [
+            EmailSchema(name=row[0], email=row[1])
+            for row in rows
+        ]
+        return email_list

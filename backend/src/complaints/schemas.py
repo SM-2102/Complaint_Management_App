@@ -32,8 +32,6 @@ class ComplaintsSchema(BaseModel):
     final_status: str
 
 class ComplaintFilterData(BaseModel):
-    complaint_number: List[str] = []
-    customer_name: List[str] = []
     action_head: List[str] = []
     action_by: List[str] = []
 
@@ -174,5 +172,6 @@ class UpdateComplaint(BaseModel):
     final_status: str = Field(..., max_length=1)
 
 class EmailSchema(BaseModel):
-    emails: List[str]
+    name: str
+    email: str
     

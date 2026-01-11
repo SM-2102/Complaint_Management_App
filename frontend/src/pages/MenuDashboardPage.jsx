@@ -190,6 +190,11 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     };
     return [
       {
+        title: "All Complaints",
+        value: getVal(c.all_complaints),
+        cardKey: "all_complaints"
+      },
+      {
         title: "CRM Open Complaints",
         value: getVal(c.crm_open_complaints),
         cardKey: "crm_open_complaints"
@@ -198,11 +203,6 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
         title: "Escalation Complaints",
         value: getVal(c.escalation_complaints),
         cardKey: "escalation_complaints"
-      },
-      {
-        title: "High Priority Complaints",
-        value: getVal(c.high_priority_complaints),
-        cardKey: "high_priority_complaints"
       },
       {
         title: "Spare Pending Complaints",

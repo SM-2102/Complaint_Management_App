@@ -143,7 +143,7 @@ class MenuService:
                         (
                             and_(
                                 Complaint.final_status == "N",
-                                func.upper(Complaint.complaint_priority).in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION"]),
+                                func.upper(Complaint.complaint_priority).in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION", "URGENT"]),
                             ),
                             1,
                         ),
@@ -151,8 +151,8 @@ class MenuService:
                     )
                 ).label("escalation"),
                 func.sum(
-                    case((and_(Complaint.final_status == "N", func.upper(Complaint.complaint_priority) == "URGENT"), 1), else_=0)
-                ).label("high_priority"),
+                    case((and_(Complaint.final_status == "N"), 1), else_=0)
+                ).label("all"),
                 func.sum(
                     case((and_(Complaint.final_status == "N", func.upper(Complaint.action_head) == "MAIL TO BE SENT TO HO"), 1), else_=0)
                 ).label("mail_to_be_sent"),
@@ -164,10 +164,10 @@ class MenuService:
         counts_rows = (await session.execute(counts_stmt)).all()
 
         # Default zeros for expected heads
+        all_complaints = {"CGCEL": 0, "CGPISL": 0}
         crm_open_complaints = {"CGCEL": 0, "CGPISL": 0}
         escalation_complaints = {"CGCEL": 0, "CGPISL": 0}
         spare_pending_complaints = {"CGCEL": 0, "CGPISL": 0}
-        high_priority_complaints = {"CGCEL": 0, "CGPISL": 0}
         mail_to_be_sent_complaints = {"CGCEL": 0, "CGPISL": 0}
 
         for row in counts_rows:
@@ -175,10 +175,10 @@ class MenuService:
             if head not in crm_open_complaints:
                 # Skip any unexpected heads but don't fail
                 continue
+            all_complaints[head] = int(row.all or 0)
             crm_open_complaints[head] = int(row.crm_open or 0)
             escalation_complaints[head] = int(row.escalation or 0)
             spare_pending_complaints[head] = int(row.spare_pending or 0)
-            high_priority_complaints[head] = int(row.high_priority or 0)
             mail_to_be_sent_complaints[head] = int(row.mail_to_be_sent or 0)
 
         return {
@@ -191,9 +191,9 @@ class MenuService:
                     "CGCEL": complaint_type_cgcel,
                     "CGPISL": complaint_type_cgpisl,
                 },
+                "all_complaints": all_complaints,
                 "crm_open_complaints": crm_open_complaints,
                 "escalation_complaints": escalation_complaints,
-                "high_priority_complaints": high_priority_complaints,
                 "spare_pending_complaints": spare_pending_complaints,
                 "mail_to_be_sent_complaints": mail_to_be_sent_complaints,
             }

@@ -78,6 +78,19 @@ function validateUpdateComplaint(form, showContact2) {
     errors.push("Payment Mode is required");
     errors_label.payment_mode = true;
   }
+  if(form.final_status == "Y")
+  {
+    if(form.complaint_status == "NEW" || form.complaint_status == "FRESH" || form.complaint_status == "ESCALATION" || form.complaint_status == "PENDING")
+    {
+      errors.push("Status must be Closed or Cancelled");
+      errors_label.complaint_status = true;
+    }
+    if(form.complaint_status == "OW" && form.payment_collected != "Y")
+    {
+      errors.push("Payment must be collected for OW");
+      errors_label.complaint_status = true;
+    }
+  }
   return [errors, errors_label];
 }
 

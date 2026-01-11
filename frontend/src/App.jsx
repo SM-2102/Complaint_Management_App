@@ -41,6 +41,7 @@ import CustomerCreatePage from "./pages/CustomerCreatePage.jsx";
 import CustomerUpdatePage from "./pages/CustomerUpdatePage.jsx";
 import ComplaintCreatePage from "./pages/ComplaintCreatePage.jsx";
 import ComplaintUpdatePage from "./pages/ComplaintUpdatePage.jsx";
+import ComplaintSendPage from "./pages/ComplaintSendPage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -379,7 +380,7 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             path="/ReportGeneration"
             element={
               <PrivateRoute>
-                <PageNotAvailable />
+                <ComplaintSendPage />
               </PrivateRoute>
             }
           />

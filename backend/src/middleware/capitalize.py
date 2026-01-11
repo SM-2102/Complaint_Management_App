@@ -23,6 +23,7 @@ class CapitalizeJSONMiddleware(BaseHTTPMiddleware):
             "/employee/create_employee",
             "/employee/delete_employee",
             "/notification/create_notification",
+            "/complaints/send_email",
         ]
 
         if request.url.path in excluded_paths:
