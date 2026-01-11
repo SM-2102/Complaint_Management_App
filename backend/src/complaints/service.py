@@ -10,6 +10,7 @@ from sqlalchemy import case, insert, tuple_, update, select, distinct, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
+from mail import mail, create_email_message
 
 from utils.date_utils import format_date_ddmmyyyy
 from utils.file_utils import capital_to_proper_case
@@ -552,3 +553,36 @@ class ComplaintsService:
             raise UpdateFailed()
         await session.refresh(existing_complaint)
         return existing_complaint
+    
+    async def send_pending_emails(
+        self,
+        session: AsyncSession,
+        recipients: List[str],
+    ):
+        statement = select(Complaint).where(
+            (Complaint.final_status == "N") & 
+            (func.upper(Complaint.action_head) == "MAIL TO BE SENT TO HO")
+        ).order_by(Complaint.complaint_number)
+        result = await session.execute(statement)
+        rows = result.scalars().all()
+        if not rows:
+            return 0  # No pending emails to send
+
+
+        for row in rows:
+            body = f"""
+            <p>Complaint Number: {row.complaint_number}</p>
+            <p>Customer Name: {row.customer_name}</p>
+            <p>Current Status: {row.current_status}</p>
+            <p>Product Division: {row.product_division}</p>
+            <p>Action By: {row.action_by}</p>
+            <p>Please take the necessary action.</p>
+            """
+            message = create_email_message(
+                subject=f"Latest Job List",
+                recipients=recipients,
+                body=body
+            )
+            await mail.send_message(message)
+
+        return

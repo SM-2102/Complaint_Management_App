@@ -9,7 +9,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
 from complaints.service import ComplaintsService
-from complaints.schemas import ComplaintFilterData, ComplaintEnquiryResponseSchema, ComplaintReallocateRequestSchema, ComplaintResponse, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, CreateComplaint, ComplaintCreateData, UpdateComplaint
+from complaints.schemas import ComplaintFilterData, ComplaintEnquiryResponseSchema, ComplaintReallocateRequestSchema, ComplaintResponse, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, CreateComplaint, ComplaintCreateData, EmailSchema
 from exceptions import ComplaintNotFound
 
 complaints_router = APIRouter()
@@ -271,3 +271,15 @@ async def update_complaint(
     # Pass the raw payload to service; service will handle `revisit` if present
     new_complaint = await complaints_service.update_complaint(complaint_number, complaint, session, token)
     return JSONResponse(content={"message": f"Complaint Updated : {new_complaint.complaint_number}"})
+
+"""
+Send pending emails for complaints.
+"""
+@complaints_router.post("/send_email", status_code=status.HTTP_200_OK)
+async def send_pending_emails(
+    recipients: EmailSchema,
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    await complaints_service.send_pending_emails(session, recipients.emails)
+    return JSONResponse(content={"message": f"Emails sent successfully."})

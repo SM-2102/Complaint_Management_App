@@ -29,29 +29,6 @@ class StockCGPISL(SQLModel, table=True):
         return f"<SpareCGPISL {self.spare_code}>"
 
 
-class StockCGPISLMovement(SQLModel, table=True):
-    __tablename__ = "stock_cgpisl_movement"
-    id: int = Field(
-        sa_column=Column(
-            pg.INTEGER,
-            Identity(always=False),  # this makes id auto-increment in PostgreSQL
-            primary_key=True,
-        )
-    )
-    spare_code: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=False))
-    division: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=False))
-    spare_description: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=False))
-    movement_type: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=False))
-    own_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=False))
-    remark: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=False))
-    entry_date: date = Field(sa_column=Column(pg.DATE, nullable=False))
-    created_by: str = Field(
-        sa_column=Column(pg.VARCHAR(30), ForeignKey("users.username"), nullable=False)
-    )
-
-    def __repr__(self):
-        return f"<SpareCGPISLMovement {self.spare_code}>"
-
 
 class StockCGPISLIndent(SQLModel, table=True):
     __tablename__ = "stock_cgpisl_indent"

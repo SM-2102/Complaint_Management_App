@@ -6,7 +6,6 @@ from sqlalchemy import Column
 
 
 class ComplaintsSchema(BaseModel):
-    
     complaint_number: str = Field(..., max_length=15)
     complaint_head: str = Field(..., max_length=10)
     complaint_date: date
@@ -173,4 +172,7 @@ class UpdateComplaint(BaseModel):
     amount_sc: Optional[float]
     amount_spare: Optional[float]
     final_status: str = Field(..., max_length=1)
+
+class EmailSchema(BaseModel):
+    emails: List[str]
     
