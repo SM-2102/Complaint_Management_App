@@ -5,21 +5,11 @@ import { complaintEnquiry } from "../services/complaintEnquiryService";
 import { fetchComplaintFilterData } from "../services/complaintFilterDataService";
 
 // Option constants
-const DIVISION_OPTIONS = [
-  { value: "", label: "ALL" },
-  { value: "FANS", label: "FANS" },
-  { value: "LIGHT", label: "LIGHT" },
-  { value: "WHC", label: "WHC" },
-  { value: "SDA", label: "SDA" },
-  { value: "PUMP", label: "PUMP" },
-  { value: "CG-PUMP", label: "CG-PUMP" },
-  { value: "CG-FANS", label: "CG-FANS" },
-  { value: "CG-WHC", label: "CG-WHC" },
-  { value: "CG-SDA", label: "CG-SDA" },
-  { value: "CG-FHP", label: "CG-FHP" },
-  { value: "CG-LT", label: "CG-LT" },
-  { value: "OTHERS", label: "OTHERS" },
-];
+const DIVISION_OPTIONS_BY_COMPANY = {
+  CGCEL: ["FANS", "SDA", "PUMP", "WHC", "LIGHT"],
+  CGPISL: ["CG-FANS", "CG-SDA", "CG-LT", "CG-FHP", "CG-PUMP", "CG-WHC"],
+  ALL: ["FANS", "SDA", "PUMP", "WHC", "LIGHT", "CG-FANS", "CG-SDA", "CG-LT", "CG-FHP", "CG-PUMP", "CG-WHC"],
+};
 const COMPLAINT_TYPE_OPTIONS = [
   { value: "", label: "ALL" },
   { value: "SALE", label: "SALE" },
@@ -41,7 +31,6 @@ const YES_NO_OPTIONS = [
 
 // Dynamic filter config state
 const DEFAULT_FILTER_CONFIG = [
-  { name: "product_division", label: "Product Division", type: "select", options: DIVISION_OPTIONS },
   { name: "complaint_type", label: "Complaint Type", type: "select", options: COMPLAINT_TYPE_OPTIONS },
   { name: "complaint_priority", label: "Complaint Priority", type: "select", options: PRIORITY_OPTIONS },
   { name: "action_by", label: "Action By", type: "select", options: [] },
@@ -60,6 +49,13 @@ const STATUS_STYLES = {
   OW: "bg-purple-100 text-purple-800",
   RESOLVED: "bg-green-100 text-green-800",
   default: "bg-gray-200 text-gray-900",
+};
+const buildDivisionOptions = (selectedCompany) => {
+  const divisions = DIVISION_OPTIONS_BY_COMPANY[selectedCompany] || [];
+  return [
+    { value: "", label: "ALL" },
+    ...divisions.map((d) => ({ value: d, label: d })),
+  ];
 };
 
 const InputField = React.memo(({ config, value, onChange, onBlur }) => {
@@ -110,6 +106,19 @@ const InputField = React.memo(({ config, value, onChange, onBlur }) => {
 import { useLocation, useNavigate } from "react-router-dom";
 
 const ComplaintPendingPage = ({ selectedCompany }) => {
+  const divisionOptions = useMemo(
+  () => buildDivisionOptions(selectedCompany),
+  [selectedCompany]
+);
+const productDivisionConfig = useMemo(
+  () => ({
+    name: "product_division",
+    label: "Product Division",
+    type: "select",
+    options: divisionOptions,
+  }),
+  [divisionOptions]
+);
   const location = useLocation();
   const navigate = useNavigate();
   // Parse query params from URL
@@ -125,9 +134,13 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
   const [filters, setFilters] = useState(() => {
     // If query params exist, use them to set initial filters
     const initial = DEFAULT_FILTER_CONFIG.reduce((acc, cur) => ({ ...acc, [cur.name]: "" }), {});
+    initial.product_division = "";
     // complaint_priority is always a string now
     return { ...initial, ...queryParams };
   });
+  useEffect(() => {
+  setFilters((prev) => ({ ...prev, product_division: "" }));
+}, [selectedCompany]);
   const [filterConfig, setFilterConfig] = useState(DEFAULT_FILTER_CONFIG);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -293,12 +306,13 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
     },
     [filters, fetchData, navigate]
   );
-  // Clear all filters
   const handleClear = useCallback(() => {
-    setFilters(DEFAULT_FILTER_CONFIG.reduce((acc, cur) => ({ ...acc, [cur.name]: "" }), {}));
-    setPage(1);
-    // Do not call fetchData here; only reset filters and page.
-  }, []);
+  setFilters({
+    ...DEFAULT_FILTER_CONFIG.reduce((acc, cur) => ({ ...acc, [cur.name]: "" }), {}),
+    product_division: "",
+  });
+  setPage(1);
+}, []);
 
   // Fetch data on page change
   const handlePageChange = (newPage) => {
@@ -363,7 +377,10 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
                 {/* First row: Division, Complaint Type, Priority, Action By, Action Head */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-7 md:gap-7 items-end">
                   {["product_division", "complaint_type", "complaint_priority", "action_by", "action_head"].map((name) => {
-                    const config = filterConfig.find(f => f.name === name);
+                    const config =
+                   name === "product_division"
+                     ? productDivisionConfig
+                     : filterConfig.find(f => f.name === name);
                     return (
                       <div key={config.name} className="flex flex-col min-w-0">
                         <span className="text-[0.7rem] font-semibold tracking-wide text-purple-800 mb-0.5 leading-tight uppercase">

@@ -359,6 +359,30 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/CreateRFRRecord"
+            element={
+              <PrivateRoute>
+                <PageNotAvailable />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/GenerateRFRRecord"
+            element={
+              <PrivateRoute>
+                <PageNotAvailable />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ReportGeneration"
+            element={
+              <PrivateRoute>
+                <PageNotAvailable />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </div>
       <Footer />
