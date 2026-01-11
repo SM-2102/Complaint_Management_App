@@ -6,7 +6,6 @@
 
 ## To Do List
 
-- Menu Dashboard
 
 - Create RFR Record
 - Print RFR Record
