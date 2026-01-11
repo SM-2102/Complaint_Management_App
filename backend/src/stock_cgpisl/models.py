@@ -43,7 +43,7 @@ class StockCGPISLIndent(SQLModel, table=True):
     division: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=False))
     spare_description: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=False))
     indent_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=False))
-    indent_date: date = Field(sa_column=Column(pg.DATE, nullable=False))
+    indent_date: date = Field(sa_column=Column(pg.DATE, nullable=False, index=True))
     indent_number: str = Field(sa_column=Column(pg.VARCHAR(6), nullable=False))
     party_name: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
     order_number: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))

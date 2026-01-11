@@ -90,7 +90,7 @@ class GRCCGPISLReturnHistory(SQLModel, table=True):
     defective_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
     returning_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True))
     challan_number: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=True))
-    challan_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
+    challan_date: date = Field(sa_column=Column(pg.DATE, nullable=True, index=True))
     docket_number: str = Field(sa_column=Column(pg.VARCHAR(8), nullable=True))
     sent_through: str = Field(sa_column=Column(pg.VARCHAR(20), nullable=True))
     dispute_remark: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))

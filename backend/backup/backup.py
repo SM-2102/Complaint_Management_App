@@ -48,6 +48,71 @@ def get_all_tables(cursor):
     )
     return [row[0] for row in cursor.fetchall() if row[0] not in exclude_tables]
 
+def purge_old_complaints(cursor):
+    """
+    Delete complaints older than 6 months based on complaint_date.
+    """
+    print("[PURGE] Removing complaints older than 6 months...")
+
+    cursor.execute(
+        """
+        DELETE FROM complaints
+        WHERE complaint_date < CURRENT_DATE - INTERVAL '6 months'
+        """
+    )
+
+    deleted = cursor.rowcount
+    print(f"[PURGE] Complaints deleted: {deleted}")
+
+def purge_old_stock_and_grc(cursor):
+    """
+    Delete GRC and stock records older than 1 year.
+    """
+    print("\n[PURGE] Removing GRC and Stock Indent data older than 1 year...")
+
+    purge_statements = [
+        (
+            "grc_cgcel_return_history",
+            "challan_date",
+            """
+            DELETE FROM grc_cgcel_return_history
+            WHERE challan_date < CURRENT_DATE - INTERVAL '1 year'
+            """
+        ),
+        (
+            "grc_cgpisl_return_history",
+            "challan_date",
+            """
+            DELETE FROM grc_cgpisl_return_history
+            WHERE challan_date < CURRENT_DATE - INTERVAL '1 year'
+            """
+        ),
+        (
+            "stock_cgcel_indent",
+            "indent_date",
+            """
+            DELETE FROM stock_cgcel_indent
+            WHERE indent_date < CURRENT_DATE - INTERVAL '1 year'
+            """
+        ),
+        (
+            "stock_cgpisl_indent",
+            "indent_date",
+            """
+            DELETE FROM stock_cgpisl_indent
+            WHERE indent_date < CURRENT_DATE - INTERVAL '1 year'
+            """
+        ),
+    ]
+
+    total_deleted = 0
+
+    for table, column, sql in purge_statements:
+        cursor.execute(sql)
+        deleted = cursor.rowcount
+        total_deleted += deleted
+        print(f"[PURGE] {table}: {deleted} rows deleted")
+
 
 def export_table_to_csv(cursor, table_name, backup_dir):
     """Export a single table to CSV file."""
@@ -130,6 +195,25 @@ def backup_database():
             f"[COMPLETE] Backup finished at {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}"
         )
         print("────────────────────────────────────────────────────────────")
+
+        # Purge old complaints AFTER successful backup
+        purge_old_complaints(cursor)
+        purge_old_stock_and_grc(cursor)
+        # Commit purge
+        connection.commit()
+        connection.autocommit = True
+        cursor.execute("VACUUM ANALYZE complaints;")
+        cursor.execute("VACUUM ANALYZE grc_cgcel_return_history;")
+        cursor.execute("VACUUM ANALYZE stock_cgcel_indent;")
+        connection.autocommit = False
+        print()
+        print("[VACUUM] Complaints Table vacuumed")
+        print("[VACUUM] Stock Indent Table vacuumed")
+        print("[VACUUM] GRC Return Table vacuumed")
+        print()
+        print("────────────────────────────────────────────────────────────")
+        print("────────────────────────────────────────────────────────────")
+
 
     except psycopg2.Error as e:
         print(f"[ERROR] Database error: {str(e)}")

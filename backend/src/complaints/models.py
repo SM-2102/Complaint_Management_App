@@ -13,7 +13,7 @@ class Complaint(SQLModel, table=True):
         sa_column=Column(pg.VARCHAR(15), primary_key=True, nullable=False)
     )
     complaint_head: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=False))
-    complaint_date: date = Field(sa_column=Column(pg.DATE, nullable=False))
+    complaint_date: date = Field(sa_column=Column(pg.DATE, nullable=False, index=True))
     complaint_time: time = Field(sa_column=Column(pg.TIME, nullable=False))
 
     # Complaint classification
