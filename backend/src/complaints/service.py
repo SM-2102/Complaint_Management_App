@@ -415,7 +415,7 @@ class ComplaintsService:
                 except IntegrityError as ie:
                     await session.rollback()
             # Include an explanatory message when raising to aid logs/clients
-            raise ComplaintNumberGenerationFailed("Failed to generate a unique complaint number after 3 retries")
+            raise ComplaintNumberGenerationFailed()
         
 
     async def get_complaint_create_data(self, session: AsyncSession) -> ComplaintCreateData:
@@ -517,8 +517,7 @@ class ComplaintsService:
                     "complaint_head": existing_complaint.complaint_head,
                     "complaint_type": existing_complaint.complaint_type,
                     "complaint_priority": existing_complaint.complaint_priority,
-                    # Set action_head to 'Others' as requested (action_type -> Others)
-                    "action_head": "Others",
+                    "action_head": "TO REVISIT BY TECHNICIAN",
                     "action_by": existing_complaint.action_by,
                     "technician": existing_complaint.technician,
                     "customer_type": existing_complaint.customer_type,

@@ -32,10 +32,10 @@ class Customer(SQLModel, table=True):
     discount_cgsda: float = Field(
         sa_column=Column(pg.FLOAT, nullable=True)
     )
-    discount_lt: float = Field(
+    discount_cglt: float = Field(
         sa_column=Column(pg.FLOAT, nullable=True)
     )
-    discount_fhp: float = Field(
+    discount_cgfhp: float = Field(
         sa_column=Column(pg.FLOAT, nullable=True)
     )
     discount_pump: float = Field(

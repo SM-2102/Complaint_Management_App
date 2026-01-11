@@ -25,8 +25,8 @@ const initialForm = {
   discount_cgfan: "",
   discount_sda: "",
   discount_cgsda: "",
-  discount_lt: "",
-  discount_fhp: "",
+  discount_cglt: "",
+  discount_cgfhp: "",
   discount_pump: "",
   discount_cgpump: "",
   discount_light: "",
@@ -570,7 +570,7 @@ const CustomerCreatePage = () => {
           <div className="w-full overflow-x-auto">
             <table className="min-w-full rounded-lg border-collapse table-auto text-md">
               <thead>
-                <tr className="text-blue-900">
+                <tr className="text-blue-800">
                   <th className="px-4 py-2 text-center">&nbsp;</th>
                   <th className="px-4 py-2 text-center">CGCEL</th>
                   <th className="px-4 py-2 text-center">CGPISL</th>
@@ -578,19 +578,18 @@ const CustomerCreatePage = () => {
               </thead>
               <tbody>
                 {[
-                  ["FAN", "discount_cgfan", "discount_fan"],
-                  ["PUMP", "discount_cgpump", "discount_pump"],
-                  ["FHP", "discount_cgfhp", "discount_fhp"],
-                  ["LT", "discount_cglt", "discount_lt"],
-                  ["LIGHT", "discount_cglight", "discount_light"],
-                  ["SDA", "discount_cgsda", "discount_sda"],
-                  ["WHC", "discount_cgwhc", "discount_whc"],
+                  ["FAN", "discount_fan", "discount_cgfan"],
+                  ["PUMP", "discount_pump", "discount_cgpump"],
+                  ["FHP", "discount_fhp", "discount_cgfhp"],
+                  ["LT", "discount_lt", "discount_cglt"],
+                  ["LIGHT", "discount_light", "discount_cglight"],
+                  ["SDA", "discount_sda", "discount_cgsda"],
+                  ["WHC", "discount_whc", "discount_cgwhc"],
                 ].map(([label, cgcelKey, cgpislKey]) => (
                   <tr key={label} className="">
                     <td className="px-4 py-2 font-medium text-gray-700">{label}</td>
                     <td className="px-4 py-2 text-center">
-                      {/* Render empty space for certain non-existent CGCEL fields */}
-                      {['discount_cglight', 'discount_cgfhp', 'discount_cglt'].includes(cgcelKey) ? (
+                      {['discount_fhp', 'discount_lt'].includes(cgcelKey) ? (
                         <div className="w-24 h-8 mx-auto"></div>
                       ) : (
                         <input
@@ -607,6 +606,9 @@ const CustomerCreatePage = () => {
                       )}
                     </td>
                     <td className="px-4 py-2 text-center">
+                      {['discount_cglight'].includes(cgpislKey) ? (
+                        <div className="w-24 h-8 mx-auto"></div>
+                      ) : (
                       <input
                         type="number"
                         inputMode="decimal"
@@ -618,6 +620,7 @@ const CustomerCreatePage = () => {
                         className="w-24 mx-auto block px-2 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 text-center"
                         disabled={submitting}
                       />
+                      )}
                     </td>
                   </tr>
                 ))}

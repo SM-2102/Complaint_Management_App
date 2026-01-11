@@ -114,8 +114,8 @@ const ComplaintCreatePage = () => {
   };
 
   const divisionOptions = {
-    CGCEL: ["CG-FANS", "CG-SDA", "CG-PUMP", "CG-WHC"],
-    CGPISL: ["FANS", "SDA", "LT", "FHP", "PUMP", "LIGHT", "WHC"],
+    CGCEL: ["FANS", "SDA", "PUMP", "WHC", "LIGHT"],
+    CGPISL: ["CG-FANS", "CG-SDA", "CG-LT", "CG-FHP", "CG-PUMP", "CG-WHC"],
   };
 
   useEffect(() => {

@@ -50,26 +50,26 @@ const Header = ({ selectedCompany }) => {
               </div>
             )}
           </div>
-          {/* <div className="flex items-center justify-center w-18 h-18 ml-20">
+          <div className="flex items-center justify-center w-18 h-18 ml-20">
             <img
               src={logo}
               alt="Logo"
               className="h-16 w-16 sm:h-16 sm:w-16 sm:mb-0"
             />
-          </div> */}
+          </div>
         </div>
         <div className="flex flex-col justify-center items-center sm:items-start text-center sm:text-left w-full">
           <span
             className="text-white text-2xl sm:text-4xl font-semibold tracking-wide leading-tight mt-1"
             style={{ fontFamily: "Times New Roman, Times, serif" }}
           >
-            {/* Unique Services */}
+            Unique Services
           </span>
           <span
             className="text-blue-50 text-sm sm:text-lg font-medium mb-1"
             style={{ fontFamily: "Montserrat, sans-serif" }}
           >
-            {/* 12, Sakharitola Street, Kolkata - 700014 */}
+            12, Sakharitola Street, Kolkata - 700014
           </span>
         </div>
       </div>
