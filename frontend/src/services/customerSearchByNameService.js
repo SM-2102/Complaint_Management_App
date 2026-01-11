@@ -17,7 +17,8 @@ async function searchCustomerByName(name) {
   const data = await response.json();
   if (!response.ok) {
     throw {
-      message: data.message || data.detail || "Failed to search customer by name",
+      message:
+        data.message || data.detail || "Failed to search customer by name",
       resolution: data.resolution || "",
     };
   }

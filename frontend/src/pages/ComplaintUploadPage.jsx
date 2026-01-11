@@ -122,9 +122,9 @@ const ComplaintUploadPage = () => {
                     color: "#7c3aed",
                     borderColor: "#8b5cf6",
                     "&:hover": {
-    backgroundColor: "#8b5cf622",
-    borderColor: "#7c3aed",
-  },
+                      backgroundColor: "#8b5cf622",
+                      borderColor: "#7c3aed",
+                    },
                   }}
                 >
                   Browse File
@@ -160,12 +160,12 @@ const ComplaintUploadPage = () => {
                     )
                   }
                   sx={{
-  backgroundColor: "#7c3aed",
-  color: "#fff",
-  "&:hover": {
-    backgroundColor: "#6d28d9",
-  },
-}}
+                    backgroundColor: "#7c3aed",
+                    color: "#fff",
+                    "&:hover": {
+                      backgroundColor: "#6d28d9",
+                    },
+                  }}
                 >
                   {uploading ? "Uploading..." : "Upload File"}
                 </Button>

@@ -16,7 +16,8 @@ async function fetchComplaintCreateData() {
   const data = await response.json();
   if (!response.ok) {
     throw {
-      message: data.message || data.detail || "Failed to fetch complaint create data",
+      message:
+        data.message || data.detail || "Failed to fetch complaint create data",
       resolution: data.resolution || "",
     };
   }

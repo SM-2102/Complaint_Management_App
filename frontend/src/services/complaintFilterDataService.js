@@ -16,7 +16,8 @@ async function fetchComplaintFilterData() {
   const data = await response.json();
   if (!response.ok) {
     throw {
-      message: data.message || data.detail || "Failed to fetch complaint filter data",
+      message:
+        data.message || data.detail || "Failed to fetch complaint filter data",
       resolution: data.resolution || "",
     };
   }

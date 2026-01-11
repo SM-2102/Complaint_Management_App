@@ -21,8 +21,7 @@ function validateCustomer(form, showContact2) {
     errors.push("PIN must be 6 digits");
     errors_label.pin = true;
   }
-  if (!form.consignee_address1)
-  {
+  if (!form.consignee_address1) {
     errors.push("Consignee Address1 is required");
     errors_label.consignee_address1 = true;
   }

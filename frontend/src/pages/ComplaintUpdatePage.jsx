@@ -36,7 +36,7 @@ const initialForm = {
   current_status: "",
   action_by: "",
   technician: "",
-  action_head: "",  
+  action_head: "",
   complaint_priority: "",
   spare_pending: "N",
   spare: "",
@@ -66,10 +66,14 @@ const ComplaintUpdatePage = () => {
   const [initialComplaintNumber, setInitialComplaintNumber] = useState("");
   const [complaintNumbers, setComplaintNumbers] = useState([]);
   const [codeLoading, setCodeLoading] = useState(true);
-  const [complaintNumberSuggestions, setComplaintNumberSuggestions] = useState([]);
-  const [showComplaintSuggestions, setShowComplaintSuggestions] = useState(false);
+  const [complaintNumberSuggestions, setComplaintNumberSuggestions] = useState(
+    [],
+  );
+  const [showComplaintSuggestions, setShowComplaintSuggestions] =
+    useState(false);
   const complaintNumberInputRef = useRef(null);
-  const [complaintNumberInputWidth, setComplaintNumberInputWidth] = useState("100%");
+  const [complaintNumberInputWidth, setComplaintNumberInputWidth] =
+    useState("100%");
   const [customerNames, setCustomerNames] = useState([]);
   const [optionData, setOptionData] = useState({});
   const [nameSuggestions, setNameSuggestions] = useState([]);
@@ -84,59 +88,67 @@ const ComplaintUpdatePage = () => {
 
   // entryType removed: always allow manual complaint_number input
   const [nameInputWidth, setNameInputWidth] = useState("100%");
-    useEffect(() => {
-      if (nameInputRef.current) {
-        setNameInputWidth(nameInputRef.current.offsetWidth + "px");
-      }
-    }, [form.customer_name, showSuggestions]);
+  useEffect(() => {
+    if (nameInputRef.current) {
+      setNameInputWidth(nameInputRef.current.offsetWidth + "px");
+    }
+  }, [form.customer_name, showSuggestions]);
 
-    useEffect(() => {
-      if (complaintNumberInputRef.current) {
-        setComplaintNumberInputWidth(complaintNumberInputRef.current.offsetWidth + "px");
-      }
-    }, [form.complaint_number, showComplaintSuggestions]);
+  useEffect(() => {
+    if (complaintNumberInputRef.current) {
+      setComplaintNumberInputWidth(
+        complaintNumberInputRef.current.offsetWidth + "px",
+      );
+    }
+  }, [form.complaint_number, showComplaintSuggestions]);
 
-    // format ISO date (yyyy-mm-dd) to display (dd-mm-yyyy)
-    const formatISOToDisplay = (iso) => {
-      if (!iso) return "";
-      // accept iso like 2025-10-07
-      const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-      if (m) return `${m[3]}-${m[2]}-${m[1]}`;
-      // if already in dd-mm-yyyy, return as-is
-      const m2 = iso.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-      if (m2) return iso;
-      return iso;
+  // format ISO date (yyyy-mm-dd) to display (dd-mm-yyyy)
+  const formatISOToDisplay = (iso) => {
+    if (!iso) return "";
+    // accept iso like 2025-10-07
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+    // if already in dd-mm-yyyy, return as-is
+    const m2 = iso.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (m2) return iso;
+    return iso;
+  };
+
+  // Fetch initial data for complaint create (complaint number, names, dropdowns)
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const data = await fetchComplaintUpdateData();
+        if (!mounted) return;
+        // DEBUG: inspect fetched data shape
+        // Store fetched complaint number separately; don't show unless Entry Type is NEW
+        setInitialComplaintNumber(data.complaint_number || "");
+        // complaint_number may be an array in response; store for suggestions
+        setComplaintNumbers(
+          Array.isArray(data.complaint_number)
+            ? data.complaint_number
+            : data.complaint_number
+              ? [data.complaint_number]
+              : [],
+        );
+        // store arrays for selects
+        setOptionData({
+          action_head: data.action_head || [],
+          action_by: data.action_by || [],
+          technician: data.technician || [],
+        });
+        // customer names for suggestions
+        setCustomerNames(data.customer_name || []);
+      } catch (err) {
+        // ignore silently for now; UI will show when search fails
+      }
     };
-
-    // Fetch initial data for complaint create (complaint number, names, dropdowns)
-    useEffect(() => {
-      let mounted = true;
-      const load = async () => {
-        try {
-          const data = await fetchComplaintUpdateData();
-          if (!mounted) return;
-          // DEBUG: inspect fetched data shape
-          // Store fetched complaint number separately; don't show unless Entry Type is NEW
-          setInitialComplaintNumber(data.complaint_number || "");
-          // complaint_number may be an array in response; store for suggestions
-          setComplaintNumbers(Array.isArray(data.complaint_number) ? data.complaint_number : (data.complaint_number ? [data.complaint_number] : []));
-          // store arrays for selects
-          setOptionData({
-            action_head: data.action_head || [],
-            action_by: data.action_by || [],
-            technician: data.technician || [],
-          });
-          // customer names for suggestions
-          setCustomerNames(data.customer_name || []);
-        } catch (err) {
-          // ignore silently for now; UI will show when search fails
-        }
-      };
-      load();
-      return () => {
-        mounted = false;
-      };
-    }, []);
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleSearch = async () => {
     setError({});
@@ -164,27 +176,23 @@ const ComplaintUpdatePage = () => {
     }
   };
   const allowedComplaintStatuses = React.useMemo(() => {
-  const current = form.complaint_status;
-  const initial = initialComplaintStatus;
+    const current = form.complaint_status;
+    const initial = initialComplaintStatus;
 
-  return ALL_STATUSES.filter((status) => {
-    // Rule 2: NEW cannot be selected unless it's already the current value
-    if (status === "NEW" && current !== "NEW") {
-      return false;
-    }
+    return ALL_STATUSES.filter((status) => {
+      // Rule 2: NEW cannot be selected unless it's already the current value
+      if (status === "NEW" && current !== "NEW") {
+        return false;
+      }
 
-    // Rule 3: If originally NEW, block FRESH and PENDING
-    if (
-      initial === "NEW" &&
-      (status === "FRESH" || status === "PENDING")
-    ) {
-      return false;
-    }
+      // Rule 3: If originally NEW, block FRESH and PENDING
+      if (initial === "NEW" && (status === "FRESH" || status === "PENDING")) {
+        return false;
+      }
 
-    return true;
-  });
-}, [form.complaint_status, initialComplaintStatus]);
-
+      return true;
+    });
+  }, [form.complaint_status, initialComplaintStatus]);
 
   const handleSearchByNumber = async () => {
     setError({});
@@ -216,18 +224,18 @@ const ComplaintUpdatePage = () => {
         technician: data.technician ?? "",
         action_head: data.action_head ?? "",
         complaint_status: data.complaint_status ?? "",
-            complaint_priority: data.complaint_priority ?? "",
-            spare_pending: data.spare_pending ?? "N",
-            spare: data.spare ?? "",
-            indent_date: data.indent_date ?? "",
-            indent_so_number: data.indent_so_number ?? "",
-            indent_so_date: data.indent_so_date ?? "",
-            payment_collected: data.payment_collected ?? "N",
-            payment_mode: data.payment_mode ?? "",
-            amount_sc: data.amount_sc ?? "",
-            amount_spare: data.amount_spare ?? "",
-            payment_details: data.payment_details ?? "",
-            final_status: data.final_status ?? "N",
+        complaint_priority: data.complaint_priority ?? "",
+        spare_pending: data.spare_pending ?? "N",
+        spare: data.spare ?? "",
+        indent_date: data.indent_date ?? "",
+        indent_so_number: data.indent_so_number ?? "",
+        indent_so_date: data.indent_so_date ?? "",
+        payment_collected: data.payment_collected ?? "N",
+        payment_mode: data.payment_mode ?? "",
+        amount_sc: data.amount_sc ?? "",
+        amount_spare: data.amount_spare ?? "",
+        payment_details: data.payment_details ?? "",
+        final_status: data.final_status ?? "N",
       }));
       setShowContact2(!!data.customer_contact2);
       setInitialComplaintStatus(data.complaint_status ?? "");
@@ -257,7 +265,11 @@ const ComplaintUpdatePage = () => {
   }, [form.complaint_head]);
 
   // Editable only when complaint number starts with 'N' (new complaints)
-  const isNewComplaint = (form.complaint_number || "").toString().trim().toUpperCase().startsWith("N");
+  const isNewComplaint = (form.complaint_number || "")
+    .toString()
+    .trim()
+    .toUpperCase()
+    .startsWith("N");
 
   // If complaint_number is present in URL, trigger search on mount / when search changes
   useEffect(() => {
@@ -278,42 +290,42 @@ const ComplaintUpdatePage = () => {
           ...prev,
           complaint_number: q,
           complaint_date: data.complaint_date ?? "",
-        complaint_head: data.complaint_head ?? "",
-        product_division: data.product_division ?? "",
-        product_model: data.product_model ?? "",
-        product_serial_number: data.product_serial_number ?? "",
-        purchased_from: data.purchased_from ?? "",
-        distributor_name: data.distributor_name ?? "",
-        invoice_date: data.invoice_date ?? "",
-        invoice_number: data.invoice_number ?? "",
-        customer_name: data.customer_name ?? "",
-        customer_address1: data.customer_address1 ?? "",
-        customer_address2: data.customer_address2 ?? "",
-        customer_city: data.customer_city ?? "",
-        customer_pincode: data.customer_pincode ?? "",
-        customer_contact1: data.customer_contact1 ?? "",
-        customer_contact2: data.customer_contact2 ?? "",
-        complaint_type: data.complaint_type ?? "",
-        updated_time: data.updated_time ?? "",
-        current_status: data.current_status ?? "",
-        action_by: data.action_by ?? "",
-        technician: data.technician ?? "",
-        action_head: data.action_head ?? "",
-        complaint_status: data.complaint_status ?? "",
-            complaint_priority: data.complaint_priority ?? "",
-            spare_pending: data.spare_pending ?? "N",
-            spare: data.spare ?? "",
-            indent_date: data.indent_date ?? "",
-            indent_so_number: data.indent_so_number ?? "",
-            indent_so_date: data.indent_so_date ?? "",
-            payment_collected: data.payment_collected ?? "N",
-            payment_mode: data.payment_mode ?? "",
-            amount_sc: data.amount_sc ?? "",
-            amount_spare: data.amount_spare ?? "",
-            payment_details: data.payment_details ?? "",
-            final_status: data.final_status ?? "N",
+          complaint_head: data.complaint_head ?? "",
+          product_division: data.product_division ?? "",
+          product_model: data.product_model ?? "",
+          product_serial_number: data.product_serial_number ?? "",
+          purchased_from: data.purchased_from ?? "",
+          distributor_name: data.distributor_name ?? "",
+          invoice_date: data.invoice_date ?? "",
+          invoice_number: data.invoice_number ?? "",
+          customer_name: data.customer_name ?? "",
+          customer_address1: data.customer_address1 ?? "",
+          customer_address2: data.customer_address2 ?? "",
+          customer_city: data.customer_city ?? "",
+          customer_pincode: data.customer_pincode ?? "",
+          customer_contact1: data.customer_contact1 ?? "",
+          customer_contact2: data.customer_contact2 ?? "",
+          complaint_type: data.complaint_type ?? "",
+          updated_time: data.updated_time ?? "",
+          current_status: data.current_status ?? "",
+          action_by: data.action_by ?? "",
+          technician: data.technician ?? "",
+          action_head: data.action_head ?? "",
+          complaint_status: data.complaint_status ?? "",
+          complaint_priority: data.complaint_priority ?? "",
+          spare_pending: data.spare_pending ?? "N",
+          spare: data.spare ?? "",
+          indent_date: data.indent_date ?? "",
+          indent_so_number: data.indent_so_number ?? "",
+          indent_so_date: data.indent_so_date ?? "",
+          payment_collected: data.payment_collected ?? "N",
+          payment_mode: data.payment_mode ?? "",
+          amount_sc: data.amount_sc ?? "",
+          amount_spare: data.amount_spare ?? "",
+          payment_details: data.payment_details ?? "",
+          final_status: data.final_status ?? "N",
         }));
-        setShowContact2(!!(data.customer_contact2));
+        setShowContact2(!!data.customer_contact2);
       } catch (err) {
         if (!mounted) return;
         setError({
@@ -328,7 +340,6 @@ const ComplaintUpdatePage = () => {
       mounted = false;
     };
   }, [location.search]);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -416,8 +427,14 @@ const ComplaintUpdatePage = () => {
         payment_collected: form.payment_collected,
         payment_mode: form.payment_mode,
         payment_details: form.payment_details,
-        amount_sc: form.amount_sc === "" || form.amount_sc == null ? null : Number(form.amount_sc),
-        amount_spare: form.amount_spare === "" || form.amount_spare == null ? null : Number(form.amount_spare),
+        amount_sc:
+          form.amount_sc === "" || form.amount_sc == null
+            ? null
+            : Number(form.amount_sc),
+        amount_spare:
+          form.amount_spare === "" || form.amount_spare == null
+            ? null
+            : Number(form.amount_spare),
         final_status: form.final_status,
         revisit: revisitValue,
       };
@@ -487,7 +504,7 @@ const ComplaintUpdatePage = () => {
         <h2 className="text-xl font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-500 justify-center flex items-center gap-2">
           Update Complaint Record
         </h2>
-        <div className="flex flex-col gap-4">      
+        <div className="flex flex-col gap-4">
           {/* hidden checkbox inputs allow labels to reference a form control for accessibility */}
           <input
             id="spare_pending"
@@ -505,12 +522,22 @@ const ComplaintUpdatePage = () => {
             checked={form.payment_collected === "Y"}
             className="sr-only"
           />
-           <div className="flex items-center w-full gap-7">
+          <div className="flex items-center w-full gap-7">
             <div className="flex items-center gap-2">
-              <label htmlFor="complaint_number" className="w-50 text-md font-medium text-purple-700">
+              <label
+                htmlFor="complaint_number"
+                className="w-50 text-md font-medium text-purple-700"
+              >
                 Complaint No.<span className="text-red-500">*</span>
               </label>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  width: "100%",
+                }}
+              >
                 <div style={{ position: "relative", width: "100%" }}>
                   <input
                     id="complaint_number"
@@ -524,10 +551,15 @@ const ComplaintUpdatePage = () => {
                     maxLength={15}
                     ref={complaintNumberInputRef}
                     onFocus={() => {
-                      if (form.complaint_number.length > 0 && complaintNumberSuggestions.length > 0)
+                      if (
+                        form.complaint_number.length > 0 &&
+                        complaintNumberSuggestions.length > 0
+                      )
                         setShowComplaintSuggestions(true);
                     }}
-                    onBlur={() => setTimeout(() => setShowComplaintSuggestions(false), 150)}
+                    onBlur={() =>
+                      setTimeout(() => setShowComplaintSuggestions(false), 150)
+                    }
                   />
                   {showComplaintSuggestions && (
                     <ul
@@ -553,7 +585,10 @@ const ComplaintUpdatePage = () => {
                           key={n}
                           style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
                           onMouseDown={() => {
-                            setForm((prev) => ({ ...prev, complaint_number: n }));
+                            setForm((prev) => ({
+                              ...prev,
+                              complaint_number: n,
+                            }));
                             setShowComplaintSuggestions(false);
                           }}
                         >
@@ -576,8 +611,11 @@ const ComplaintUpdatePage = () => {
                 </button>
               </div>
             </div>
-             <div className="flex items-center gap-2">
-              <label htmlFor="complaint_date" className="w-60 text-md font-medium text-gray-700">
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="complaint_date"
+                className="w-60 text-md font-medium text-gray-700"
+              >
                 Complaint Date<span className="text-red-500">*</span>
               </label>
               <input
@@ -590,10 +628,13 @@ const ComplaintUpdatePage = () => {
                 className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900 cursor-not-allowed`}
               />
             </div>
-           </div>
+          </div>
           <div className="flex items-center w-full gap-7">
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="product_division" className="w-52.5 text-md font-medium text-gray-700">
+              <label
+                htmlFor="product_division"
+                className="w-52.5 text-md font-medium text-gray-700"
+              >
                 Division<span className="text-red-500">*</span>
               </label>
               <select
@@ -604,8 +645,7 @@ const ComplaintUpdatePage = () => {
                 disabled={submitting}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.product_division ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
-                <option value="" disabled>
-                </option>
+                <option value="" disabled></option>
                 {(divisionOptions[form.complaint_head] || []).map((d) => (
                   <option key={d} value={d} title={d}>
                     {d}
@@ -614,7 +654,10 @@ const ComplaintUpdatePage = () => {
               </select>
             </div>
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="complaint_head" className="w-59 text-md font-medium text-gray-700">
+              <label
+                htmlFor="complaint_head"
+                className="w-59 text-md font-medium text-gray-700"
+              >
                 Complaint Head<span className="text-red-500">*</span>
               </label>
               <select
@@ -624,10 +667,11 @@ const ComplaintUpdatePage = () => {
                 onChange={handleChange}
                 disabled={submitting || !isNewComplaint}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.complaint_head ? "border-red-300" : "border-gray-300"} text-gray-900`}
-                title={isNewComplaint ? "" : "Read-only for existing complaints"}
+                title={
+                  isNewComplaint ? "" : "Read-only for existing complaints"
+                }
               >
-                <option value="" disabled>
-                </option>
+                <option value="" disabled></option>
                 <option value="CGCEL">CGCEL</option>
                 <option value="CGPISL">CGPISL</option>
               </select>
@@ -643,11 +687,13 @@ const ComplaintUpdatePage = () => {
             </span>
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
-          
+
           <div className="flex items-center w-full gap-7">
-            
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="product_model" className="w-50 text-md font-medium text-gray-700">
+              <label
+                htmlFor="product_model"
+                className="w-50 text-md font-medium text-gray-700"
+              >
                 Product Model
               </label>
               <input
@@ -662,7 +708,10 @@ const ComplaintUpdatePage = () => {
               />
             </div>
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="product_serial_number" className="w-58 text-md font-medium text-gray-700">
+              <label
+                htmlFor="product_serial_number"
+                className="w-58 text-md font-medium text-gray-700"
+              >
                 Serial Number
               </label>
               <input
@@ -678,76 +727,85 @@ const ComplaintUpdatePage = () => {
             </div>
           </div>
 
-            <div className="flex items-center w-full gap-7">
-              <div className="flex items-center gap-2 w-1/2">
-                <label htmlFor="purchased_from" className="w-50 text-md font-medium text-gray-700">
-                  Purchased From
-                </label>
-                <input
-                  id="purchased_from"
-                  name="purchased_from"
-                  type="text"
-                  maxLength={40}
-                  value={form.purchased_from}
-                  onChange={handleChange}
-                  disabled={submitting}
-                  className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
-                />
-              </div>
-              <div className="flex items-center gap-2 w-1/2">
-                <label htmlFor="invoice_number" className="w-58 text-md font-medium text-gray-700">
-                  Invoice Number
-                </label>
-                <input
-                  id="invoice_number"
-                  name="invoice_number"
-                  type="text"
-                  maxLength={25}
-                  value={form.invoice_number}
-                  onChange={handleChange}
-                  disabled={submitting}
-                  className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
-                />
-              </div>
-              
-              
+          <div className="flex items-center w-full gap-7">
+            <div className="flex items-center gap-2 w-1/2">
+              <label
+                htmlFor="purchased_from"
+                className="w-50 text-md font-medium text-gray-700"
+              >
+                Purchased From
+              </label>
+              <input
+                id="purchased_from"
+                name="purchased_from"
+                type="text"
+                maxLength={40}
+                value={form.purchased_from}
+                onChange={handleChange}
+                disabled={submitting}
+                className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
+              />
             </div>
+            <div className="flex items-center gap-2 w-1/2">
+              <label
+                htmlFor="invoice_number"
+                className="w-58 text-md font-medium text-gray-700"
+              >
+                Invoice Number
+              </label>
+              <input
+                id="invoice_number"
+                name="invoice_number"
+                type="text"
+                maxLength={25}
+                value={form.invoice_number}
+                onChange={handleChange}
+                disabled={submitting}
+                className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
+              />
+            </div>
+          </div>
 
-            <div className="flex items-center w-full gap-7">
-              
-              <div className="flex items-center gap-2 w-1/2">
-                <label htmlFor="distributor_name" className="w-50 text-md font-medium text-gray-700">
-                  Distributor
-                </label>
-                <input
-                  id="distributor_name"
-                  name="distributor_name"
-                  type="text"
-                  maxLength={40}
-                  value={form.distributor_name}
-                  onChange={handleChange}
-                  disabled={submitting}
-                  className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
-                />
-              </div>
-              <div className="flex items-center gap-2 w-1/2">
-                <label htmlFor="invoice_date" className="w-32.5 text-md font-medium text-gray-700">
-                  Invoice Date
-                </label>
-                <input
-                  id="invoice_date"
-                  name="invoice_date"
-                  type="date"
-                  max={new Date().toLocaleDateString("en-CA")}
-                  value={form.invoice_date}
-                  onChange={handleChange}
-                  disabled={submitting}
-                  className={`flex-1 px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
-                />
-              </div>
+          <div className="flex items-center w-full gap-7">
+            <div className="flex items-center gap-2 w-1/2">
+              <label
+                htmlFor="distributor_name"
+                className="w-50 text-md font-medium text-gray-700"
+              >
+                Distributor
+              </label>
+              <input
+                id="distributor_name"
+                name="distributor_name"
+                type="text"
+                maxLength={40}
+                value={form.distributor_name}
+                onChange={handleChange}
+                disabled={submitting}
+                className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
+              />
             </div>
-          
-           <div className="w-full flex items-center">
+            <div className="flex items-center gap-2 w-1/2">
+              <label
+                htmlFor="invoice_date"
+                className="w-32.5 text-md font-medium text-gray-700"
+              >
+                Invoice Date
+              </label>
+              <input
+                id="invoice_date"
+                name="invoice_date"
+                type="date"
+                max={new Date().toLocaleDateString("en-CA")}
+                value={form.invoice_date}
+                onChange={handleChange}
+                disabled={submitting}
+                className={`flex-1 px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
+              />
+            </div>
+          </div>
+
+          <div className="w-full flex items-center">
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
               className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
@@ -757,86 +815,89 @@ const ComplaintUpdatePage = () => {
             </span>
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
-           <div
-                       className="flex items-center gap-2 w-full"
-                       style={{ position: "relative" }}
-                     >
-                       <label
-                         htmlFor="customer_name"
-                         className="w-29 text-md font-medium text-gray-700"
-                       >
-                         Name<span className="text-red-500">*</span>
-                       </label>
-                       <div className="flex-1 flex items-center gap-2">
-                         <div style={{ position: "relative", width: "100%" }}>
-                           <input
-                             id="customer_name"
-                             name="customer_name"
-                             type="text"
-                             value={form.customer_name}
-                             onChange={handleChange}
-                             className={`w-full px-3 py-1 rounded-lg border ${errs_label.customer_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
-                             minLength={3}
-                             maxLength={40}
-                             required
-                             disabled={submitting}
-                             autoComplete="name"
-                             onFocus={() => {
-                               if (form.customer_name.length > 0 && nameSuggestions.length > 0)
-                                 setShowSuggestions(true);
-                             }}
-                             onBlur={() =>
-                               setTimeout(() => setShowSuggestions(false), 150)
-                             }
-                             ref={nameInputRef}
-                           />
-                           {showSuggestions && (
-                             <ul
-                               style={{
-                                 position: "absolute",
-                                 top: "100%",
-                                 left: 0,
-                                 zIndex: 10,
-                                 background: "#fff",
-                                 border: "1px solid #d1d5db",
-                                 borderRadius: "0.5rem",
-                                 boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                                 width: nameInputWidth,
-                                 maxHeight: 180,
-                                 overflowY: "auto",
-                                 margin: 0,
-                                 padding: 0,
-                                 listStyle: "none",
-                               }}
-                             >
-                               {nameSuggestions.map((n) => (
-                                 <li
-                                   key={n}
-                                   style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
-                                   onMouseDown={() => {
-                                     setForm((prev) => ({ ...prev, customer_name: n }));
-                                     setShowSuggestions(false);
-                                   }}
-                                 >
-                                   {n}
-                                 </li>
-                               ))}
-                             </ul>
-                           )}
-                         </div>
-                         <button
-                           type="button"
-                           title="Search by name"
-                           className="p-1 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
-                           disabled={submitting || !form.customer_name}
-                           onClick={() => handleSearch()}
-                           tabIndex={0}
-                           style={{ width: 32, height: 32 }}
-                         >
-                           <FiSearch size={20} />
-                         </button>
-                       </div>
-                     </div>
+          <div
+            className="flex items-center gap-2 w-full"
+            style={{ position: "relative" }}
+          >
+            <label
+              htmlFor="customer_name"
+              className="w-29 text-md font-medium text-gray-700"
+            >
+              Name<span className="text-red-500">*</span>
+            </label>
+            <div className="flex-1 flex items-center gap-2">
+              <div style={{ position: "relative", width: "100%" }}>
+                <input
+                  id="customer_name"
+                  name="customer_name"
+                  type="text"
+                  value={form.customer_name}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-1 rounded-lg border ${errs_label.customer_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
+                  minLength={3}
+                  maxLength={40}
+                  required
+                  disabled={submitting}
+                  autoComplete="name"
+                  onFocus={() => {
+                    if (
+                      form.customer_name.length > 0 &&
+                      nameSuggestions.length > 0
+                    )
+                      setShowSuggestions(true);
+                  }}
+                  onBlur={() =>
+                    setTimeout(() => setShowSuggestions(false), 150)
+                  }
+                  ref={nameInputRef}
+                />
+                {showSuggestions && (
+                  <ul
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      zIndex: 10,
+                      background: "#fff",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "0.5rem",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                      width: nameInputWidth,
+                      maxHeight: 180,
+                      overflowY: "auto",
+                      margin: 0,
+                      padding: 0,
+                      listStyle: "none",
+                    }}
+                  >
+                    {nameSuggestions.map((n) => (
+                      <li
+                        key={n}
+                        style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
+                        onMouseDown={() => {
+                          setForm((prev) => ({ ...prev, customer_name: n }));
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        {n}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <button
+                type="button"
+                title="Search by name"
+                className="p-1 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
+                disabled={submitting || !form.customer_name}
+                onClick={() => handleSearch()}
+                tabIndex={0}
+                style={{ width: 32, height: 32 }}
+              >
+                <FiSearch size={20} />
+              </button>
+            </div>
+          </div>
           <div className="flex items-center gap-3 w-full">
             <label
               htmlFor="customer_address1"
@@ -856,7 +917,7 @@ const ComplaintUpdatePage = () => {
               disabled={submitting}
             />
           </div>
-           <div className="flex items-center gap-3 w-full">
+          <div className="flex items-center gap-3 w-full">
             <label
               htmlFor="customer_address2"
               className="w-28 text-md font-medium text-gray-700"
@@ -916,7 +977,7 @@ const ComplaintUpdatePage = () => {
               />
             </div>
           </div>
-                <div className="flex items-center w-full gap-7">
+          <div className="flex items-center w-full gap-7">
             <div className="flex items-center w-1/2 gap-2">
               <label
                 htmlFor="customer_contact1"
@@ -973,7 +1034,7 @@ const ComplaintUpdatePage = () => {
               )}
             </div>
           </div>
-        
+
           <div className="w-full flex items-center">
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
@@ -986,7 +1047,10 @@ const ComplaintUpdatePage = () => {
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center flex-1 gap-2 w-1/2">
-              <label htmlFor="complaint_type" className="w-33.5 text-md font-medium text-gray-700">
+              <label
+                htmlFor="complaint_type"
+                className="w-33.5 text-md font-medium text-gray-700"
+              >
                 Complaint Type<span className="text-red-500">*</span>
               </label>
               <select
@@ -997,16 +1061,18 @@ const ComplaintUpdatePage = () => {
                 disabled={submitting}
                 className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.complaint_type ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
-                <option value="" disabled>
-                </option>
+                <option value="" disabled></option>
                 <option value="INSTALL">INSTALL</option>
                 <option value="SERVICE">SERVICE</option>
                 <option value="SALE">SALE</option>
               </select>
             </div>
-            
-             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="updated_time" className="w-76 text-md font-medium text-gray-700 ml-7">
+
+            <div className="flex items-center gap-2 w-1/2">
+              <label
+                htmlFor="updated_time"
+                className="w-76 text-md font-medium text-gray-700 ml-7"
+              >
                 Upload Time
               </label>
               <input
@@ -1024,7 +1090,10 @@ const ComplaintUpdatePage = () => {
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="action_by" className="w-60 text-md font-medium text-gray-700">
+              <label
+                htmlFor="action_by"
+                className="w-60 text-md font-medium text-gray-700"
+              >
                 Action By<span className="text-red-500">*</span>
               </label>
               <select
@@ -1044,32 +1113,39 @@ const ComplaintUpdatePage = () => {
               </select>
             </div>
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="complaint_status" className="w-35 text-md font-medium text-gray-700 ml-7">
+              <label
+                htmlFor="complaint_status"
+                className="w-35 text-md font-medium text-gray-700 ml-7"
+              >
                 Complaint Status<span className="text-red-500">*</span>
               </label>
               <select
-  id="complaint_status"
-  name="complaint_status"
-  value={form.complaint_status}
-  onChange={handleChange}
-  disabled={submitting}
-  className={`flex-1 min-w-0 px-3 py-1 rounded-lg border ${
-    errs_label.complaint_status ? "border-red-300" : "border-gray-300"
-  } text-gray-900`}
->
-  <option value="" disabled></option>
-  {allowedComplaintStatuses.map((s) => (
-    <option key={s} value={s}>
-      {s}
-    </option>
-  ))}
-</select>
+                id="complaint_status"
+                name="complaint_status"
+                value={form.complaint_status}
+                onChange={handleChange}
+                disabled={submitting}
+                className={`flex-1 min-w-0 px-3 py-1 rounded-lg border ${
+                  errs_label.complaint_status
+                    ? "border-red-300"
+                    : "border-gray-300"
+                } text-gray-900`}
+              >
+                <option value="" disabled></option>
+                {allowedComplaintStatuses.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
             </div>
-            
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="technician" className="w-60 text-md font-medium text-gray-700">
+              <label
+                htmlFor="technician"
+                className="w-60 text-md font-medium text-gray-700"
+              >
                 Technician<span className="text-red-500">*</span>
               </label>
               <select
@@ -1089,7 +1165,10 @@ const ComplaintUpdatePage = () => {
               </select>
             </div>
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="complaint_priority" className="w-75 text-md font-medium text-gray-700 ml-7">
+              <label
+                htmlFor="complaint_priority"
+                className="w-75 text-md font-medium text-gray-700 ml-7"
+              >
                 Action Priority<span className="text-red-500">*</span>
               </label>
               <select
@@ -1109,43 +1188,49 @@ const ComplaintUpdatePage = () => {
               </select>
             </div>
           </div>
-           <div className="flex items-center w-full gap-3">            
-              <label htmlFor="current_status" className="w-42 text-md font-medium text-gray-700">
-                Current Status<span className="text-red-500">*</span>
-              </label>
-              <input
-                id="current_status"
-                name="current_status"
-                type="text"
-                required
-                maxLength={50}
-                value={form.current_status}
-                onChange={handleChange}
-                disabled={submitting}
-                className={`w-full px-3 py-1 rounded-lg border ${errs_label.current_status ? "border-red-300" : "border-gray-300"} text-gray-900`}
-              />
+          <div className="flex items-center w-full gap-3">
+            <label
+              htmlFor="current_status"
+              className="w-42 text-md font-medium text-gray-700"
+            >
+              Current Status<span className="text-red-500">*</span>
+            </label>
+            <input
+              id="current_status"
+              name="current_status"
+              type="text"
+              required
+              maxLength={50}
+              value={form.current_status}
+              onChange={handleChange}
+              disabled={submitting}
+              className={`w-full px-3 py-1 rounded-lg border ${errs_label.current_status ? "border-red-300" : "border-gray-300"} text-gray-900`}
+            />
           </div>
           <div className="flex items-center gap-3 w-full">
-              <label htmlFor="action_head" className="w-33 text-md font-medium text-gray-700">
-                Action Required<span className="text-red-500">*</span>
-              </label>
-              <select
-                id="action_head"
-                name="action_head"
-                value={form.action_head}
-                onChange={handleChange}
-                disabled={submitting}
-                className={`flex-1 min-w-0 px-3 py-1 rounded-lg border ${errs_label.action_head ? "border-red-300" : "border-gray-300"} text-gray-900 truncate`}
-              >
-                <option value="" disabled></option>
-                {(optionData.action_head || []).map((h) => (
-                  <option key={h} value={h} title={h} className="truncate">
-                    {h.length > 60 ? h.slice(0, 57) + "..." : h}
-                  </option>
-                ))}
-              </select>
+            <label
+              htmlFor="action_head"
+              className="w-33 text-md font-medium text-gray-700"
+            >
+              Action Required<span className="text-red-500">*</span>
+            </label>
+            <select
+              id="action_head"
+              name="action_head"
+              value={form.action_head}
+              onChange={handleChange}
+              disabled={submitting}
+              className={`flex-1 min-w-0 px-3 py-1 rounded-lg border ${errs_label.action_head ? "border-red-300" : "border-gray-300"} text-gray-900 truncate`}
+            >
+              <option value="" disabled></option>
+              {(optionData.action_head || []).map((h) => (
+                <option key={h} value={h} title={h} className="truncate">
+                  {h.length > 60 ? h.slice(0, 57) + "..." : h}
+                </option>
+              ))}
+            </select>
           </div>
-           <div className="w-full flex items-center">
+          <div className="w-full flex items-center">
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
               className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
@@ -1157,18 +1242,26 @@ const ComplaintUpdatePage = () => {
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-1/6">
-              <label htmlFor="spare_pending" className="w-20 text-md font-medium text-gray-700">
+              <label
+                htmlFor="spare_pending"
+                className="w-20 text-md font-medium text-gray-700"
+              >
                 Spare?
               </label>
               <YesNoToggle
                 id="spare_pending"
                 value={form.spare_pending}
-                onChange={(v) => setForm((prev) => ({ ...prev, spare_pending: v }))}
+                onChange={(v) =>
+                  setForm((prev) => ({ ...prev, spare_pending: v }))
+                }
                 disabled={submitting}
               />
             </div>
             <div className="flex items-center gap-2 w-13/3">
-              <label htmlFor="spare" className="w-40 text-md font-medium text-gray-700 ml-5">
+              <label
+                htmlFor="spare"
+                className="w-40 text-md font-medium text-gray-700 ml-5"
+              >
                 Spare Code
               </label>
               <input
@@ -1180,11 +1273,16 @@ const ComplaintUpdatePage = () => {
                 onChange={handleChange}
                 disabled={submitting || form.spare_pending !== "Y"}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.spare ? "border-red-300" : "border-gray-300"} text-gray-900 ${form.spare_pending !== "Y" ? "bg-gray-100 text-gray-500" : ""}`}
-                placeholder={form.spare_pending === "Y" ? "Enter spare code" : "Disabled"}
+                placeholder={
+                  form.spare_pending === "Y" ? "Enter spare code" : "Disabled"
+                }
               />
             </div>
             <div className="flex items-center gap-2 w-2/5">
-              <label htmlFor="indent_date" className="w-50 text-md font-medium text-gray-700 ml-5">
+              <label
+                htmlFor="indent_date"
+                className="w-50 text-md font-medium text-gray-700 ml-5"
+              >
                 Indent Date
               </label>
               <input
@@ -1201,7 +1299,10 @@ const ComplaintUpdatePage = () => {
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-3/5">
-              <label htmlFor="indent_so_number" className="w-40 text-md font-medium text-gray-700">
+              <label
+                htmlFor="indent_so_number"
+                className="w-40 text-md font-medium text-gray-700"
+              >
                 I-SO Number
               </label>
               <input
@@ -1216,7 +1317,10 @@ const ComplaintUpdatePage = () => {
               />
             </div>
             <div className="flex items-center gap-2 w-2/5">
-              <label htmlFor="indent_so_date" className="w-50 text-md font-medium text-gray-700 ml-5">
+              <label
+                htmlFor="indent_so_date"
+                className="w-50 text-md font-medium text-gray-700 ml-5"
+              >
                 I-SO Date
               </label>
               <input
@@ -1231,7 +1335,7 @@ const ComplaintUpdatePage = () => {
               />
             </div>
           </div>
-        <div className="w-full flex items-center">
+          <div className="w-full flex items-center">
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
               className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
@@ -1244,18 +1348,26 @@ const ComplaintUpdatePage = () => {
           {/* Payment rows: editable only when complaint_status === 'OW' */}
           <div className="flex items-center w-full gap-7">
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="payment_collected" className="w-45 text-md font-medium text-gray-700">
+              <label
+                htmlFor="payment_collected"
+                className="w-45 text-md font-medium text-gray-700"
+              >
                 Payment Collected?
               </label>
               <YesNoToggle
                 id="payment_collected"
                 value={form.payment_collected}
-                onChange={(v) => setForm((prev) => ({ ...prev, payment_collected: v }))}
+                onChange={(v) =>
+                  setForm((prev) => ({ ...prev, payment_collected: v }))
+                }
                 disabled={form.complaint_status !== "OW" || submitting}
               />
             </div>
             <div className="flex items-center gap-2 w-1/2         ">
-              <label htmlFor="payment_mode" className="w-60 text-md font-medium text-gray-700">
+              <label
+                htmlFor="payment_mode"
+                className="w-60 text-md font-medium text-gray-700"
+              >
                 Payment Mode
               </label>
               <select
@@ -1277,7 +1389,10 @@ const ComplaintUpdatePage = () => {
 
           <div className="flex items-center w-full gap-7">
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="amount_sc" className="w-60 text-md font-medium text-gray-700">
+              <label
+                htmlFor="amount_sc"
+                className="w-60 text-md font-medium text-gray-700"
+              >
                 Service Charge
               </label>
               <input
@@ -1293,7 +1408,10 @@ const ComplaintUpdatePage = () => {
               />
             </div>
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="amount_spare" className="w-60 text-md font-medium text-gray-700">
+              <label
+                htmlFor="amount_spare"
+                className="w-60 text-md font-medium text-gray-700"
+              >
                 Spare Cost
               </label>
               <input
@@ -1311,7 +1429,10 @@ const ComplaintUpdatePage = () => {
           </div>
 
           <div className="flex items-center gap-3 w-full">
-            <label htmlFor="payment_details" className="w-32 text-md font-medium text-gray-700">
+            <label
+              htmlFor="payment_details"
+              className="w-32 text-md font-medium text-gray-700"
+            >
               Payment Details
             </label>
             <input
@@ -1334,11 +1455,14 @@ const ComplaintUpdatePage = () => {
             </span>
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
-           <div className="flex items-center w-full">
+          <div className="flex items-center w-full">
             <div className="flex-1" />
-            <label htmlFor="final_status" className="w-30 text-md font-medium text-gray-700">
-                Final Status
-              </label>
+            <label
+              htmlFor="final_status"
+              className="w-30 text-md font-medium text-gray-700"
+            >
+              Final Status
+            </label>
             <FinalStatusToggle
               form={form}
               setForm={setForm}
@@ -1347,7 +1471,7 @@ const ComplaintUpdatePage = () => {
             <div className="flex-1" />
           </div>
         </div>
-        
+
         <div className="flex justify-center mt-6">
           <button
             type="submit"

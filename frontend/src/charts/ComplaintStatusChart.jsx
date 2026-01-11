@@ -47,51 +47,47 @@ const ComplaintStatusChart = ({ data }) => {
   // Animation state for each bar: animate purple first, then red
   const [barStates, setBarStates] = useState([]);
   const animationRanRef = React.useRef("");
-useLayoutEffect(() => {
-  const chartKey = JSON.stringify(chartData);
-  if (animationRanRef.current === chartKey) return;
+  useLayoutEffect(() => {
+    const chartKey = JSON.stringify(chartData);
+    if (animationRanRef.current === chartKey) return;
 
-  animationRanRef.current = chartKey;
+    animationRanRef.current = chartKey;
 
-  // Reset before paint
-  setBarStates(chartData.map(() => ({ purple: false, yellow: false })));
+    // Reset before paint
+    setBarStates(chartData.map(() => ({ purple: false, yellow: false })));
 
-  // Start all purple together
-  const purpleTimer = setTimeout(() => {
-    setBarStates((prev) =>
-      prev.map((s) => (s ? { ...s, purple: true } : s)),
-    );
-  }, 50);
+    // Start all purple together
+    const purpleTimer = setTimeout(() => {
+      setBarStates((prev) => prev.map((s) => (s ? { ...s, purple: true } : s)));
+    }, 50);
 
-  // Then all yellow together
-  const yellowTimer = setTimeout(() => {
-    setBarStates((prev) =>
-      prev.map((s) => (s ? { ...s, yellow: true } : s)),
-    );
-  }, 700);
+    // Then all yellow together
+    const yellowTimer = setTimeout(() => {
+      setBarStates((prev) => prev.map((s) => (s ? { ...s, yellow: true } : s)));
+    }, 700);
 
-  return () => {
-    clearTimeout(purpleTimer);
-    clearTimeout(yellowTimer);
-  };
-}, [chartData]);
+    return () => {
+      clearTimeout(purpleTimer);
+      clearTimeout(yellowTimer);
+    };
+  }, [chartData]);
 
+  const rows = chartData.length || 1;
+  const containerHeight = 235;
 
-const rows = chartData.length || 1;
-const containerHeight = 235;
+  const MIN_BAR = 18;
+  const MAX_BAR = 35;
+  const MIN_GAP = 2;
+  const MAX_GAP = 20;
 
-const MIN_BAR = 18;
-const MAX_BAR = 35;
-const MIN_GAP = 2;
-const MAX_GAP = 20;
+  const idealBar = Math.min(
+    Math.max((containerHeight / rows) * 0.6, MIN_BAR),
+    MAX_BAR,
+  );
+  let remaining = containerHeight - idealBar * rows;
 
-const idealBar = Math.min(Math.max(containerHeight / rows * 0.6, MIN_BAR), MAX_BAR);
-let remaining = containerHeight - idealBar * rows;
-
-let gap = rows > 1 ? remaining / (rows - 1) : 0;
-gap = Math.min(Math.max(gap, MIN_GAP), MAX_GAP);
-
-
+  let gap = rows > 1 ? remaining / (rows - 1) : 0;
+  gap = Math.min(Math.max(gap, MIN_GAP), MAX_GAP);
 
   return (
     <div
@@ -133,14 +129,13 @@ gap = Math.min(Math.max(gap, MIN_GAP), MAX_GAP);
 
       <div className="flex flex-row items-start justify-start gap-0 w-full h-full">
         {/* Horizontal bars and labels */}
-  <div
-  className="flex flex-col w-full min-w-0 overflow-hidden"
-  style={{
-    height: "100%",
-    rowGap: `${gap}px`,
-  }}
->
-
+        <div
+          className="flex flex-col w-full min-w-0 overflow-hidden"
+          style={{
+            height: "100%",
+            rowGap: `${gap}px`,
+          }}
+        >
           {chartData.map((item, idx) => {
             const total = (item.Y || 0) + (item.N || 0);
             const yPercentage = total > 0 ? (item.Y / total) * 100 : 0;
@@ -164,11 +159,9 @@ gap = Math.min(Math.max(gap, MIN_GAP), MAX_GAP);
                 </span>
                 {/* Stacked horizontal bar: purple left, red right */}
                 <div
-  className="relative flex flex-row w-full rounded overflow-hidden"
-  style={{ height: `${idealBar}px` }}
->
-
-
+                  className="relative flex flex-row w-full rounded overflow-hidden"
+                  style={{ height: `${idealBar}px` }}
+                >
                   {/* Completed (Y) - purple left */}
                   <div
                     className="bg-purple-500 h-full transition-all duration-700 cursor-pointer relative"

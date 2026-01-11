@@ -34,7 +34,12 @@ const columns = [
 ];
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
-const QtyInput = React.memo(function QtyInput({ value, disabled, onCommit, hasError }) {
+const QtyInput = React.memo(function QtyInput({
+  value,
+  disabled,
+  onCommit,
+  hasError,
+}) {
   const [local, setLocal] = useState(value ?? "");
   useEffect(() => {
     // Only update local if value changed from parent (not while editing)

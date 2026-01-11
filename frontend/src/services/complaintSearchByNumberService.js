@@ -7,14 +7,15 @@ import { authFetch } from "./authFetchService";
  * @returns {Promise<object>} Customer data
  */
 async function searchComplaintByNumber(complaint_number) {
-  const url = `${API_ENDPOINTS.COMPLAINT_SEARCH_NUMBER.replace(/\/$/, '')}/${encodeURIComponent(complaint_number)}`;
+  const url = `${API_ENDPOINTS.COMPLAINT_SEARCH_NUMBER.replace(/\/$/, "")}/${encodeURIComponent(complaint_number)}`;
   const response = await authFetch(url, {
     method: "GET",
   });
   const data = await response.json();
   if (!response.ok) {
     throw {
-      message: data.message || data.detail || "Failed to search by complaint number",
+      message:
+        data.message || data.detail || "Failed to search by complaint number",
       resolution: data.resolution || "",
     };
   }

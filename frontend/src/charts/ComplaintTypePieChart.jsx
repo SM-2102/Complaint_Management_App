@@ -13,7 +13,6 @@ const COLORS = [
   "#ec4899", // Pink
 ];
 
-
 const ComplaintTypePieChart = ({ data }) => {
   // expects: [{ type, count }, ...]
   const [pieData, setPieData] = useState({ labels: [], datasets: [] });
@@ -77,9 +76,7 @@ const ComplaintTypePieChart = ({ data }) => {
   };
 
   return (
-    <div
-      className="p-1 rounded-lg flex flex-col items-center w-full h-full min-h-0 min-w-0 overflow-hidden"
-    >
+    <div className="p-1 rounded-lg flex flex-col items-center w-full h-full min-h-0 min-w-0 overflow-hidden">
       <div
         className="relative w-full aspect-square max-w-full flex items-center justify-center overflow-hidden mt-5"
         style={{ maxWidth: "100%", maxHeight: "100%" }}

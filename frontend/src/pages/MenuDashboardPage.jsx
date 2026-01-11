@@ -53,12 +53,10 @@ const getFilteredCards = (company) =>
       ...rest,
       actions: filteredActions, // may be empty — that's OK
       dashboardActions: filteredActions.filter(
-        (a) => a.showInDashboard !== false
+        (a) => a.showInDashboard !== false,
       ),
     };
   });
-
-
 
 const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
   const { data, loading, error, refetch } = useDashboardData();
@@ -192,27 +190,27 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
       {
         title: "All Complaints",
         value: getVal(c.all_complaints),
-        cardKey: "all_complaints"
+        cardKey: "all_complaints",
       },
       {
         title: "CRM Open Complaints",
         value: getVal(c.crm_open_complaints),
-        cardKey: "crm_open_complaints"
+        cardKey: "crm_open_complaints",
       },
       {
         title: "Escalation Complaints",
         value: getVal(c.escalation_complaints),
-        cardKey: "escalation_complaints"
+        cardKey: "escalation_complaints",
       },
       {
         title: "Spare Pending Complaints",
         value: getVal(c.spare_pending_complaints),
-        cardKey: "spare_pending_complaints"
+        cardKey: "spare_pending_complaints",
       },
       {
         title: "Mails to be Sent",
         value: getVal(c.mail_to_be_sent_complaints),
-        cardKey: "mail_to_be_sent_complaints"
+        cardKey: "mail_to_be_sent_complaints",
       },
     ];
   }, [data, selectedCompany]);
@@ -319,7 +317,10 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
             </button>
           </div>
         </div>
-        <ComplaintStatsCards stats={complaintStats} onCardClick={handleComplaintStatCardClick} />
+        <ComplaintStatsCards
+          stats={complaintStats}
+          onCardClick={handleComplaintStatCardClick}
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 flex-grow min-w-0 w-full mt-2">
           {filteredCards.map(

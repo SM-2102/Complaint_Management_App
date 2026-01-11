@@ -14,7 +14,6 @@ function todayLocalDMY() {
   return `${d}-${m}-${y}`;
 }
 
-
 const initialForm = {
   complaint_type: "",
   complaint_number: "",
@@ -35,7 +34,7 @@ const initialForm = {
   current_status: "",
   action_by: "",
   technician: "",
-  action_head: "",  
+  action_head: "",
   complaint_priority: "",
 };
 
@@ -54,39 +53,39 @@ const ComplaintCreatePage = () => {
   const [showContact2, setShowContact2] = useState(false);
   const [entryType, setEntryType] = useState("");
   const [nameInputWidth, setNameInputWidth] = useState("100%");
-    useEffect(() => {
-      if (nameInputRef.current) {
-        setNameInputWidth(nameInputRef.current.offsetWidth + "px");
-      }
-    }, [form.customer_name, showSuggestions]);
+  useEffect(() => {
+    if (nameInputRef.current) {
+      setNameInputWidth(nameInputRef.current.offsetWidth + "px");
+    }
+  }, [form.customer_name, showSuggestions]);
 
-    // Fetch initial data for complaint create (complaint number, names, dropdowns)
-    useEffect(() => {
-      let mounted = true;
-      const load = async () => {
-        try {
-          const data = await fetchComplaintCreateData();
-          if (!mounted) return;
-          // DEBUG: inspect fetched data shape
-          // Store fetched complaint number separately; don't show unless Entry Type is NEW
-          setInitialComplaintNumber(data.complaint_number || "");
-          // store arrays for selects
-          setOptionData({
-            action_head: data.action_head || [],
-            action_by: data.action_by || [],
-            technician: data.technician || [],
-          });
-          // customer names for suggestions
-          setCustomerNames(data.customer_name || []);
-        } catch (err) {
-          // ignore silently for now; UI will show when search fails
-        }
-      };
-      load();
-      return () => {
-        mounted = false;
-      };
-    }, []);
+  // Fetch initial data for complaint create (complaint number, names, dropdowns)
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const data = await fetchComplaintCreateData();
+        if (!mounted) return;
+        // DEBUG: inspect fetched data shape
+        // Store fetched complaint number separately; don't show unless Entry Type is NEW
+        setInitialComplaintNumber(data.complaint_number || "");
+        // store arrays for selects
+        setOptionData({
+          action_head: data.action_head || [],
+          action_by: data.action_by || [],
+          technician: data.technician || [],
+        });
+        // customer names for suggestions
+        setCustomerNames(data.customer_name || []);
+      } catch (err) {
+        // ignore silently for now; UI will show when search fails
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleSearch = async () => {
     setError("");
@@ -102,7 +101,7 @@ const ComplaintCreatePage = () => {
         customer_contact1: data.contact1 ?? "",
         customer_contact2: data.contact2 ?? "",
       }));
-      setShowContact2(!!(data.contact2));
+      setShowContact2(!!data.contact2);
     } catch (err) {
       setError({
         message: err?.message || "Not found",
@@ -127,7 +126,6 @@ const ComplaintCreatePage = () => {
       setForm((prev) => ({ ...prev, product_division: "" }));
     }
   }, [form.complaint_head]);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -162,8 +160,16 @@ const ComplaintCreatePage = () => {
   };
 
   // Always compute validation errors for rendering
-  const validationForm = { ...form, complaint_number: entryType === "NEW" ? initialComplaintNumber : form.complaint_number };
-  const [errs, errs_label] = validateCreateComplaint(validationForm, showContact2, entryType);
+  const validationForm = {
+    ...form,
+    complaint_number:
+      entryType === "NEW" ? initialComplaintNumber : form.complaint_number,
+  };
+  const [errs, errs_label] = validateCreateComplaint(
+    validationForm,
+    showContact2,
+    entryType,
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -180,9 +186,13 @@ const ComplaintCreatePage = () => {
     setSubmitting(true);
     try {
       const { code, ...rest } = form;
-      const complaintNumberToSend = entryType === "NEW" ? initialComplaintNumber : form.complaint_number;
+      const complaintNumberToSend =
+        entryType === "NEW" ? initialComplaintNumber : form.complaint_number;
       const payload = Object.fromEntries(
-        Object.entries({ ...rest, complaint_number: complaintNumberToSend }).map(([k, v]) => [k, v === "" ? null : v]),
+        Object.entries({
+          ...rest,
+          complaint_number: complaintNumberToSend,
+        }).map(([k, v]) => [k, v === "" ? null : v]),
       );
       await createComplaint(payload, entryType);
       setError({
@@ -221,10 +231,13 @@ const ComplaintCreatePage = () => {
         <h2 className="text-xl font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-500 justify-center flex items-center gap-2">
           Create Complaint Record
         </h2>
-        <div className="flex flex-col gap-4">      
-           <div className="flex items-center w-full gap-7">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center w-full gap-7">
             <div className="flex items-center w-1/2">
-              <label htmlFor="entry_type" className="text-md font-medium text-gray-700 w-65">
+              <label
+                htmlFor="entry_type"
+                className="text-md font-medium text-gray-700 w-65"
+              >
                 Entry Type<span className="text-red-500">*</span>
               </label>
               <select
@@ -234,14 +247,16 @@ const ComplaintCreatePage = () => {
                 disabled={submitting}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.entryType ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
-                <option value="" disabled>
-                </option>
+                <option value="" disabled></option>
                 <option value="NEW">NEW</option>
                 <option value="CRM">CRM</option>
               </select>
             </div>
             <div className="flex items-center gap-2 w-1/2">
-              <label htmlFor="complaint_number" className="w-60 text-md font-medium text-purple-700">
+              <label
+                htmlFor="complaint_number"
+                className="w-60 text-md font-medium text-purple-700"
+              >
                 Complaint No.<span className="text-red-500">*</span>
               </label>
               {entryType === "NEW" ? (
@@ -271,10 +286,13 @@ const ComplaintCreatePage = () => {
                 />
               )}
             </div>
-            </div>    
+          </div>
           <div className="flex items-center w-full gap-7">
             <div className="flex items-center flex-1 gap-2 w-1/4">
-              <label htmlFor="complaint_head" className="w-33.5 text-md font-medium text-gray-700">
+              <label
+                htmlFor="complaint_head"
+                className="w-33.5 text-md font-medium text-gray-700"
+              >
                 Complaint Head<span className="text-red-500">*</span>
               </label>
               <select
@@ -290,7 +308,10 @@ const ComplaintCreatePage = () => {
               </select>
             </div>
             <div className="flex items-center flex-1 gap-2">
-              <label htmlFor="complaint_date" className="w-60 text-md font-medium text-gray-700">
+              <label
+                htmlFor="complaint_date"
+                className="w-60 text-md font-medium text-gray-700"
+              >
                 Complaint Date<span className="text-red-500">*</span>
               </label>
               <input
@@ -307,7 +328,10 @@ const ComplaintCreatePage = () => {
 
           <div className="flex items-center w-full gap-7">
             <div className="flex items-center flex-1 gap-2 w-1/2">
-              <label htmlFor="complaint_type" className="w-33.5 text-md font-medium text-gray-700">
+              <label
+                htmlFor="complaint_type"
+                className="w-33.5 text-md font-medium text-gray-700"
+              >
                 Complaint Type<span className="text-red-500">*</span>
               </label>
               <select
@@ -318,16 +342,18 @@ const ComplaintCreatePage = () => {
                 disabled={submitting}
                 className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.complaint_type ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
-                <option value="" disabled>
-                </option>
+                <option value="" disabled></option>
                 <option value="INSTALL">INSTALL</option>
                 <option value="SERVICE">SERVICE</option>
                 <option value="SALE">SALE</option>
               </select>
             </div>
-            
-             <div className="flex items-center flex-1 gap-2">
-              <label htmlFor="customer_type" className="w-33 text-md font-medium text-gray-700">
+
+            <div className="flex items-center flex-1 gap-2">
+              <label
+                htmlFor="customer_type"
+                className="w-33 text-md font-medium text-gray-700"
+              >
                 Customer Type<span className="text-red-500">*</span>
               </label>
               <select
@@ -338,14 +364,13 @@ const ComplaintCreatePage = () => {
                 disabled={submitting}
                 className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_type ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
-                <option value="" disabled>
-                </option>
+                <option value="" disabled></option>
                 <option value="CUSTOMER">CUSTOMER</option>
                 <option value="DEALER">DEALER</option>
               </select>
             </div>
           </div>
-           <div className="w-full flex items-center">
+          <div className="w-full flex items-center">
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-r from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
             <span
               className="mx-3 text-purple-400 font-semibold text-xs tracking-widest select-none"
@@ -355,86 +380,89 @@ const ComplaintCreatePage = () => {
             </span>
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
-           <div
-                       className="flex items-center gap-2 w-full"
-                       style={{ position: "relative" }}
-                     >
-                       <label
-                         htmlFor="customer_name"
-                         className="w-29 text-md font-medium text-gray-700"
-                       >
-                         Name<span className="text-red-500">*</span>
-                       </label>
-                       <div className="flex-1 flex items-center gap-2">
-                         <div style={{ position: "relative", width: "100%" }}>
-                           <input
-                             id="customer_name"
-                             name="customer_name"
-                             type="text"
-                             value={form.customer_name}
-                             onChange={handleChange}
-                             className={`w-full px-3 py-1 rounded-lg border ${errs_label.customer_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
-                             minLength={3}
-                             maxLength={40}
-                             required
-                             disabled={submitting}
-                             autoComplete="name"
-                             onFocus={() => {
-                               if (form.customer_name.length > 0 && nameSuggestions.length > 0)
-                                 setShowSuggestions(true);
-                             }}
-                             onBlur={() =>
-                               setTimeout(() => setShowSuggestions(false), 150)
-                             }
-                             ref={nameInputRef}
-                           />
-                           {showSuggestions && (
-                             <ul
-                               style={{
-                                 position: "absolute",
-                                 top: "100%",
-                                 left: 0,
-                                 zIndex: 10,
-                                 background: "#fff",
-                                 border: "1px solid #d1d5db",
-                                 borderRadius: "0.5rem",
-                                 boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                                 width: nameInputWidth,
-                                 maxHeight: 180,
-                                 overflowY: "auto",
-                                 margin: 0,
-                                 padding: 0,
-                                 listStyle: "none",
-                               }}
-                             >
-                               {nameSuggestions.map((n) => (
-                                 <li
-                                   key={n}
-                                   style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
-                                   onMouseDown={() => {
-                                     setForm((prev) => ({ ...prev, customer_name: n }));
-                                     setShowSuggestions(false);
-                                   }}
-                                 >
-                                   {n}
-                                 </li>
-                               ))}
-                             </ul>
-                           )}
-                         </div>
-                         <button
-                           type="button"
-                           title="Search by name"
-                           className="p-1 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
-                           disabled={submitting || !form.customer_name}
-                           onClick={() => handleSearch("customer_name")}
-                           tabIndex={0}
-                           style={{ width: 32, height: 32 }}
-                         >
-                           <FiSearch size={20} />
-                         </button>
-                       </div>
-                     </div>
+          <div
+            className="flex items-center gap-2 w-full"
+            style={{ position: "relative" }}
+          >
+            <label
+              htmlFor="customer_name"
+              className="w-29 text-md font-medium text-gray-700"
+            >
+              Name<span className="text-red-500">*</span>
+            </label>
+            <div className="flex-1 flex items-center gap-2">
+              <div style={{ position: "relative", width: "100%" }}>
+                <input
+                  id="customer_name"
+                  name="customer_name"
+                  type="text"
+                  value={form.customer_name}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-1 rounded-lg border ${errs_label.customer_name ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
+                  minLength={3}
+                  maxLength={40}
+                  required
+                  disabled={submitting}
+                  autoComplete="name"
+                  onFocus={() => {
+                    if (
+                      form.customer_name.length > 0 &&
+                      nameSuggestions.length > 0
+                    )
+                      setShowSuggestions(true);
+                  }}
+                  onBlur={() =>
+                    setTimeout(() => setShowSuggestions(false), 150)
+                  }
+                  ref={nameInputRef}
+                />
+                {showSuggestions && (
+                  <ul
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      zIndex: 10,
+                      background: "#fff",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "0.5rem",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                      width: nameInputWidth,
+                      maxHeight: 180,
+                      overflowY: "auto",
+                      margin: 0,
+                      padding: 0,
+                      listStyle: "none",
+                    }}
+                  >
+                    {nameSuggestions.map((n) => (
+                      <li
+                        key={n}
+                        style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
+                        onMouseDown={() => {
+                          setForm((prev) => ({ ...prev, customer_name: n }));
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        {n}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <button
+                type="button"
+                title="Search by name"
+                className="p-1 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
+                disabled={submitting || !form.customer_name}
+                onClick={() => handleSearch("customer_name")}
+                tabIndex={0}
+                style={{ width: 32, height: 32 }}
+              >
+                <FiSearch size={20} />
+              </button>
+            </div>
+          </div>
           <div className="flex items-center gap-3 w-full">
             <label
               htmlFor="customer_address1"
@@ -454,7 +482,7 @@ const ComplaintCreatePage = () => {
               disabled={submitting}
             />
           </div>
-           <div className="flex items-center gap-3 w-full">
+          <div className="flex items-center gap-3 w-full">
             <label
               htmlFor="customer_address2"
               className="w-28 text-md font-medium text-gray-700"
@@ -514,7 +542,7 @@ const ComplaintCreatePage = () => {
               />
             </div>
           </div>
-                <div className="flex items-center w-full gap-7">
+          <div className="flex items-center w-full gap-7">
             <div className="flex items-center w-1/2 gap-2">
               <label
                 htmlFor="customer_contact1"
@@ -583,7 +611,10 @@ const ComplaintCreatePage = () => {
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-2/5">
-              <label htmlFor="product_division" className="w-45 text-md font-medium text-gray-700">
+              <label
+                htmlFor="product_division"
+                className="w-45 text-md font-medium text-gray-700"
+              >
                 Division<span className="text-red-500">*</span>
               </label>
               <select
@@ -594,8 +625,7 @@ const ComplaintCreatePage = () => {
                 disabled={submitting}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.product_division ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
-                <option value="" disabled>
-                </option>
+                <option value="" disabled></option>
                 {(divisionOptions[form.complaint_head] || []).map((d) => (
                   <option key={d} value={d} title={d}>
                     {d}
@@ -604,7 +634,10 @@ const ComplaintCreatePage = () => {
               </select>
             </div>
             <div className="flex items-center gap-2 w-3/5">
-              <label htmlFor="product_model" className="w-50 text-md font-medium text-gray-700 ml-7">
+              <label
+                htmlFor="product_model"
+                className="w-50 text-md font-medium text-gray-700 ml-7"
+              >
                 Product Model
               </label>
               <input
@@ -622,7 +655,10 @@ const ComplaintCreatePage = () => {
 
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-2/5">
-              <label htmlFor="updated_time" className="w-45 text-md font-medium text-gray-700">
+              <label
+                htmlFor="updated_time"
+                className="w-45 text-md font-medium text-gray-700"
+              >
                 Upload Time
               </label>
               <input
@@ -638,7 +674,10 @@ const ComplaintCreatePage = () => {
               />
             </div>
             <div className="flex items-center gap-2 w-3/5">
-              <label htmlFor="product_serial_number" className="w-50 text-md font-medium text-gray-700 ml-7">
+              <label
+                htmlFor="product_serial_number"
+                className="w-50 text-md font-medium text-gray-700 ml-7"
+              >
                 Serial Number
               </label>
               <input
@@ -655,7 +694,10 @@ const ComplaintCreatePage = () => {
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-2/5">
-              <label htmlFor="appoint_date" className="w-45 text-md font-medium text-gray-700">
+              <label
+                htmlFor="appoint_date"
+                className="w-45 text-md font-medium text-gray-700"
+              >
                 Appoint Date
               </label>
               <input
@@ -670,7 +712,10 @@ const ComplaintCreatePage = () => {
               />
             </div>
             <div className="flex items-center gap-2 w-3/5">
-              <label htmlFor="current_status" className="w-50 text-md font-medium text-gray-700 ml-7">
+              <label
+                htmlFor="current_status"
+                className="w-50 text-md font-medium text-gray-700 ml-7"
+              >
                 Current Status<span className="text-red-500">*</span>
               </label>
               <input
@@ -698,7 +743,10 @@ const ComplaintCreatePage = () => {
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center flex-1 gap-2 w-2/5">
-              <label htmlFor="action_by" className="w-35 text-md font-medium text-gray-700">
+              <label
+                htmlFor="action_by"
+                className="w-35 text-md font-medium text-gray-700"
+              >
                 Action By<span className="text-red-500">*</span>
               </label>
               <select
@@ -718,7 +766,10 @@ const ComplaintCreatePage = () => {
               </select>
             </div>
             <div className="flex items-center flex-1 gap-2 w-3/5">
-              <label htmlFor="action_head" className="w-33 text-md font-medium text-gray-700 ml-7">
+              <label
+                htmlFor="action_head"
+                className="w-33 text-md font-medium text-gray-700 ml-7"
+              >
                 Action Required<span className="text-red-500">*</span>
               </label>
               <select
@@ -737,11 +788,13 @@ const ComplaintCreatePage = () => {
                 ))}
               </select>
             </div>
-            
           </div>
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2 w-2/5">
-              <label htmlFor="technician" className="w-35 text-md font-medium text-gray-700">
+              <label
+                htmlFor="technician"
+                className="w-35 text-md font-medium text-gray-700"
+              >
                 Technician<span className="text-red-500">*</span>
               </label>
               <select
@@ -761,7 +814,10 @@ const ComplaintCreatePage = () => {
               </select>
             </div>
             <div className="flex items-center gap-2 w-3/5">
-              <label htmlFor="complaint_priority" className="w-57 text-md font-medium text-gray-700 ml-7">
+              <label
+                htmlFor="complaint_priority"
+                className="w-57 text-md font-medium text-gray-700 ml-7"
+              >
                 Action Priority<span className="text-red-500">*</span>
               </label>
               <select
@@ -781,7 +837,6 @@ const ComplaintCreatePage = () => {
               </select>
             </div>
           </div>
-        
         </div>
         <div className="flex justify-center mt-6">
           <button

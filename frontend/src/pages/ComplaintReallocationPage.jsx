@@ -45,7 +45,6 @@ const ComplaintReallocationPage = () => {
   const [complaintAllocLoading, setComplaintAllocLoading] = useState(false);
   const [selected, setSelected] = useState([]); // array of complaint_number
 
-
   // Handler for allocated_to change
   const handleAllocatedToChange = async (e) => {
     const value = e.target.value;
@@ -74,7 +73,10 @@ const ComplaintReallocationPage = () => {
   // Selection handlers
   const toggleSelectAll = (checked) => {
     if (checked) {
-      const source = complaintAllocData && complaintAllocData.length > 0 ? complaintAllocData : data;
+      const source =
+        complaintAllocData && complaintAllocData.length > 0
+          ? complaintAllocData
+          : data;
       const ids = source
         .map((r) => {
           if (r === null || r === undefined) return null;
@@ -98,7 +100,7 @@ const ComplaintReallocationPage = () => {
   };
 
   // Handler for Reallocate button — calls reallocateComplaints service
-  const handleReallocate = async () => {    
+  const handleReallocate = async () => {
     if (!form.allocated_to) {
       setError({
         message: "Old technician is required.",
@@ -147,7 +149,6 @@ const ComplaintReallocationPage = () => {
       setUpdating(false);
     }
   };
-
 
   // Fetch technicians on mount
   useEffect(() => {
@@ -225,8 +226,8 @@ const ComplaintReallocationPage = () => {
                 ))}
               </select>
             </div>
-            </div>
-            <div className="flex items-center justify-center mb-2 gap-5">
+          </div>
+          <div className="flex items-center justify-center mb-2 gap-5">
             {/* Reallocate to dropdown */}
             <label
               htmlFor="reallocate_to"
@@ -269,14 +270,17 @@ const ComplaintReallocationPage = () => {
                   <Checkbox
                     size="small"
                     indeterminate={
-                      selected.length > 0 && selected.length < (complaintAllocData.length || data.length)
+                      selected.length > 0 &&
+                      selected.length <
+                        (complaintAllocData.length || data.length)
                     }
                     checked={
                       (complaintAllocData.length || data.length) > 0 &&
-                      selected.length === (complaintAllocData.length || data.length)
+                      selected.length ===
+                        (complaintAllocData.length || data.length)
                     }
                     onChange={(e) => toggleSelectAll(e.target.checked)}
-                    inputProps={{ 'aria-label': 'select all complaints' }}
+                    inputProps={{ "aria-label": "select all complaints" }}
                   />
                 </TableCell>
                 {columns.map((col) => (
@@ -308,7 +312,7 @@ const ComplaintReallocationPage = () => {
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : (complaintAllocData && complaintAllocData.length > 0 ? (
+              ) : complaintAllocData && complaintAllocData.length > 0 ? (
                 complaintAllocData.map((row, idx) => (
                   <TableRow
                     key={row.complaint_number || idx}
@@ -322,7 +326,9 @@ const ComplaintReallocationPage = () => {
                         size="small"
                         checked={selected.includes(row.complaint_number)}
                         onChange={() => toggleSelectOne(row.complaint_number)}
-                        inputProps={{ 'aria-label': `select-${row.complaint_number}` }}
+                        inputProps={{
+                          "aria-label": `select-${row.complaint_number}`,
+                        }}
                       />
                     </TableCell>
                     {columns.map((col) => (
@@ -356,7 +362,9 @@ const ComplaintReallocationPage = () => {
                         size="small"
                         checked={selected.includes(row.complaint_number)}
                         onChange={() => toggleSelectOne(row.complaint_number)}
-                        inputProps={{ 'aria-label': `select-${row.complaint_number}` }}
+                        inputProps={{
+                          "aria-label": `select-${row.complaint_number}`,
+                        }}
                       />
                     </TableCell>
                     {columns.map((col) => (
@@ -390,7 +398,7 @@ const ComplaintReallocationPage = () => {
                     No Records Found
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>

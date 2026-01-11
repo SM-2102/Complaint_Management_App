@@ -53,7 +53,6 @@ const GRCCGPISLReceiveSparePage = () => {
   const [altSpareAnchorEl, setAltSpareAnchorEl] = useState(null);
   const [invalidSpareCodes, setInvalidSpareCodes] = useState(new Set());
 
-
   // fetch stock list helper
   const fetchStockByDivision = async (division) => {
     if (!division) {
@@ -162,36 +161,35 @@ const GRCCGPISLReceiveSparePage = () => {
     }
     // Validation: issue_qty = receive_qty + damaged_qty + short_qty + alt_spare_qty for all records
     // Validation: issue_qty = receive_qty + damaged_qty + short_qty + alt_spare_qty
-const invalidRows = payload.filter((row) => {
-  const issue_qty = Number(row.issue_qty ?? 0);
-  const receive_qty = Number(row.receive_qty ?? 0);
-  const damaged_qty = Number(row.damaged_qty ?? 0);
-  const short_qty = Number(row.short_qty ?? 0);
-  const alt_spare_qty = Number(row.alt_spare_qty ?? 0);
+    const invalidRows = payload.filter((row) => {
+      const issue_qty = Number(row.issue_qty ?? 0);
+      const receive_qty = Number(row.receive_qty ?? 0);
+      const damaged_qty = Number(row.damaged_qty ?? 0);
+      const short_qty = Number(row.short_qty ?? 0);
+      const alt_spare_qty = Number(row.alt_spare_qty ?? 0);
 
-  return issue_qty !== receive_qty + damaged_qty + short_qty + alt_spare_qty;
-});
+      return (
+        issue_qty !== receive_qty + damaged_qty + short_qty + alt_spare_qty
+      );
+    });
 
-if (invalidRows.length > 0) {
-  // collect all failing spare codes
-  const failingCodes = new Set(
-    invalidRows.map((r) => r.spare_code),
-  );
-  setInvalidSpareCodes(failingCodes);
+    if (invalidRows.length > 0) {
+      // collect all failing spare codes
+      const failingCodes = new Set(invalidRows.map((r) => r.spare_code));
+      setInvalidSpareCodes(failingCodes);
 
-  setError({
-    message: "Quantity mismatch.",
-    type: "warning",
-    resolution: "Highlighted spare codes require correction.",
-  });
-  setShowToast(true);
-  setUpdating(false);
-  return;
-}
+      setError({
+        message: "Quantity mismatch.",
+        type: "warning",
+        resolution: "Highlighted spare codes require correction.",
+      });
+      setShowToast(true);
+      setUpdating(false);
+      return;
+    }
 
-// clear highlights if validation passes
-setInvalidSpareCodes(new Set());
-
+    // clear highlights if validation passes
+    setInvalidSpareCodes(new Set());
 
     // Validation: if alt_spare_qty is entered (> 0), alt_spare_code and dispute_remark are mandatory
     const altSpareMissingRows = payload.filter(
@@ -610,28 +608,29 @@ setInvalidSpareCodes(new Set());
                               }}
                             />
                           )
-                       ) : row[col.key] !== null &&
-  row[col.key] !== undefined ? (
-  col.key === "spare_code" ? (
-    <span
-      style={{
-        color: invalidSpareCodes.has(row.spare_code)
-          ? "#d32f2f"
-          : "inherit",
-        fontWeight: invalidSpareCodes.has(row.spare_code)
-          ? 700
-          : 500,
-      }}
-    >
-      {row[col.key]}
-    </span>
-  ) : (
-    row[col.key]
-  )
-) : (
-  "-"
-)}
-
+                        ) : row[col.key] !== null &&
+                          row[col.key] !== undefined ? (
+                          col.key === "spare_code" ? (
+                            <span
+                              style={{
+                                color: invalidSpareCodes.has(row.spare_code)
+                                  ? "#d32f2f"
+                                  : "inherit",
+                                fontWeight: invalidSpareCodes.has(
+                                  row.spare_code,
+                                )
+                                  ? 700
+                                  : 500,
+                              }}
+                            >
+                              {row[col.key]}
+                            </span>
+                          ) : (
+                            row[col.key]
+                          )
+                        ) : (
+                          "-"
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>

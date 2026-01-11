@@ -135,7 +135,8 @@ const Filter = ({
                 background: "#f7f9fc",
                 transition: "border 0.2s",
                 outline: "none",
-                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",              }}
+                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+              }}
               onFocus={(e) => (e.target.style.border = "1.5px solid #2e7d32")}
               onBlur={() => {
                 isTypingSpareCodeRef.current = false;
@@ -216,7 +217,8 @@ const Filter = ({
                 background: "#f7f9fc",
                 transition: "border 0.2s",
                 outline: "none",
-                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",              }}
+                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+              }}
               onFocus={(e) => (e.target.style.border = "1.5px solid #2e7d32")}
               onBlur={() => {
                 isTypingSpareDescriptionRef.current = false;
@@ -290,7 +292,8 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  width: "100%",
                 }}
               >
                 <option value=""></option>
@@ -328,7 +331,8 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  width: "100%",
                 }}
               >
                 <option value=""></option>
@@ -363,7 +367,8 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  width: "100%",
                 }}
               >
                 <option value=""></option>
@@ -398,7 +403,8 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",                  width: "100%",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  width: "100%",
                 }}
               >
                 <option value=""></option>

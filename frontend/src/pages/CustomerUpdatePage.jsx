@@ -35,7 +35,7 @@ const initialForm = {
   discount_cgpump: "",
   discount_light: "",
   discount_whc: "",
-  discount_cgwhc: "",  
+  discount_cgwhc: "",
 };
 
 const CustomerUpdatePage = () => {
@@ -136,7 +136,7 @@ const CustomerUpdatePage = () => {
         discount_cgpump: data.discount_cgpump ?? "",
         discount_light: data.discount_light ?? "",
         discount_whc: data.discount_whc ?? "",
-        discount_cgwhc: data.discount_cgwhc ?? "", 
+        discount_cgwhc: data.discount_cgwhc ?? "",
       }));
       setShowContact2(!!data.contact2);
     } catch (err) {
@@ -205,38 +205,41 @@ const CustomerUpdatePage = () => {
           Update Customer Record
         </h2>
         <div className="flex flex-col gap-4">
-        <div className="flex items-center w-full gap-3">
-          {/* Code (readonly, small, label beside input) */}
-          <div className="flex items-center gap-3 justify-center">
-            <label htmlFor="code" className="text-md font-medium text-gray-700">
-              Customer Code
-            </label>
-            <input
-              id="code"
-              name="code"
-              type="text"
-              value={form.code}
-              onChange={handleChange}
-              disabled={submitting}
-              required
-              autoComplete="off"
-              className="w-28 text-center px-2 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 font-medium"
-              maxLength={5}
-              style={{ minWidth: 0 }}
-            />
-            <button
-              type="button"
-              title="Search by code"
-              className="p-0 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
-              disabled={submitting || !form.code}
-              onClick={() => handleSearch("code")}
-              tabIndex={0}
-              style={{ width: 32, height: 32 }}
-            >
-              <FiSearch size={20} />
-            </button>
-          </div>
-          <div className="flex items-center flex-1 gap-2 min-w-0">
+          <div className="flex items-center w-full gap-3">
+            {/* Code (readonly, small, label beside input) */}
+            <div className="flex items-center gap-3 justify-center">
+              <label
+                htmlFor="code"
+                className="text-md font-medium text-gray-700"
+              >
+                Customer Code
+              </label>
+              <input
+                id="code"
+                name="code"
+                type="text"
+                value={form.code}
+                onChange={handleChange}
+                disabled={submitting}
+                required
+                autoComplete="off"
+                className="w-28 text-center px-2 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 font-medium"
+                maxLength={5}
+                style={{ minWidth: 0 }}
+              />
+              <button
+                type="button"
+                title="Search by code"
+                className="p-0 rounded-full bg-gradient-to-tr from-purple-200 to-purple-500 text-white shadow-md hover:scale-105 hover:from-purple-600 hover:to-purple-900 focus:outline-none transition-all duration-200 flex items-center justify-center"
+                disabled={submitting || !form.code}
+                onClick={() => handleSearch("code")}
+                tabIndex={0}
+                style={{ width: 32, height: 32 }}
+              >
+                <FiSearch size={20} />
+              </button>
+            </div>
+            <div className="flex items-center flex-1 gap-2 min-w-0">
               <label
                 htmlFor="type"
                 className="w-18 text-md font-medium text-gray-700 ml-6"
@@ -361,7 +364,7 @@ const CustomerUpdatePage = () => {
               disabled={submitting}
             />
           </div>
-           <div className="flex items-center gap-3 w-full">
+          <div className="flex items-center gap-3 w-full">
             <label
               htmlFor="address2"
               className="w-28 text-md font-medium text-gray-700"
@@ -421,7 +424,7 @@ const CustomerUpdatePage = () => {
               />
             </div>
           </div>
-                <div className="flex items-center w-full gap-7">
+          <div className="flex items-center w-full gap-7">
             <div className="flex items-center w-1/2 gap-2">
               <label
                 htmlFor="contact1"
@@ -528,23 +531,25 @@ const CustomerUpdatePage = () => {
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
           <div className="flex items-center gap-3">
-              <label className="text-md font-semibold text-gray-700 mr-10">Consignee Address</label>
-              <button
-                type="button"
-                className="text-sm px-3 py-1 rounded bg-purple-600 text-white font-semibold hover:bg-purple-700 focus:outline-none"
-                onClick={() => {
-                  setForm((prev) => ({
-                    ...prev,
-                    consignee_address1: prev.address1,
-                    consignee_address2: prev.address2,
-                    consignee_city: prev.city,
-                    consignee_pin: prev.pin,
-                  }));
-                }}
-              >
-                Same as Billing Address
-              </button>
-            </div>
+            <label className="text-md font-semibold text-gray-700 mr-10">
+              Consignee Address
+            </label>
+            <button
+              type="button"
+              className="text-sm px-3 py-1 rounded bg-purple-600 text-white font-semibold hover:bg-purple-700 focus:outline-none"
+              onClick={() => {
+                setForm((prev) => ({
+                  ...prev,
+                  consignee_address1: prev.address1,
+                  consignee_address2: prev.address2,
+                  consignee_city: prev.city,
+                  consignee_pin: prev.pin,
+                }));
+              }}
+            >
+              Same as Billing Address
+            </button>
+          </div>
           <div className="flex items-center gap-3 w-full">
             <label
               htmlFor="consignee_address1"
@@ -564,7 +569,7 @@ const CustomerUpdatePage = () => {
               disabled={submitting}
             />
           </div>
-           <div className="flex items-center gap-3 w-full">
+          <div className="flex items-center gap-3 w-full">
             <label
               htmlFor="consignee_address2"
               className="w-28 text-md font-medium text-gray-700"
@@ -654,9 +659,11 @@ const CustomerUpdatePage = () => {
                   ["WHC", "discount_whc", "discount_cgwhc"],
                 ].map(([label, cgcelKey, cgpislKey]) => (
                   <tr key={label} className="">
-                    <td className="px-4 py-2 font-medium text-gray-700">{label}</td>
+                    <td className="px-4 py-2 font-medium text-gray-700">
+                      {label}
+                    </td>
                     <td className="px-4 py-2 text-center">
-                      {['discount_fhp', 'discount_lt'].includes(cgcelKey) ? (
+                      {["discount_fhp", "discount_lt"].includes(cgcelKey) ? (
                         <div className="w-24 h-8 mx-auto"></div>
                       ) : (
                         <input
@@ -673,27 +680,27 @@ const CustomerUpdatePage = () => {
                       )}
                     </td>
                     <td className="px-4 py-2 text-center">
-                      {['discount_cglight'].includes(cgpislKey) ? (
+                      {["discount_cglight"].includes(cgpislKey) ? (
                         <div className="w-24 h-8 mx-auto"></div>
                       ) : (
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        name={cgpislKey}
-                        value={form[cgpislKey]}
-                        onChange={handleChange}
-                        min={0}
-                        step={1}
-                        className="w-24 mx-auto block px-2 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 text-center"
-                        disabled={submitting}
-                      />
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          name={cgpislKey}
+                          value={form[cgpislKey]}
+                          onChange={handleChange}
+                          min={0}
+                          step={1}
+                          className="w-24 mx-auto block px-2 py-1 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 text-center"
+                          disabled={submitting}
+                        />
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>         
+          </div>
         </div>
         <div className="flex justify-center mt-6">
           <button

@@ -23,7 +23,6 @@ const columns = [
 
 const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
 
-
 const Filter = ({
   open = false,
   onToggle,
@@ -40,36 +39,36 @@ const Filter = ({
   setToGRCDate,
   GRCNumber,
   setGRCNumber,
-    challanNumber,
-    setChallanNumber,
-    GRCStatus,
-    setGRCStatus,
+  challanNumber,
+  setChallanNumber,
+  GRCStatus,
+  setGRCStatus,
 }) => {
   const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
-    const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
-      useState(false);
-    const isTypingSpareCodeRef = React.useRef(false);
-    useEffect(() => {
-  if (GRCStatus === "N") {
-    setChallanNumber("");
-  }
-}, [GRCStatus]);
-    useEffect(() => {
-        if (!isTypingSpareCodeRef.current) {
-          setShowSpareCodeSuggestions(false);
-          return;
-        }
-    
-        if (spareCode && spareCodes.length > 0) {
-          const filtered = spareCodes.filter((n) =>
-            n.toLowerCase().includes(spareCode.toLowerCase()),
-          );
-          setSpareCodeSuggestions(filtered);
-          setShowSpareCodeSuggestions(filtered.length > 0);
-        } else {
-          setShowSpareCodeSuggestions(false);
-        }
-      }, [spareCode, spareCodes]);
+  const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
+    useState(false);
+  const isTypingSpareCodeRef = React.useRef(false);
+  useEffect(() => {
+    if (GRCStatus === "N") {
+      setChallanNumber("");
+    }
+  }, [GRCStatus]);
+  useEffect(() => {
+    if (!isTypingSpareCodeRef.current) {
+      setShowSpareCodeSuggestions(false);
+      return;
+    }
+
+    if (spareCode && spareCodes.length > 0) {
+      const filtered = spareCodes.filter((n) =>
+        n.toLowerCase().includes(spareCode.toLowerCase()),
+      );
+      setSpareCodeSuggestions(filtered);
+      setShowSpareCodeSuggestions(filtered.length > 0);
+    } else {
+      setShowSpareCodeSuggestions(false);
+    }
+  }, [spareCode, spareCodes]);
 
   return (
     <>
@@ -80,7 +79,6 @@ const Filter = ({
         style={{ maxHeight: "calc(100vh - 88px)", overflowY: "auto" }}
       >
         <div style={{ padding: 15, marginTop: 5 }}>
-         
           <div style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <label
@@ -202,7 +200,14 @@ const Filter = ({
               </ul>
             )}
           </div>
-          <div style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+          <div
+            style={{
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
             <label
               htmlFor="GRCNumber"
               style={{
@@ -218,24 +223,31 @@ const Filter = ({
               GRC No.
             </label>
             <input
-                id="GRCNumber"
-                name="GRCNumber"
-                value={GRCNumber}
-                type="text"
-                onChange={(e) => setGRCNumber(e.target.value)}
-                style={{
-                  padding: "4px 8px",
-                  border: "1px solid #d1d5db",
-                  borderRadius: 6,
-                  fontSize: 13,
-                  background: "#f7f9fc",
-                  outline: "none",
-                  boxShadow: "0 1px 2px rgba(46,125,50,0.08)",
-                  width: "100%",
-                }}
-              />
+              id="GRCNumber"
+              name="GRCNumber"
+              value={GRCNumber}
+              type="text"
+              onChange={(e) => setGRCNumber(e.target.value)}
+              style={{
+                padding: "4px 8px",
+                border: "1px solid #d1d5db",
+                borderRadius: 6,
+                fontSize: 13,
+                background: "#f7f9fc",
+                outline: "none",
+                boxShadow: "0 1px 2px rgba(46,125,50,0.08)",
+                width: "100%",
+              }}
+            />
           </div>
-          <div style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+          <div
+            style={{
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
             <label
               htmlFor="challanNumber"
               style={{
@@ -251,63 +263,67 @@ const Filter = ({
               Challan No.
             </label>
             <input
-  id="challanNumber"
-  name="challanNumber"
-  value={challanNumber}
-  type="text"
-  disabled={GRCStatus === "N"}
-  onChange={(e) => setChallanNumber(e.target.value)}
-  style={{
-    padding: "4px 8px",
-    border: "1px solid #d1d5db",
-    borderRadius: 6,
-    fontSize: 13,
-    background: GRCStatus === "N" ? "#e5e7eb" : "#f7f9fc",
-    color: GRCStatus === "N" ? "#6b7280" : "#111827",
-    cursor: GRCStatus === "N" ? "not-allowed" : "text",
-    outline: "none",
-    boxShadow:
-      GRCStatus === "N"
-        ? "none"
-        : "0 1px 2px rgba(46,125,50,0.08)",
-    width: "100%",
-  }}
-/>
-
+              id="challanNumber"
+              name="challanNumber"
+              value={challanNumber}
+              type="text"
+              disabled={GRCStatus === "N"}
+              onChange={(e) => setChallanNumber(e.target.value)}
+              style={{
+                padding: "4px 8px",
+                border: "1px solid #d1d5db",
+                borderRadius: 6,
+                fontSize: 13,
+                background: GRCStatus === "N" ? "#e5e7eb" : "#f7f9fc",
+                color: GRCStatus === "N" ? "#6b7280" : "#111827",
+                cursor: GRCStatus === "N" ? "not-allowed" : "text",
+                outline: "none",
+                boxShadow:
+                  GRCStatus === "N" ? "none" : "0 1px 2px rgba(46,125,50,0.08)",
+                width: "100%",
+              }}
+            />
           </div>
-          <div style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
-             <label
-                htmlFor="GRCStatus"
-                style={{
-                  fontWeight: 600,
-                  color: "#2e7d32",
-                  letterSpacing: 0.5,
-                  fontSize: 13,
-                  width: 140,
-                }}
-              >
-                GRC Status
-              </label>
-              <select
-                id="GRCStatus"
-                name="GRCStatus"
-                value={GRCStatus}
-                onChange={(e) => setGRCStatus(e.target.value)}
-                style={{
-                  padding: "4px 8px",
-                  border: "1px solid #d1d5db",
-                  borderRadius: 6,
-                  fontSize: 13,
-                  background: "#f7f9fc",
-                  outline: "none",
-                  boxShadow: "0 1px 2px rgba(46,125,50,0.08)",
-                  width: "100%",
-                }}
-              >
-                <option value="N">Pending</option>
-                <option value="Y">Already Sent</option>
-              </select>
-            </div>
+          <div
+            style={{
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <label
+              htmlFor="GRCStatus"
+              style={{
+                fontWeight: 600,
+                color: "#2e7d32",
+                letterSpacing: 0.5,
+                fontSize: 13,
+                width: 140,
+              }}
+            >
+              GRC Status
+            </label>
+            <select
+              id="GRCStatus"
+              name="GRCStatus"
+              value={GRCStatus}
+              onChange={(e) => setGRCStatus(e.target.value)}
+              style={{
+                padding: "4px 8px",
+                border: "1px solid #d1d5db",
+                borderRadius: 6,
+                fontSize: 13,
+                background: "#f7f9fc",
+                outline: "none",
+                boxShadow: "0 1px 2px rgba(46,125,50,0.08)",
+                width: "100%",
+              }}
+            >
+              <option value="N">Pending</option>
+              <option value="Y">Already Sent</option>
+            </select>
+          </div>
           <div style={{ marginBottom: 10 }}>
             <label
               htmlFor="fromGRCDate"
@@ -373,54 +389,53 @@ const Filter = ({
                 }}
               />
             </div>
- 
-            </div>
           </div>
-          <div
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 16,
+          }}
+        >
+          <button
+            onClick={onSearch}
             style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 16,
+              padding: "8px 16px",
+              background: "linear-gradient(90deg, #2e7d32 60%, #1b5e20 100%)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+              fontWeight: "bold",
+              fontSize: 15,
+              boxShadow: "0 2px 8px rgba(25,118,210,0.08)",
+              cursor: "pointer",
+              letterSpacing: 1,
+              transition: "background 0.2s, box-shadow 0.2s",
             }}
           >
-            <button
-              onClick={onSearch}
-              style={{
-                padding: "8px 16px",
-                background: "linear-gradient(90deg, #2e7d32 60%, #1b5e20 100%)",
-                color: "#fff",
-                border: "none",
-                borderRadius: 10,
-                fontWeight: "bold",
-                fontSize: 15,
-                boxShadow: "0 2px 8px rgba(25,118,210,0.08)",
-                cursor: "pointer",
-                letterSpacing: 1,
-                transition: "background 0.2s, box-shadow 0.2s",
-              }}
-            >
-              Search
-            </button>
-            <button
-              onClick={onClear}
-              style={{
-                padding: "8px 16px",
-                background: "linear-gradient(90deg, #2e7d32 60%, #1b5e20 100%)",
-                color: "#fff",
-                border: "none",
-                borderRadius: 10,
-                fontWeight: "bold",
-                fontSize: 15,
-                boxShadow: "0 2px 8px rgba(25,118,210,0.08)",
-                cursor: "pointer",
-                letterSpacing: 1,
-                marginLeft: 8,
-                transition: "background 0.2s, box-shadow 0.2s",
-              }}
-            >
-              Clear
-            </button>
+            Search
+          </button>
+          <button
+            onClick={onClear}
+            style={{
+              padding: "8px 16px",
+              background: "linear-gradient(90deg, #2e7d32 60%, #1b5e20 100%)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+              fontWeight: "bold",
+              fontSize: 15,
+              boxShadow: "0 2px 8px rgba(25,118,210,0.08)",
+              cursor: "pointer",
+              letterSpacing: 1,
+              marginLeft: 8,
+              transition: "background 0.2s, box-shadow 0.2s",
+            }}
+          >
+            Clear
+          </button>
         </div>
       </div>
       <div
@@ -475,22 +490,22 @@ const GRCCGPISLEnquiryPage = () => {
     setError(null);
     setPage(1);
   };
- 
+
   useEffect(() => {
-      let mounted = true;
-      fetchStockCGPISLList()
-        .then((data) => {
-          if (mounted && Array.isArray(data)) {
-            setSpareCodes(data.map((item) => item.spare_code));
-          }
-        })
-        .catch(() => {
-          setSpareCodes([]);
-        });
-      return () => {
-        mounted = false;
-      };
-    }, []);
+    let mounted = true;
+    fetchStockCGPISLList()
+      .then((data) => {
+        if (mounted && Array.isArray(data)) {
+          setSpareCodes(data.map((item) => item.spare_code));
+        }
+      })
+      .catch(() => {
+        setSpareCodes([]);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Fetch data when page/limit changes or after search
 
@@ -528,7 +543,7 @@ const GRCCGPISLEnquiryPage = () => {
 
     const params = {};
     if (division) params.division = division;
-        if (spareCode) params.spare_code = spareCode;
+    if (spareCode) params.spare_code = spareCode;
 
     if (fromGRCDate) params.from_grc_date = fromGRCDate;
     if (toGRCDate) params.to_grc_date = toGRCDate;
@@ -543,7 +558,7 @@ const GRCCGPISLEnquiryPage = () => {
     setPage(newPage);
     const params = {};
     if (division) params.division = division;
-        if (spareCode) params.spare_code = spareCode;
+    if (spareCode) params.spare_code = spareCode;
 
     if (fromGRCDate) params.from_grc_date = fromGRCDate;
     if (toGRCDate) params.to_grc_date = toGRCDate;
@@ -559,7 +574,7 @@ const GRCCGPISLEnquiryPage = () => {
     setPage(1);
     const params = {};
     if (division) params.division = division;
-        if (spareCode) params.spare_code = spareCode;
+    if (spareCode) params.spare_code = spareCode;
 
     if (fromGRCDate) params.from_grc_date = fromGRCDate;
     if (toGRCDate) params.to_grc_date = toGRCDate;
@@ -591,8 +606,7 @@ const GRCCGPISLEnquiryPage = () => {
         setGRCStatus={setGRCStatus}
         spareCode={spareCode}
         setSpareCode={setSpareCode}
-                spareCodes={spareCodes}
-
+        spareCodes={spareCodes}
       />
       {/* Results or placeholder */}
       {error ? (

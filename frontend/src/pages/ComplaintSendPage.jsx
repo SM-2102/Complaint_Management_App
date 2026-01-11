@@ -15,7 +15,6 @@ import { fetchMailTechnician } from "../services/complaintMailTechnicianService"
 import { Checkbox } from "@mui/material";
 import { complaintSendEmail } from "../services/complaintMailSendService";
 
-
 const columns = [
   { key: "select", label: "Send" },
   { key: "name", label: "Technician Name" },
@@ -29,13 +28,12 @@ const ComplaintSendPage = () => {
   const [showToast, setShowToast] = useState(false);
   const [updating, setUpdating] = useState(false);
   const allSelected = data.length > 0 && data.every((r) => r.select === "Y");
-const someSelected = data.some((r) => r.select === "Y");
-const handleSelectAll = (checked) => {
-  setData((prev) =>
-    prev.map((row) => ({ ...row, select: checked ? "Y" : "N" })),
-  );
-};
-
+  const someSelected = data.some((r) => r.select === "Y");
+  const handleSelectAll = (checked) => {
+    setData((prev) =>
+      prev.map((row) => ({ ...row, select: checked ? "Y" : "N" })),
+    );
+  };
 
   /* ---------- Fetch technicians on load (NO UI CHANGE) ---------- */
   useEffect(() => {
@@ -91,21 +89,20 @@ const handleSelectAll = (checked) => {
     setUpdating(true);
 
     try {
-  const payload = selectedRows.map(({ name, email }) => ({
-    name,
-    email,
-  }));
+      const payload = selectedRows.map(({ name, email }) => ({
+        name,
+        email,
+      }));
 
-  await complaintSendEmail(payload);
+      await complaintSendEmail(payload);
 
-  setError({
-    message: "Mail sent successfully!",
-    type: "success",
-    resolution: `Recipients: ${payload.length}`,
-  });
-  setShowToast(true);
-}
- catch (err) {
+      setError({
+        message: "Mail sent successfully!",
+        type: "success",
+        resolution: `Recipients: ${payload.length}`,
+      });
+      setShowToast(true);
+    } catch (err) {
       setError({
         message: err?.message || "Operation failed.",
         type: "error",
@@ -147,40 +144,42 @@ const handleSelectAll = (checked) => {
           Complaint Mail Generation
         </h2>
 
-        <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 2 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 3, boxShadow: 2 }}
+        >
           <Table size="small">
             <TableHead>
-  <TableRow sx={{ background: "#f3e5f5" }}>
-    {columns.map((col) => (
-      <TableCell
-        key={col.key}
-        sx={{
-          fontWeight: 700,
-          fontSize: 16,
-          textAlign: col.key === "select" ? "left" : "center",
-          py: 1,
-          pl: col.key === "select" ? 2 : 0,
-        }}
-      >
-        {col.key === "select" ? (
-          <Checkbox
-            checked={allSelected}
-            indeterminate={!allSelected && someSelected}
-            onChange={(e) => handleSelectAll(e.target.checked)}
-            sx={{
-              padding: 0,
-              "&.Mui-checked": { color: "#7b1fa2" },
-              "&.MuiCheckbox-indeterminate": { color: "#7b1fa2" },
-            }}
-          />
-        ) : (
-          col.label
-        )}
-      </TableCell>
-    ))}
-  </TableRow>
-</TableHead>
-
+              <TableRow sx={{ background: "#f3e5f5" }}>
+                {columns.map((col) => (
+                  <TableCell
+                    key={col.key}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: 16,
+                      textAlign: col.key === "select" ? "left" : "center",
+                      py: 1,
+                      pl: col.key === "select" ? 2 : 0,
+                    }}
+                  >
+                    {col.key === "select" ? (
+                      <Checkbox
+                        checked={allSelected}
+                        indeterminate={!allSelected && someSelected}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        sx={{
+                          padding: 0,
+                          "&.Mui-checked": { color: "#7b1fa2" },
+                          "&.MuiCheckbox-indeterminate": { color: "#7b1fa2" },
+                        }}
+                      />
+                    ) : (
+                      col.label
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
 
             <TableBody>
               {data.length === 0 ? (
@@ -207,23 +206,21 @@ const handleSelectAll = (checked) => {
                     }}
                   >
                     <TableCell sx={{ textAlign: "left", pl: 2 }}>
-  <Checkbox
-    checked={row.select === "Y"}
-    onChange={() => handleSelect(idx)}
-    sx={{
-      padding: 0,
-      "&.Mui-checked": { color: "#7b1fa2" },
-    }}
-  />
-</TableCell>
+                      <Checkbox
+                        checked={row.select === "Y"}
+                        onChange={() => handleSelect(idx)}
+                        sx={{
+                          padding: 0,
+                          "&.Mui-checked": { color: "#7b1fa2" },
+                        }}
+                      />
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       {row.name}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       {row.email}
                     </TableCell>
-                    
-
                   </TableRow>
                 ))
               )}
