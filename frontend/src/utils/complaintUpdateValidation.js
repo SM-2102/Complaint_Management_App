@@ -74,9 +74,13 @@ function validateUpdateComplaint(form, showContact2) {
     errors.push("Action Priority is required");
     errors_label.complaint_priority = true;
   }
-  if (form.spare_pending == "Y" && !form.spare) {
+  if (form.spare_pending == "Y" && !form.spare_code) {
     errors.push("Spare Code is required");
-    errors_label.spare = true;
+    errors_label.spare_code = true;
+  }
+  if (form.spare_pending == "Y" && !form.spare_description) {
+    errors.push("Spare Description is required");
+    errors_label.spare_description = true;
   }
   if (form.payment_collected == "Y" && !form.payment_mode) {
     errors.push("Payment Mode is required");

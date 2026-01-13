@@ -1,11 +1,5 @@
 import API_ENDPOINTS from "../config/api";
 
-/**
- * Login user with credentials. Relies on backend to set HTTP-only cookie.
- * @param {string} username
- * @param {string} password
- * @returns {Promise<{ success: boolean, message?: string }>} Result of login
- */
 async function login(username, password) {
   try {
     const response = await fetch(API_ENDPOINTS.LOGIN, {
@@ -13,29 +7,30 @@ async function login(username, password) {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include", // Important: send/receive cookies
+      credentials: "include",
       body: JSON.stringify({ username, password }),
     });
 
-    if (response.ok) {
-      const data = await response.json().catch(() => ({}));
-      // Pass birthday_names if present
-      return {
-        success: true,
-        birthday_names: data.birthday_names || [],
-        holiday: data.holiday || null,
-      };
-    } else {
-      const data = await response.json().catch(() => ({}));
-      // Prefer message and resolution from backend, fallback to detail
+    const data = await response.json(); // ❗ DO NOT catch here
+
+    if (!response.ok) {
       return {
         success: false,
         message: data.message || data.detail || "Login failed",
         resolution: data.resolution || "",
       };
     }
+
+    // ✅ Preserve backend response
+    return {
+      success: true,
+      ...data,
+    };
   } catch (error) {
-    return { success: false, message: error.message || "Network error" };
+    return {
+      success: false,
+      message: error.message || "Network error",
+    };
   }
 }
 

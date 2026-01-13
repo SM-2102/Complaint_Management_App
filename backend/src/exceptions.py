@@ -290,7 +290,7 @@ def register_exceptions(app: FastAPI):
         create_exception_handler(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             initial_detail={
-                "message": "Unable to generate unique complaint number",
+                "message": "Unable to generate complaint number",
                 "resolution": "Please retry the request or contact support",
                 "error_code": "complaint_number_generation_failed",
             },

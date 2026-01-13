@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BirthdayWish from "../components/BirthdayWish";
 import HolidayWish from "../components/HolidayWish";
@@ -68,33 +68,95 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
   const [holiday, setHoliday] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const { user } = useAuth();
+  const birthdayCheckedRef = useRef(false);
 
-  // On mount, check for birthday_names and holiday in location.state
   useEffect(() => {
-    if (location.state) {
-      if (
-        Array.isArray(location.state.birthday_names) &&
-        location.state.birthday_names.length > 0
-      ) {
-        setBirthdayNames(location.state.birthday_names);
-        setShowBirthday(true);
-      }
-      if (location.state.holiday && location.state.holiday.name) {
-        setHoliday(location.state.holiday);
-        // Do not show holiday immediately if birthday is present
-        if (
-          !location.state.birthday_names ||
-          location.state.birthday_names.length === 0
-        ) {
-          setShowHoliday(true);
+    // Prevent double execution
+    if (birthdayCheckedRef.current) return;
+    birthdayCheckedRef.current = true;
+
+    // Only show wishes if there's an explicit "wishes_pending" signal
+    // This flag should be set at login (either via navigation state or sessionStorage)
+    const navState = location?.state || {};
+    const pendingFromNav = !!navState.wishes_pending;
+    const pendingFromSession = sessionStorage.getItem("wishes_pending") === "1";
+
+    // If no pending flag, don't show wishes (prevents showing on every visit)
+    if (!pendingFromNav && !pendingFromSession) {
+      // If there was transient nav state but no pending flag, clear it to avoid accidental re-use
+      if (Object.keys(navState).length > 0) {
+        try {
+          navigate(location.pathname, { replace: true, state: {} });
+        } catch (e) {
+          // ignore navigation errors
         }
       }
+      return;
     }
-    // Fetch notifications on mount only if user.role is USER
-    if (user && user.role === "USER") {
-      fetchUserNotifications().then(setNotifications);
+
+    // --- If navigation state contains wishes and the pending flag, consume it ---
+    if (pendingFromNav) {
+      if (
+        Array.isArray(navState.birthday_names) &&
+        navState.birthday_names.length > 0
+      ) {
+        setBirthdayNames(navState.birthday_names);
+        setShowBirthday(true);
+      }
+      if (navState.holiday && navState.holiday.name) {
+        setHoliday(navState.holiday);
+        // do not show holiday immediately here; BirthdayWish onDone will trigger showHoliday
+      }
+      // Clear transient navigation state so it doesn't re-trigger on back/refresh
+      try {
+        navigate(location.pathname, { replace: true, state: {} });
+      } catch (e) {
+        // ignore navigation errors
+      }
+      // Ensure session flag is cleared if present
+      sessionStorage.removeItem("wishes_pending");
+      return;
     }
-  }, [location.state, user]);
+
+    // --- Otherwise consume from sessionStorage (set by login flow) ---
+    const storedBirthday = sessionStorage.getItem("birthday_names");
+    if (storedBirthday) {
+      try {
+        const names = JSON.parse(storedBirthday);
+        if (Array.isArray(names) && names.length > 0) {
+          setBirthdayNames(names);
+          setShowBirthday(true);
+        }
+      } catch {
+        console.error("Invalid birthday_names in sessionStorage");
+      }
+      sessionStorage.removeItem("birthday_names");
+    }
+
+    const storedHoliday = sessionStorage.getItem("holiday");
+    if (storedHoliday) {
+      try {
+        const h = JSON.parse(storedHoliday);
+        if (h && h.name) {
+          setHoliday(h);
+        }
+      } catch {
+        console.error("Invalid holiday in sessionStorage");
+      }
+      sessionStorage.removeItem("holiday");
+    }
+
+    // Clear the session flag after consuming
+    sessionStorage.removeItem("wishes_pending");
+  }, [location, navigate]);
+useEffect(() => {
+  if (user && user.role === "USER") {
+    fetchUserNotifications().then(setNotifications);
+  }
+}, [user]);
+
+
+
 
   // Show holiday after birthday wish is fully done (fade-out complete)
   useEffect(() => {
@@ -249,6 +311,7 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     }
     navigate({ pathname: "/ComplaintEnquiry", search: params.toString() });
   };
+ 
 
   return (
     <>

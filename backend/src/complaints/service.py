@@ -73,7 +73,6 @@ class ComplaintsService:
 
             # Override / ensure defaults required by the user
             row["spare_pending"] = "N"
-            row["complaint_status"] = "FRESH"
             row["created_by"] = "D Manna"
             row["final_status"] = "N"
 
@@ -143,7 +142,7 @@ class ComplaintsService:
                 await session.execute(
                     update(table)
                     .where(table.c.complaint_number.in_(to_close))
-                    .values(complaint_status="Closed", final_status="Y")
+                    .values(complaint_status="CLOSED", final_status="Y")
                 )
                 updated += len(to_close)
 
@@ -214,9 +213,9 @@ class ComplaintsService:
         customer_name: Optional[str] = None,
         complaint_head: Optional[str] = None,
         spare_pending_complaints: Optional[str] = None,
+        all_complaints: Optional[str] = None,
         crm_open_complaints: Optional[str] = None,
         escalation_complaints: Optional[str] = None,
-        high_priority_complaints: Optional[str] = None,
         mail_to_be_sent_complaints: Optional[str] = None,
         model=Complaint,
     ):
@@ -247,12 +246,12 @@ class ComplaintsService:
             statement = statement.where(model.complaint_head == complaint_head)
         if spare_pending_complaints == "Y":
             statement = statement.where((model.final_status == "N") & (model.spare_pending == "Y"))
+        if all_complaints == "Y":
+            statement = statement.where(model.final_status == "N")
         if crm_open_complaints == "Y":
             statement = statement.where((model.final_status == "N") & (model.complaint_number.notlike("N%"))& (model.complaint_status.notin_(["CLOSED", "NEW", "CANCEL"])))
         if escalation_complaints == "Y":
-            statement = statement.where((model.final_status == "N") & (model.complaint_priority.in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION"])))
-        if high_priority_complaints == "Y":                   
-            statement = statement.where((model.final_status == "N") & (model.complaint_priority == "URGENT"))
+            statement = statement.where((model.final_status == "N") & (model.complaint_priority.in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION", "URGENT"])))
         if mail_to_be_sent_complaints == "Y":
             statement = statement.where((model.final_status == "N") & (func.upper(model.action_head) == "MAIL TO BE SENT TO HO"))
         return statement
@@ -272,16 +271,16 @@ class ComplaintsService:
         customer_name: Optional[str] = None,
         complaint_head: Optional[str] = None,
         spare_pending_complaints: Optional[str] = None,
+        all_complaints: Optional[str] = None,
         crm_open_complaints: Optional[str] = None,
         escalation_complaints: Optional[str] = None,
-        high_priority_complaints: Optional[str] = None,
         mail_to_be_sent_complaints: Optional[str] = None,
         limit: int = 100,
         offset: int = 0, 
     ):
         statement = select(Complaint)
         statement = self._apply_complaint_filters(
-            statement, product_division, complaint_type, complaint_priority, action_head, spare_pending, final_status, action_by, complaint_number, customer_contact, customer_name, complaint_head, spare_pending_complaints, crm_open_complaints, escalation_complaints, high_priority_complaints, mail_to_be_sent_complaints 
+            statement, product_division, complaint_type, complaint_priority, action_head, spare_pending, final_status, action_by, complaint_number, customer_contact, customer_name, complaint_head, spare_pending_complaints, all_complaints, crm_open_complaints, escalation_complaints, mail_to_be_sent_complaints 
         )
 
         statement = statement.order_by(Complaint.complaint_date, Complaint.complaint_number)
@@ -358,7 +357,7 @@ class ComplaintsService:
         last_number = result.scalar()
         last_number = last_number[1:] if last_number else "0"
         next_number = int(last_number) + 1
-        next_number = "N" + str(next_number).zfill(4)
+        next_number = "N" + str(next_number).zfill(5)
         return next_number
 
     async def create_complaint(
@@ -400,7 +399,7 @@ class ComplaintsService:
                 try:
                     await session.commit()
                     return new_complaint
-                except IntegrityError as ie:
+                except IntegrityError:
                     await session.rollback()
             # Include an explanatory message when raising to aid logs/clients
             raise ComplaintNumberGenerationFailed()
@@ -505,7 +504,7 @@ class ComplaintsService:
                     "complaint_head": existing_complaint.complaint_head,
                     "complaint_type": existing_complaint.complaint_type,
                     "complaint_priority": existing_complaint.complaint_priority,
-                    "action_head": "TO REVISIT BY TECHNICIAN",
+                    "action_head": "REVISIT BY TECHNICIAN",
                     "action_by": existing_complaint.action_by,
                     "technician": existing_complaint.technician,
                     "customer_type": existing_complaint.customer_type,
@@ -520,11 +519,10 @@ class ComplaintsService:
                     "product_serial_number": existing_complaint.product_serial_number,
                     "product_model": existing_complaint.product_model,
                     "current_status": existing_complaint.current_status,
-                    "updated_time": existing_complaint.updated_time,
                     "appoint_date": existing_complaint.appoint_date,
                 }
                 create_req = CreateComplaint(**create_payload)
-                await self.create_complaint(session, create_req, "NEW" ,token)
+                await self.create_complaint(session, create_req,"NEW",token)
             except Exception as e:
                 raise ComplaintNumberGenerationFailed()
 
@@ -662,7 +660,7 @@ class ComplaintsService:
             """
 
             message = create_email_message(
-                subject="Latest Complaints List",
+                subject = f"Latest Complaints as on {datetime.now().strftime('%d-%m %H:%M')}",
                 recipients=[recipient.email],  # single recipient per mail
                 body=body,
             )

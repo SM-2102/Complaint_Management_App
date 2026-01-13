@@ -186,15 +186,16 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
   }, [location.search]);
 
   const [filters, setFilters] = useState(() => {
-    // If query params exist, use them to set initial filters
-    const initial = DEFAULT_FILTER_CONFIG.reduce(
-      (acc, cur) => ({ ...acc, [cur.name]: "" }),
-      {},
-    );
-    initial.product_division = "";
-    // complaint_priority is always a string now
-    return { ...initial, ...queryParams };
-  });
+  const initial = DEFAULT_FILTER_CONFIG.reduce(
+    (acc, cur) => ({ ...acc, [cur.name]: "" }),
+    {},
+  );
+
+  initial.product_division = "";
+  initial.final_status = "N"; // <-- DEFAULT TO "NO"
+
+  return { ...initial, ...queryParams };
+});
   useEffect(() => {
     setFilters((prev) => ({ ...prev, product_division: "" }));
   }, [selectedCompany]);

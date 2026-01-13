@@ -20,31 +20,52 @@ function LoginPage() {
 
   // Handle login form submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    const result = await login(username, password);
-    setLoading(false);
-    if (result.success) {
-      // Ensure auth state is updated before navigating
-      await checkAuth();
-      // Fetch dashboard data before navigating
-      await fetchDashboardData();
-      // Pass birthday_names to MenuDashboard via navigation state
-      navigate("/MenuDashboard", {
-        state: {
-          birthday_names: result.birthday_names || [],
-          holiday: result.holiday || null,
-        },
-      });
-    } else {
-      setError({
-        message: result.message || "Login failed",
-        resolution: result.resolution || "",
-      });
-      setShowToast(true);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+
+  const result = await login(username, password);
+
+  setLoading(false);
+
+  if (result.success) {
+    // Immediately persist one-time values so they are available even if
+    // further async work triggers renders or redirects.
+    const birthdayNamesToStore = Array.isArray(result.birthday_names)
+      ? result.birthday_names
+      : null;
+    const holidayToStore = result.holiday || null;
+
+    if (birthdayNamesToStore && birthdayNamesToStore.length > 0) {
+      sessionStorage.setItem("birthday_names", JSON.stringify(birthdayNamesToStore));
     }
-  };
+    if (holidayToStore && holidayToStore.name) {
+      sessionStorage.setItem("holiday", JSON.stringify(holidayToStore));
+    }
+      // Mark that wishes are pending so the dashboard only shows them once
+      sessionStorage.setItem("wishes_pending", "1");
+
+    // Ensure auth state is updated and dashboard data is fetched before navigating
+    await checkAuth();
+    await fetchDashboardData();
+
+    // Navigate and pass the same one-time values via navigation state
+    navigate("/MenuDashboard", {
+      state: {
+        birthday_names: birthdayNamesToStore,
+        holiday: holidayToStore,
+        wishes_pending: true,
+      },
+    });
+  } else {
+    setError({
+      message: result.message || "Login failed",
+      resolution: result.resolution || "",
+    });
+    setShowToast(true);
+  }
+};
+
 
   return (
     <>

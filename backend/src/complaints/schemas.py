@@ -124,7 +124,8 @@ class ComplaintResponse(BaseModel):
     technician: Optional[str]
     complaint_priority: str
     spare_pending: str
-    spare: Optional[str]
+    spare_code: Optional[str]
+    spare_description: Optional[str]
     indent_date: Optional[date]
     indent_so_number: Optional[str]
     indent_so_date: Optional[date]
@@ -160,7 +161,8 @@ class UpdateComplaint(BaseModel):
     current_status: str = Field(..., max_length=50)
     action_head: str
     spare_pending: str = Field(..., max_length=1)
-    spare: Optional[str] = Field(None, max_length=30)
+    spare_code: Optional[str] = Field(None, max_length=30)
+    spare_description: Optional[str] = Field(None, max_length=40)
     indent_date: Optional[date]
     indent_so_number: Optional[str] = Field(None, max_length=20)
     indent_so_date: Optional[date]

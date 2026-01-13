@@ -33,7 +33,12 @@ const columns = [
   { key: "invoice", label: "Invoice" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = ["CG-FANS",
+    "CG-SDA",
+    "CG-LT",
+    "CG-FHP",
+    "CG-PUMP",
+    "CG-WHC",];
 const QtyInput = React.memo(function QtyInput({
   value,
   disabled,

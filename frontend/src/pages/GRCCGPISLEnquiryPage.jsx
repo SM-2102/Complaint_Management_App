@@ -21,7 +21,12 @@ const columns = [
   { key: "docket_number", label: "Docket Number" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = ["CG-FANS",
+    "CG-SDA",
+    "CG-LT",
+    "CG-FHP",
+    "CG-PUMP",
+    "CG-WHC",];
 
 const Filter = ({
   open = false,

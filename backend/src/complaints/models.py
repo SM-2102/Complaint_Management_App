@@ -60,7 +60,8 @@ class Complaint(SQLModel, table=True):
     # Spare details (up to 6)
     spare_pending: str = Field(sa_column=Column(pg.CHAR(1), nullable=False))
 
-    spare: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
+    spare_code: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
+    spare_description: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     indent_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
 
     # Status & replacement

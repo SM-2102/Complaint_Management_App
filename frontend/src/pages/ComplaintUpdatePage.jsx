@@ -39,7 +39,8 @@ const initialForm = {
   action_head: "",
   complaint_priority: "",
   spare_pending: "N",
-  spare: "",
+  spare_code: "",
+  spare_description: "",
   indent_date: "",
   indent_so_number: "",
   indent_so_date: "",
@@ -63,6 +64,7 @@ const ALL_STATUSES = [
 const ComplaintUpdatePage = () => {
   const location = useLocation();
   const [form, setForm] = useState(initialForm);
+  const [isLocked, setIsLocked] = useState(false);
   const [initialComplaintNumber, setInitialComplaintNumber] = useState("");
   const [complaintNumbers, setComplaintNumbers] = useState([]);
   const [codeLoading, setCodeLoading] = useState(true);
@@ -149,6 +151,28 @@ const ComplaintUpdatePage = () => {
       mounted = false;
     };
   }, []);
+  useEffect(() => {
+  if (form.complaint_status !== "OW") {
+    setForm((prev) => ({
+      ...prev,
+      payment_collected: "N",
+      payment_mode: "",
+      amount_sc: "",
+      amount_spare: "",
+      payment_details: "",
+    }));
+  }
+}, [form.complaint_status]);
+useEffect(() => {
+  if (form.spare_pending !== "Y") {
+    setForm((prev) => ({
+      ...prev,
+      spare_code: "",
+      spare_description: "",
+    }));
+  }
+}, [form.spare_pending]);
+
 
   const handleSearch = async () => {
     setError({});
@@ -226,7 +250,8 @@ const ComplaintUpdatePage = () => {
         complaint_status: data.complaint_status ?? "",
         complaint_priority: data.complaint_priority ?? "",
         spare_pending: data.spare_pending ?? "N",
-        spare: data.spare ?? "",
+        spare_code: data.spare_code ?? "",
+        spare_description: data.spare_description ?? "",
         indent_date: data.indent_date ?? "",
         indent_so_number: data.indent_so_number ?? "",
         indent_so_date: data.indent_so_date ?? "",
@@ -239,6 +264,17 @@ const ComplaintUpdatePage = () => {
       }));
       setShowContact2(!!data.customer_contact2);
       setInitialComplaintStatus(data.complaint_status ?? "");
+      if (data.final_status === "Y") {
+        setError({
+          message: "Already Completed",
+          resolution: "This record is not editable",
+          type: "info",
+        });
+        setShowToast(true);
+        setIsLocked(true);
+      } else {
+        setIsLocked(false);
+      }
     } catch (err) {
       setError({
         message: err?.message || "Not found",
@@ -314,7 +350,8 @@ const ComplaintUpdatePage = () => {
           complaint_status: data.complaint_status ?? "",
           complaint_priority: data.complaint_priority ?? "",
           spare_pending: data.spare_pending ?? "N",
-          spare: data.spare ?? "",
+          spare_code: data.spare_code ?? "",
+          spare_description: data.spare_description ?? "",
           indent_date: data.indent_date ?? "",
           indent_so_number: data.indent_so_number ?? "",
           indent_so_date: data.indent_so_date ?? "",
@@ -420,7 +457,8 @@ const ComplaintUpdatePage = () => {
         current_status: form.current_status,
         action_head: form.action_head,
         spare_pending: form.spare_pending,
-        spare: form.spare,
+        spare_code: form.spare_code,
+        spare_description: form.spare_description,
         indent_date: form.indent_date,
         indent_so_number: form.indent_so_number,
         indent_so_date: form.indent_so_date,
@@ -545,7 +583,7 @@ const ComplaintUpdatePage = () => {
                     type="text"
                     value={form.complaint_number}
                     onChange={handleChange}
-                    disabled={submitting}
+                    disabled={submitting || isLocked}
                     autoComplete="off"
                     className={`w-full px-3 py-1 rounded-lg border ${errs_label.complaint_number ? "border-red-300" : "border-gray-300"} text-gray-900`}
                     maxLength={15}
@@ -624,7 +662,7 @@ const ComplaintUpdatePage = () => {
                 type="text"
                 value={formatISOToDisplay(form.complaint_date)}
                 readOnly
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900 cursor-not-allowed`}
               />
             </div>
@@ -642,7 +680,7 @@ const ComplaintUpdatePage = () => {
                 name="product_division"
                 value={form.product_division}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.product_division ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
                 <option value="" disabled></option>
@@ -665,7 +703,7 @@ const ComplaintUpdatePage = () => {
                 name="complaint_head"
                 value={form.complaint_head}
                 onChange={handleChange}
-                disabled={submitting || !isNewComplaint}
+                disabled={submitting || !isNewComplaint || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.complaint_head ? "border-red-300" : "border-gray-300"} text-gray-900`}
                 title={
                   isNewComplaint ? "" : "Read-only for existing complaints"
@@ -703,7 +741,7 @@ const ComplaintUpdatePage = () => {
                 maxLength={25}
                 value={form.product_model}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
               />
             </div>
@@ -721,7 +759,7 @@ const ComplaintUpdatePage = () => {
                 maxLength={20}
                 value={form.product_serial_number}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
               />
             </div>
@@ -742,7 +780,7 @@ const ComplaintUpdatePage = () => {
                 maxLength={40}
                 value={form.purchased_from}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
               />
             </div>
@@ -760,7 +798,7 @@ const ComplaintUpdatePage = () => {
                 maxLength={25}
                 value={form.invoice_number}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
               />
             </div>
@@ -781,7 +819,7 @@ const ComplaintUpdatePage = () => {
                 maxLength={40}
                 value={form.distributor_name}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
               />
             </div>
@@ -799,7 +837,7 @@ const ComplaintUpdatePage = () => {
                 max={new Date().toLocaleDateString("en-CA")}
                 value={form.invoice_date}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`flex-1 px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
               />
             </div>
@@ -837,7 +875,7 @@ const ComplaintUpdatePage = () => {
                   minLength={3}
                   maxLength={40}
                   required
-                  disabled={submitting}
+                  disabled={submitting || isLocked}
                   autoComplete="name"
                   onFocus={() => {
                     if (
@@ -914,7 +952,7 @@ const ComplaintUpdatePage = () => {
               maxLength={40}
               required
               autoComplete="street-address"
-              disabled={submitting}
+              disabled={submitting || isLocked}
             />
           </div>
           <div className="flex items-center gap-3 w-full">
@@ -932,7 +970,7 @@ const ComplaintUpdatePage = () => {
               className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.customer_address2 ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
               maxLength={40}
               autoComplete="street-address"
-              disabled={submitting}
+              disabled={submitting || isLocked}
             />
           </div>
           <div className="flex items-center w-full gap-7">
@@ -953,7 +991,7 @@ const ComplaintUpdatePage = () => {
                 maxLength={30}
                 required
                 autoComplete="address-level2"
-                disabled={submitting}
+                disabled={submitting || isLocked}
               />
             </div>
             <div className="flex items-center w-1/2 gap-2">
@@ -973,7 +1011,7 @@ const ComplaintUpdatePage = () => {
                 maxLength={6}
                 pattern="\d{6}"
                 autoComplete="postal-code"
-                disabled={submitting}
+                disabled={submitting || isLocked}
               />
             </div>
           </div>
@@ -996,7 +1034,7 @@ const ComplaintUpdatePage = () => {
                 pattern="\d{10}"
                 required
                 autoComplete="tel"
-                disabled={submitting}
+                disabled={submitting || isLocked}
               />
             </div>
             <div className="flex items-center w-1/2 gap-2">
@@ -1018,7 +1056,7 @@ const ComplaintUpdatePage = () => {
                     maxLength={10}
                     pattern="\d{10}"
                     autoComplete="tel"
-                    disabled={submitting}
+                    disabled={submitting || isLocked}
                   />
                 </>
               ) : (
@@ -1027,7 +1065,7 @@ const ComplaintUpdatePage = () => {
                   onClick={handleAddContact2}
                   type="button"
                   tabIndex={0}
-                  disabled={submitting}
+                  disabled={submitting || isLocked}
                 >
                   + Add Another Contact
                 </button>
@@ -1058,7 +1096,7 @@ const ComplaintUpdatePage = () => {
                 name="complaint_type"
                 value={form.complaint_type}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.complaint_type ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
                 <option value="" disabled></option>
@@ -1082,7 +1120,7 @@ const ComplaintUpdatePage = () => {
                 maxLength={7}
                 value={form.updated_time}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.updated_time ? "border-red-300" : "border-gray-300"} text-gray-900`}
                 placeholder="DD-HHMM"
               />
@@ -1101,7 +1139,7 @@ const ComplaintUpdatePage = () => {
                 name="action_by"
                 value={form.action_by}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.action_by ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
                 <option value="" disabled></option>
@@ -1124,7 +1162,7 @@ const ComplaintUpdatePage = () => {
                 name="complaint_status"
                 value={form.complaint_status}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`flex-1 min-w-0 px-3 py-1 rounded-lg border ${
                   errs_label.complaint_status
                     ? "border-red-300"
@@ -1153,7 +1191,7 @@ const ComplaintUpdatePage = () => {
                 name="technician"
                 value={form.technician}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.technician ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
                 <option value="" disabled></option>
@@ -1176,7 +1214,7 @@ const ComplaintUpdatePage = () => {
                 name="complaint_priority"
                 value={form.complaint_priority}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.complaint_priority ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
                 <option value="" disabled></option>
@@ -1203,7 +1241,7 @@ const ComplaintUpdatePage = () => {
               maxLength={50}
               value={form.current_status}
               onChange={handleChange}
-              disabled={submitting}
+              disabled={submitting || isLocked}
               className={`w-full px-3 py-1 rounded-lg border ${errs_label.current_status ? "border-red-300" : "border-gray-300"} text-gray-900`}
             />
           </div>
@@ -1219,7 +1257,7 @@ const ComplaintUpdatePage = () => {
               name="action_head"
               value={form.action_head}
               onChange={handleChange}
-              disabled={submitting}
+              disabled={submitting || isLocked}
               className={`flex-1 min-w-0 px-3 py-1 rounded-lg border ${errs_label.action_head ? "border-red-300" : "border-gray-300"} text-gray-900 truncate`}
             >
               <option value="" disabled></option>
@@ -1240,11 +1278,11 @@ const ComplaintUpdatePage = () => {
             </span>
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
-          <div className="flex items-center w-full">
-            <div className="flex items-center gap-2 w-1/6">
+          <div className="flex items-center w-full gap-7">
+            <div className="flex items-center gap-2 w-2/5">
               <label
                 htmlFor="spare_pending"
-                className="w-20 text-md font-medium text-gray-700"
+                className="w-30 text-md font-medium text-gray-700"
               >
                 Spare?
               </label>
@@ -1254,34 +1292,36 @@ const ComplaintUpdatePage = () => {
                 onChange={(v) =>
                   setForm((prev) => ({ ...prev, spare_pending: v }))
                 }
-                disabled={submitting}
+                disabled={submitting || isLocked}
               />
             </div>
-            <div className="flex items-center gap-2 w-13/3">
+            <div className="flex items-center gap-2 w-3/5">
               <label
-                htmlFor="spare"
-                className="w-40 text-md font-medium text-gray-700 ml-5"
+                htmlFor="spare_code"
+                className="w-40.5 text-md font-medium text-gray-700 ml-3"
               >
                 Spare Code
               </label>
               <input
-                id="spare"
-                name="spare"
+                id="spare_code"
+                name="spare_code"
                 type="text"
-                maxLength={40}
-                value={form.spare}
+                maxLength={30}
+                value={form.spare_code}
                 onChange={handleChange}
-                disabled={submitting || form.spare_pending !== "Y"}
-                className={`w-full px-3 py-1 rounded-lg border ${errs_label.spare ? "border-red-300" : "border-gray-300"} text-gray-900 ${form.spare_pending !== "Y" ? "bg-gray-100 text-gray-500" : ""}`}
+                disabled={submitting || form.spare_pending !== "Y" || isLocked}
+                className={`w-full px-3 py-1 rounded-lg border ${errs_label.spare_code ? "border-red-300" : "border-gray-300"} text-gray-900 ${form.spare_pending !== "Y" ? "bg-gray-100 text-gray-500" : ""}`}
                 placeholder={
                   form.spare_pending === "Y" ? "Enter spare code" : "Disabled"
                 }
               />
             </div>
+          </div>
+          <div className="flex items-center w-full gap-7">
             <div className="flex items-center gap-2 w-2/5">
               <label
                 htmlFor="indent_date"
-                className="w-50 text-md font-medium text-gray-700 ml-5"
+                className="w-40 text-md font-medium text-gray-700"
               >
                 Indent Date
               </label>
@@ -1292,12 +1332,51 @@ const ComplaintUpdatePage = () => {
                 max={new Date().toLocaleDateString("en-CA")}
                 value={form.indent_date}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.indent_date ? "border-red-300" : "border-gray-300"} text-gray-900`}
               />
             </div>
+            <div className="flex items-center gap-2 w-3/5">
+              <label
+              htmlFor="spare_description"
+              className="w-40 text-md font-medium text-gray-700"
+            >
+              Description
+            </label>
+            <input
+              id="spare_description"
+              name="spare_description"
+              value={form.spare_description}
+              maxLength={40}
+              onChange={handleChange}
+              disabled={submitting || form.spare_pending !== "Y" || isLocked}
+              className={`w-full px-3 py-1 rounded-lg border ${errs_label.spare_description ? "border-red-300" : "border-gray-300"} text-gray-900 ${form.spare_pending !== "Y" ? "bg-gray-100 text-gray-500" : ""}`}
+              placeholder={
+                form.spare_pending === "Y" ? "Enter spare description" : "Disabled"
+              }
+            />
+            </div>
+            
           </div>
-          <div className="flex items-center w-full">
+          <div className="flex items-center w-full gap-7">
+            <div className="flex items-center gap-2 w-2/5">
+              <label
+                htmlFor="indent_so_date"
+                className="w-40 text-md font-medium text-gray-700"
+              >
+                I-SO Date
+              </label>
+              <input
+                id="indent_so_date"
+                name="indent_so_date"
+                type="date"
+                max={new Date().toLocaleDateString("en-CA")}
+                value={form.indent_so_date}
+                onChange={handleChange}
+                disabled={submitting || isLocked}
+                className={`w-full px-3 py-1 rounded-lg border ${errs_label.indent_so_date ? "border-red-300" : "border-gray-300"} text-gray-900`}
+              />
+            </div>
             <div className="flex items-center gap-2 w-3/5">
               <label
                 htmlFor="indent_so_number"
@@ -1312,26 +1391,8 @@ const ComplaintUpdatePage = () => {
                 maxLength={20}
                 value={form.indent_so_number}
                 onChange={handleChange}
-                disabled={submitting}
+                disabled={submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.indent_so_number ? "border-red-300" : "border-gray-300"} text-gray-900`}
-              />
-            </div>
-            <div className="flex items-center gap-2 w-2/5">
-              <label
-                htmlFor="indent_so_date"
-                className="w-50 text-md font-medium text-gray-700 ml-5"
-              >
-                I-SO Date
-              </label>
-              <input
-                id="indent_so_date"
-                name="indent_so_date"
-                type="date"
-                max={new Date().toLocaleDateString("en-CA")}
-                value={form.indent_so_date}
-                onChange={handleChange}
-                disabled={submitting}
-                className={`w-full px-3 py-1 rounded-lg border ${errs_label.indent_so_date ? "border-red-300" : "border-gray-300"} text-gray-900`}
               />
             </div>
           </div>
@@ -1360,7 +1421,7 @@ const ComplaintUpdatePage = () => {
                 onChange={(v) =>
                   setForm((prev) => ({ ...prev, payment_collected: v }))
                 }
-                disabled={form.complaint_status !== "OW" || submitting}
+                disabled={form.complaint_status !== "OW" || submitting || isLocked}
               />
             </div>
             <div className="flex items-center gap-2 w-1/2         ">
@@ -1375,7 +1436,7 @@ const ComplaintUpdatePage = () => {
                 name="payment_mode"
                 value={form.payment_mode}
                 onChange={handleChange}
-                disabled={form.complaint_status !== "OW" || submitting}
+                disabled={form.complaint_status !== "OW" || submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.payment_mode ? "border-red-300" : "border-gray-300"} text-gray-900`}
               >
                 <option value="" disabled></option>
@@ -1403,7 +1464,7 @@ const ComplaintUpdatePage = () => {
                 step="1"
                 value={form.amount_sc}
                 onChange={handleChange}
-                disabled={form.complaint_status !== "OW" || submitting}
+                disabled={form.complaint_status !== "OW" || submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.amount_sc ? "border-red-300" : "border-gray-300"} text-gray-900`}
               />
             </div>
@@ -1422,7 +1483,7 @@ const ComplaintUpdatePage = () => {
                 step="1"
                 value={form.amount_spare}
                 onChange={handleChange}
-                disabled={form.complaint_status !== "OW" || submitting}
+                disabled={form.complaint_status !== "OW" || submitting || isLocked}
                 className={`w-full px-3 py-1 rounded-lg border ${errs_label.amount_spare ? "border-red-300" : "border-gray-300"} text-gray-900`}
               />
             </div>
@@ -1440,7 +1501,7 @@ const ComplaintUpdatePage = () => {
               name="payment_details"
               value={form.payment_details}
               onChange={handleChange}
-              disabled={form.complaint_status !== "OW" || submitting}
+              disabled={form.complaint_status !== "OW" || submitting || isLocked}
               className={`flex-1 px-3 py-1 rounded-lg border ${errs_label.payment_details ? "border-red-300" : "border-gray-300"} bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-small`}
               maxLength={40}
             />
@@ -1466,7 +1527,7 @@ const ComplaintUpdatePage = () => {
             <FinalStatusToggle
               form={form}
               setForm={setForm}
-              disabled={submitting}
+              disabled={submitting || isLocked}
             />
             <div className="flex-1" />
           </div>
@@ -1476,7 +1537,7 @@ const ComplaintUpdatePage = () => {
           <button
             type="submit"
             className="py-1.5 px-6 rounded-lg bg-purple-600 text-white font-bold text-base shadow hover:bg-purple-900 transition-colors duration-200 w-fit disabled:opacity-60"
-            disabled={submitting}
+            disabled={submitting || isLocked}
           >
             {submitting ? "Updating..." : "Update Record"}
           </button>

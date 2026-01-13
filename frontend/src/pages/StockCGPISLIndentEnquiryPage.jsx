@@ -18,14 +18,12 @@ const columns = [
 ];
 
 const divisionOptions = [
-  "FANS",
-  "PUMP",
-  "SDA",
-  "WHC",
-  "FHP",
-  "LT",
-  "HT",
-  "OTHERS",
+ "CG-FANS",
+    "CG-SDA",
+    "CG-LT",
+    "CG-FHP",
+    "CG-PUMP",
+    "CG-WHC",
 ];
 
 const Filter = ({

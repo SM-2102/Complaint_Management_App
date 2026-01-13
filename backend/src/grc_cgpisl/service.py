@@ -522,11 +522,11 @@ class GRCCGPISLService:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         static_dir = os.path.normpath(os.path.join(base_dir, "..", "static"))
         if report_type == "Defective":
-            template_path = safe_join(static_dir, "grc_cgpisl_defective.pdf")
+            template_path = safe_join(static_dir, "grc_cgcel_defective.pdf")
         elif report_type == "Good":
-            template_path = safe_join(static_dir, "grc_cgpisl_good.pdf")
+            template_path = safe_join(static_dir, "grc_cgcel_good.pdf")
         else:
-            template_path = safe_join(static_dir, "grc_cgpisl_all.pdf")
+            template_path = safe_join(static_dir, "grc_cgcel_all.pdf")
 
         # Read the template PDF
         try:
