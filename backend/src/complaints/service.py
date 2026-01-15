@@ -103,6 +103,7 @@ class ComplaintsService:
         all_db_keys = {r[0] for r in all_db_result.all()}
 
         to_insert = []
+        to_reopen = []
 
         # Determine which columns are present in the CSV (excluding complaint_number)
         present_fields = set()
@@ -114,7 +115,7 @@ class ComplaintsService:
             key = r.complaint_number
             if key in all_db_keys:
                 # If complaint exists in DB, ignore this CSV record
-                continue
+                to_reopen.append(key)
 
             data_dict = {
                 k: v
@@ -130,7 +131,6 @@ class ComplaintsService:
         inserted = 0
         updated = 0
 
-
         table = Complaint.__table__
 
         try:
@@ -142,9 +142,17 @@ class ComplaintsService:
                 await session.execute(
                     update(table)
                     .where(table.c.complaint_number.in_(to_close))
-                    .values(complaint_status="CLOSED", final_status="Y")
+                    .values(final_status="Y")
                 )
                 updated += len(to_close)
+
+            if to_reopen:
+                await session.execute(
+                    update(table)
+                    .where(table.c.complaint_number.in_(to_reopen))
+                    .values(final_status="N")
+                )
+                updated += len(to_reopen)
 
             await session.commit()
 
@@ -157,9 +165,6 @@ class ComplaintsService:
             }
         except Exception as e:
             await session.rollback()
-            import traceback
-
-            traceback.print_exc()
             return {
                 "message": "Unexpected server error",
                 "resolution": str(e),
@@ -660,7 +665,7 @@ class ComplaintsService:
             """
 
             message = create_email_message(
-                subject = f"Latest Complaints as on {datetime.now().strftime('%d-%m %H:%M')}",
+                subject = f"Latest Complaints as on {datetime.now().strftime('%d-%m-%Y')}",
                 recipients=[recipient.email],  # single recipient per mail
                 body=body,
             )
