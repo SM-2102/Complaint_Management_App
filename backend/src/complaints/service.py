@@ -116,6 +116,7 @@ class ComplaintsService:
             if key in all_db_keys:
                 # If complaint exists in DB, ignore this CSV record
                 to_reopen.append(key)
+                continue
 
             data_dict = {
                 k: v
