@@ -8,17 +8,17 @@ import { stockCGPISLIndentEnquiry } from "../services/stockCGPISLIndentEnquirySe
 import { fetchStockCGPISLList } from "../services/stockCGPISLStockListService.js";
 
 const columns = [
-  { key: "index", label: "Sl. No." },
   { key: "indent_number", label: "Indent Number" },
   { key: "indent_date", label: "Date" },
   { key: "spare_code", label: "Spare Code" },
   { key: "spare_description", label: "Spare Description" },
   { key: "indent_qty", label: "Quantity" },
   { key: "party_name", label: "Party Name" },
+  { key: "created_by", label: "Created By" },
 ];
 
 const divisionOptions = [
- "CG-FANS",
+  "CG-FANS",
     "CG-SDA",
     "CG-LT",
     "CG-FHP",
@@ -51,22 +51,21 @@ const Filter = ({
   const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
   const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
     useState(false);
-  const spareCodeSuggestionClickedRef = React.useRef(false);
+  const isTypingSpareCodeRef = React.useRef(false);
+  const isTypingSpareDescriptionRef = React.useRef(false);
 
   const [spareDescriptionSuggestions, setSpareDescriptionSuggestions] =
     useState([]);
   const [showSpareDescriptionSuggestions, setShowSpareDescriptionSuggestions] =
     useState(false);
-  const spareDescriptionSuggestionClickedRef = React.useRef(false);
 
   useEffect(() => {
-    if (spareCodeSuggestionClickedRef.current) {
+    if (!isTypingSpareCodeRef.current) {
       setShowSpareCodeSuggestions(false);
-      setSpareCodeSuggestions([]);
-      spareCodeSuggestionClickedRef.current = false;
       return;
     }
-    if (spareCode && spareCodes && spareCodes.length > 0) {
+
+    if (spareCode && spareCodes.length > 0) {
       const filtered = spareCodes.filter((n) =>
         n.toLowerCase().includes(spareCode.toLowerCase()),
       );
@@ -78,13 +77,12 @@ const Filter = ({
   }, [spareCode, spareCodes]);
 
   useEffect(() => {
-    if (spareDescriptionSuggestionClickedRef.current) {
+    if (!isTypingSpareDescriptionRef.current) {
       setShowSpareDescriptionSuggestions(false);
-      setSpareDescriptionSuggestions([]);
-      spareDescriptionSuggestionClickedRef.current = false;
       return;
     }
-    if (spareDescription && spareDescriptions && spareDescriptions.length > 0) {
+
+    if (spareDescription && spareDescriptions.length > 0) {
       const filtered = spareDescriptions.filter((n) =>
         n.toLowerCase().includes(spareDescription.toLowerCase()),
       );
@@ -123,7 +121,10 @@ const Filter = ({
               id="spareCode"
               name="spareCode"
               value={spareCode}
-              onChange={(e) => setSpareCode(e.target.value)}
+              onChange={(e) => {
+                isTypingSpareCodeRef.current = true;
+                setSpareCode(e.target.value);
+              }}
               placeholder="Spare Code"
               style={{
                 width: "100%",
@@ -134,12 +135,12 @@ const Filter = ({
                 background: "#f7f9fc",
                 transition: "border 0.2s",
                 outline: "none",
-                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.04)",
               }}
-              onBlur={(e) => {
-                if (!spareCodeSuggestionClickedRef.current) {
-                  setShowSpareCodeSuggestions(false);
-                }
+              onFocus={(e) => (e.target.style.border = "1.5px solid #2e7d32")}
+              onBlur={() => {
+                isTypingSpareCodeRef.current = false;
+                setShowSpareCodeSuggestions(false);
               }}
             />
             {showSpareCodeSuggestions && (
@@ -152,7 +153,7 @@ const Filter = ({
                   background: "#fff",
                   border: "0.5px solid #d1d5db",
                   borderRadius: "0.25rem",
-                  boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
+                  boxShadow: "0 2px 8px rgba(46,125,50,0.08)",
                   width: "100%",
                   maxHeight: 160,
                   overflowY: "auto",
@@ -172,10 +173,9 @@ const Filter = ({
                       borderBottom: "1px solid #f0f0f0",
                     }}
                     onMouseDown={() => {
-                      spareCodeSuggestionClickedRef.current = true;
+                      isTypingSpareCodeRef.current = false;
                       setSpareCode(n);
                       setShowSpareCodeSuggestions(false);
-                      setSpareCodeSuggestions([]);
                     }}
                   >
                     {n}
@@ -188,13 +188,13 @@ const Filter = ({
             <label
               htmlFor="spareDescription"
               style={{
-                fontWeight: 600,
-                color: "#2e7d32",
-                letterSpacing: 0.5,
-                fontSize: 13,
-                marginBottom: 4,
-                display: "block",
-              }}
+                  fontWeight: 600,
+                  color: "#2e7d32",
+                  letterSpacing: 0.5,
+                  fontSize: 13,
+                  marginBottom: 4,
+                  display: "block",
+                }}
             >
               Spare Description
             </label>
@@ -203,8 +203,11 @@ const Filter = ({
               id="spareDescription"
               name="spareDescription"
               value={spareDescription}
-              onChange={(e) => setSpareDescription(e.target.value)}
-              placeholder="Spare Description"
+              onChange={(e) => {
+                isTypingSpareDescriptionRef.current = true;
+                setSpareDescription(e.target.value);
+              }}
+              placeholder="Spare Code"
               style={{
                 width: "100%",
                 padding: "6px 10px",
@@ -214,12 +217,12 @@ const Filter = ({
                 background: "#f7f9fc",
                 transition: "border 0.2s",
                 outline: "none",
-                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                boxShadow: "0 1px 2px rgba(46, 125, 50, 0.04)",
               }}
-              onBlur={(e) => {
-                if (!spareDescriptionSuggestionClickedRef.current) {
-                  setShowSpareDescriptionSuggestions(false);
-                }
+              onFocus={(e) => (e.target.style.border = "1.5px solid #2e7d32")}
+              onBlur={() => {
+                isTypingSpareDescriptionRef.current = false;
+                setShowSpareDescriptionSuggestions(false);
               }}
             />
             {showSpareDescriptionSuggestions && (
@@ -232,7 +235,7 @@ const Filter = ({
                   background: "#fff",
                   border: "0.5px solid #d1d5db",
                   borderRadius: "0.25rem",
-                  boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
+                  boxShadow: "0 2px 8px rgba(46,125,50,0.08)",
                   width: "100%",
                   maxHeight: 160,
                   overflowY: "auto",
@@ -252,10 +255,9 @@ const Filter = ({
                       borderBottom: "1px solid #f0f0f0",
                     }}
                     onMouseDown={() => {
-                      spareDescriptionSuggestionClickedRef.current = true;
+                      isTypingSpareDescriptionRef.current = false;
                       setSpareDescription(n);
                       setShowSpareDescriptionSuggestions(false);
-                      setSpareDescriptionSuggestions([]);
                     }}
                   >
                     {n}
@@ -290,7 +292,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.04)",
                   width: "100%",
                 }}
               >
@@ -343,7 +345,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.04)",
                 }}
               />
             </div>
@@ -366,7 +368,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.04)",
                 }}
               />
             </div>
@@ -410,7 +412,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  boxShadow: "0 1px 2px rgba(25, 118, 210, 0.04)",
                 }}
               />
             </div>
@@ -432,7 +434,7 @@ const Filter = ({
                   fontSize: 13,
                   background: "#f7f9fc",
                   outline: "none",
-                  boxShadow: "0 1px 2px rgba(46, 125, 50, 0.08)",
+                  boxShadow: "0 1px 2px rgba(25, 118, 210, 0.04)",
                 }}
               />
             </div>
@@ -456,7 +458,7 @@ const Filter = ({
                 borderRadius: 10,
                 fontWeight: "bold",
                 fontSize: 15,
-                boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
+                boxShadow: "0 2px 8px rgba(46,125,50,0.08)",
                 cursor: "pointer",
                 letterSpacing: 1,
                 transition: "background 0.2s, box-shadow 0.2s",
@@ -474,7 +476,7 @@ const Filter = ({
                 borderRadius: 10,
                 fontWeight: "bold",
                 fontSize: 15,
-                boxShadow: "0 2px 8px rgba(46,125,50,0.12)",
+                boxShadow: "0 2px 8px rgba(46,125,50,0.08)",
                 cursor: "pointer",
                 letterSpacing: 1,
                 marginLeft: 8,
@@ -507,12 +509,12 @@ const StockCGPISLIndentEnquiryPage = () => {
   const [division, setDivision] = useState("");
   const [spareDescription, setSpareDescription] = useState("");
   const [spareCode, setSpareCode] = useState("");
-  const [available, setAvailable] = useState("");
   const [fromIndentDate, setFromIndentDate] = useState("");
   const [toIndentDate, setToIndentDate] = useState("");
   // Data states
 
   const [data, setData] = useState([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false); // Don't load on mount
   const [error, setError] = useState(null);
   const [filterOpen, setFilterOpen] = useState(true);
@@ -522,11 +524,14 @@ const StockCGPISLIndentEnquiryPage = () => {
   const [fromIndentNumber, setFromIndentNumber] = useState("");
   const [toIndentNumber, setToIndentNumber] = useState("");
 
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(100);
+
   const handleClear = () => {
     setDivision("");
     setSpareDescription("");
     setSpareCode("");
-    setAvailable("");
     setFromIndentDate("");
     setToIndentDate("");
     setFromIndentNumber("");
@@ -534,6 +539,7 @@ const StockCGPISLIndentEnquiryPage = () => {
     setSearched(false);
     setData([]);
     setError(null);
+    setPage(1);
   };
 
   useEffect(() => {
@@ -554,34 +560,78 @@ const StockCGPISLIndentEnquiryPage = () => {
     };
   }, []);
 
+  // Fetch data when page/limit changes or after search
+
+  const fetchData = async (params = {}, pageNum = page, pageLimit = limit) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const offset = (pageNum - 1) * pageLimit;
+      const res = await stockCGPISLIndentEnquiry(params, pageLimit, offset);
+      if (res && typeof res === "object" && Array.isArray(res.records)) {
+        setData(res.records);
+        setTotalRecords(res.total_records || 0);
+      } else if (Array.isArray(res)) {
+        setData(res);
+        setTotalRecords(res.length);
+      } else {
+        setData([]);
+        setTotalRecords(0);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to fetch data");
+      setData([]);
+      setTotalRecords(0);
+    }
+    setLoading(false);
+  };
+
   // Handler for search button
   const handleSearch = async () => {
     setLoading(true);
     setError(null);
     setSearched(true);
     setFilterOpen(false);
-    try {
-      // Update fetchIndentEnquiry to accept params
-      const params = {};
-      if (spareDescription) params.spare_description = spareDescription;
-      if (spareCode) params.spare_code = spareCode;
-      if (division) params.division = division;
-      if (available) params.available = available;
-      if (fromIndentDate) params.from_indent_date = fromIndentDate;
-      if (toIndentDate) params.to_indent_date = toIndentDate;
-      if (fromIndentNumber) params.from_indent_number = fromIndentNumber;
-      if (toIndentNumber) params.to_indent_number = toIndentNumber;
-      const res = await stockCGPISLIndentEnquiry(params);
-      // Add index property to each row (for display)
-      const indexedRes = Array.isArray(res)
-        ? res.map((row, idx) => ({ ...row, index: idx + 1 }))
-        : [];
-      setData(indexedRes);
-    } catch (err) {
-      setError(err.message || "Failed to fetch data");
-      setData([]);
-    }
+    setPage(1); // Reset to first page on new search
+
+    const params = {};
+    if (spareDescription) params.spare_description = spareDescription;
+    if (spareCode) params.spare_code = spareCode;
+    if (division) params.division = division;
+    if (fromIndentDate) params.from_indent_date = fromIndentDate;
+    if (toIndentDate) params.to_indent_date = toIndentDate;
+    if (fromIndentNumber) params.from_indent_number = fromIndentNumber;
+    if (toIndentNumber) params.to_indent_number = toIndentNumber;
+    await fetchData(params, 1, limit);
     setLoading(false);
+  };
+
+  const handlePageChange = async (newPage) => {
+    setPage(newPage);
+    const params = {};
+    if (spareDescription) params.spare_description = spareDescription;
+    if (spareCode) params.spare_code = spareCode;
+    if (division) params.division = division;
+    if (fromIndentDate) params.from_indent_date = fromIndentDate;
+    if (toIndentDate) params.to_indent_date = toIndentDate;
+    if (fromIndentNumber) params.from_indent_number = fromIndentNumber;
+    if (toIndentNumber) params.to_indent_number = toIndentNumber;
+    await fetchData(params, newPage, limit);
+  };
+
+  const handleLimitChange = async (e) => {
+    const newLimit = parseInt(e.target.value, 10) || 100;
+    setLimit(newLimit);
+    setPage(1);
+    const params = {};
+    if (spareDescription) params.spare_description = spareDescription;
+    if (spareCode) params.spare_code = spareCode;
+    if (division) params.division = division;
+    if (fromIndentDate) params.from_indent_date = fromIndentDate;
+    if (toIndentDate) params.to_indent_date = toIndentDate;
+    if (fromIndentNumber) params.from_indent_number = fromIndentNumber;
+    if (toIndentNumber) params.to_indent_number = toIndentNumber;
+    await fetchData(params, 1, newLimit);
   };
 
   return (
@@ -596,8 +646,6 @@ const StockCGPISLIndentEnquiryPage = () => {
         setSpareDescription={setSpareDescription}
         spareCode={spareCode}
         setSpareCode={setSpareCode}
-        available={available}
-        setAvailable={setAvailable}
         spareCodes={spareCodes}
         spareDescriptions={spareDescriptions}
         onSearch={handleSearch}
@@ -621,10 +669,12 @@ const StockCGPISLIndentEnquiryPage = () => {
       ) : (
         <>
           <EnquiryTableCGPISL
-            data={data.map((row, idx) => ({ ...row, index: idx + 1 }))}
+            data={data}
             columns={columns}
             title="Stock CGPISL Indent Enquiry List"
             sum_column="amount"
+            total_records={totalRecords}
+            exportButton={true}
             noDataMessage={
               searched && data.length === 0 ? (
                 <tr>
@@ -643,6 +693,106 @@ const StockCGPISLIndentEnquiryPage = () => {
               ) : null
             }
           />
+          {/* Pagination Controls */}
+          {searched && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginTop: 24,
+                gap: 8,
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 16,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
+                {/* Centered Pagination Buttons */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 16,
+                    flex: 1,
+                  }}
+                >
+                  <button
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page === 1 || loading}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 6,
+                      background: "#2e7d32",
+                      color: "#fff",
+                      border: "none",
+                      fontWeight: "bold",
+                      fontSize: 15,
+                      cursor: page === 1 ? "not-allowed" : "pointer",
+                      opacity: page === 1 ? 0.6 : 1,
+                    }}
+                  >
+                    Previous
+                  </button>
+                  <span style={{ fontWeight: 600, fontSize: 16 }}>
+                    Page {page}
+                  </span>
+                  <button
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={data.length < limit || loading}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 6,
+                      background: "#2e7d32",
+                      color: "#fff",
+                      border: "none",
+                      fontWeight: "bold",
+                      fontSize: 15,
+                      cursor: data.length < limit ? "not-allowed" : "pointer",
+                      opacity: data.length < limit ? 0.6 : 1,
+                    }}
+                  >
+                    Next
+                  </button>
+                </div>
+                {/* Rows per page selector aligned right */}
+                <div
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <label style={{ fontWeight: 500 }}>
+                    Rows per page:
+                    <select
+                      value={limit}
+                      onChange={handleLimitChange}
+                      style={{
+                        marginLeft: 8,
+                        padding: "4px 8px",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value={200}>200</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </Container>

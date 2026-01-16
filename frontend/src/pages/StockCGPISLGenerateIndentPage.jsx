@@ -64,7 +64,7 @@ const StockCGPISLGenerateIndentPage = () => {
         if (mounted && data) {
           setForm((prev) => ({
             ...prev,
-            indent_code: data.next_cgcel_indent_code || "",
+            indent_code: data.next_cgpisl_indent_code || "",
           }));
         }
       })

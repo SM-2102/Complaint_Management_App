@@ -15,6 +15,7 @@ const columns = [
   { key: "grc_qty", label: "GRC Quantity" },
   { key: "own_qty", label: "Own Stock" },
   { key: "alp", label: "ALP" },
+  { key: "sale_price", label: "Sale Price" },
 ];
 
 const divisionOptions = [

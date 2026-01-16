@@ -35,8 +35,10 @@ const COMPLAINT_TYPE_OPTIONS = [
 const PRIORITY_OPTIONS = [
   { value: "", label: "ALL" },
   { value: "NORMAL", label: "NORMAL" },
+  { value: "ESCALATION", label: "ESCALATION" },
   { value: "HO-ESCALATION", label: "HO-ESCALATION" },
   { value: "CRM-ESCALATION", label: "CRM-ESCALATION" },
+  { value: "MD-ESCALATION", label: "MD-ESCALATION" },
   { value: "URGENT", label: "URGENT" },
 ];
 const YES_NO_OPTIONS = [
@@ -389,6 +391,7 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
       "Date",
       "Status",
       "Customer Name",
+      "Customer Address",
       "Contact",
       "Current Status",
       "Allocated",
@@ -587,10 +590,13 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
                         }
                       }}
                     >
-                      <td className="px-2 py-2 break-words text-sm font-bold text-purple-700 drop-shadow text-center">
+                      <td className="py-2 break-words text-sm font-bold text-purple-700 drop-shadow text-center">
                         {row.complaint_number}
+                         <div className="text-[11px] text-red-800">
+                            {row.product_division}
+                          </div>
                       </td>
-                      <td className="px-2 py-2 whitespace-nowrap text-sm text-center">
+                      <td className="py-2 whitespace-nowrap text-sm text-center">
                         <div>{row.complaint_date}</div>
                         {row.complaint_time && (
                           <div className="text-[11px] text-gray-600 mt-1">
@@ -598,13 +604,16 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
                           </div>
                         )}
                       </td>
-                      <td className="px-2 py-2 break-words text-sm text-center">
+                      <td className="py-2 break-words text-sm text-center">
                         {renderStatus(row.complaint_status)}
                       </td>
-                      <td className="px-2 py-2 break-words text-sm text-gray-800 font-medium text-center">
+                      <td className="py-2 break-words text-sm text-gray-800 font-medium text-center">
                         {row.customer_name}
                       </td>
-                      <td className="px-2 py-2 break-words text-sm text-center">
+                      <td className="py-2 break-words text-sm text-center">
+                        {row.customer_address}
+                      </td>
+                      <td className="py-2 break-words text-sm text-center">
                         {row.customer_contact1 && (
                           <div>{row.customer_contact1}</div>
                         )}
@@ -612,23 +621,23 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
                           <div className="mt-1">{row.customer_contact2}</div>
                         )}
                       </td>
-                      <td className="px-2 py-2 break-words text-sm text-center">
+                      <td className="py-2 break-words text-sm text-center">
                         {row.current_status}
                       </td>
-                      <td className="px-2 py-2 whitespace-nowrap text-sm text-center">
+                      <td className="py-2 whitespace-nowrap text-sm text-center">
                         {row.action_by}
                       </td>
-                      <td className="px-2 py-2 whitespace-nowrap text-sm text-orange-700 text-center">
-                        {row.product_division && (
-                          <div>{row.product_division}</div>
-                        )}
+                      <td className="py-2 whitespace-nowrap text-sm text-orange-700 text-center">
                         {row.product_model && (
+                          <div>{row.product_model}</div>
+                        )}
+                        {row.product_serial_number && (
                           <div className="text-[11px] text-gray-700 mt-1">
-                            {row.product_model}
+                            {row.product_serial_number}
                           </div>
                         )}
                       </td>
-                      <td className="px-2 py-2 break-words text-sm text-center">
+                      <td className="py-2 break-words text-sm text-center">
                         {row.action_head}
                       </td>
                     </tr>

@@ -9,25 +9,8 @@
 
 - Create RFR Record
 - Print RFR Record
-- Backup System
 - Invoice Create
 - Invoice Update
-
-
----
-
-## Database Tables
-
-- [x] **User**
-- [x] **Employee**
-- [x] **Notification**
-- [x] **Holiday**
-- [x] **ComplaintNumber**
-- [x] **StockCGPISL**
-- [x] **StockCGCEL**
-- [x] **GRCCGPISL**
-- [x] **GRCCGCEL**
-- [x] **Customer**
 
 ---
 
@@ -60,9 +43,9 @@
 - [x] **ComplaintPendingPage** - Main Pending Page
 - [x] **ComplaintNumberUploadPage** - Upload complaint number file .csv [ADMIN]
 - [x] **ComplaintReallocationPage** - Reallocate Complaints
-- [ ] **ComplaintNumberCreatePage** - Create Complaint Number
-- [ ] **ComplaintNumberUpdatePage** - Update Complaint Number
-- [ ] **ComplaintNumberSendPage** - Send Complaint Number via Email
+- [x] **ComplaintNumberCreatePage** - Create Complaint Number
+- [x] **ComplaintNumberUpdatePage** - Update Complaint Number
+- [x] **ComplaintNumberSendPage** - Send Complaint Number via Email
 
 ### Stock CGCEL Module
 
@@ -146,7 +129,7 @@
 - [x] **/complaint_update_data**
 - [x] **/update/{complaint_number}**
 - [x] **/send_email**
-- [ ] **/mail_technician_list**
+- [x] **/mail_technician_list**
 
 ### StockCGCEL Module
 
@@ -217,17 +200,17 @@
 - [x] **Authorization**
 - [x] **Database Schema**
 - [x] **Initial Deployment**
-- [ ] **Backup**
+- [x] **Backup**
 - [x] **Login**
 - [x] **Menu**
 - [x] **Wishes**
 - [x] **Notification**
 - [x] **Employee**
 - [x] **User**
-- [ ] **Email**
+- [x] **Email**
 - [ ] **Complaint Number**
-- [x] **Spare_CGCEL**
-- [x] **Spare_CGPISL**
+- [ ] **Stock_CGCEL**
+- [ ] **Stock_CGPISL**
 - [x] **GRC_CGCEL**
 - [x] **GRC_CGPISL**
 - [ ] **Final Deployment**

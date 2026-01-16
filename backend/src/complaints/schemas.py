@@ -41,18 +41,21 @@ class ComplaintEnquiryResponseSchema(BaseModel):
     complaint_time: time
     complaint_status: str
     customer_name: Optional[str]
+    customer_address: Optional[str]
     customer_contact1: Optional[str]
     customer_contact2: Optional[str]
     product_division: str
     current_status: str
     action_by: Optional[str]
     product_model: Optional[str]
+    product_serial_number: Optional[str]
     action_head: str
 
 class ComplaintTechniciansReallocationSchema(BaseModel):
     complaint_number: str
     complaint_date: str
-    customer_name: Optional[str]
+    customer_name: str
+    customer_address: str
     current_status: str
     product_division: str
 
@@ -176,4 +179,43 @@ class UpdateComplaint(BaseModel):
 class EmailSchema(BaseModel):
     name: str
     email: str
-    
+
+
+class ComplaintResponseRFR(BaseModel):
+    complaint_date: date
+    product_division: str
+    product_model: Optional[str]
+    product_serial_number: Optional[str]
+    invoice_date: Optional[date]
+    invoice_number: Optional[str]
+    purchased_from: Optional[str]
+    distributor_name: Optional[str]
+    customer_type: str
+    customer_name: str
+    customer_address1: str
+    customer_address2: Optional[str]
+    customer_city: str
+    customer_pincode: str
+    current_status: str
+    spare_code: Optional[str]
+    spare_description: Optional[str]
+    indent_date: Optional[date]
+    replacement_reason: Optional[str]
+    replacement_remark: Optional[str]
+
+class CreateComplaintRFR(BaseModel):
+    complaint_number: str = Field(..., max_length=15)
+    product_model: str = Field(..., max_length=25)
+    product_serial_number: str = Field(..., max_length=20)
+    invoice_date: Optional[date]
+    invoice_number: Optional[str] = Field(None, max_length=25)
+    purchased_from: Optional[str] = Field(None, max_length=40)
+    distributor_name: Optional[str] = Field(None, max_length=40)
+    customer_type: str = Field(..., max_length=20)
+    current_status: str = Field(..., max_length=50)
+    spare_code: Optional[str] = Field(None, max_length=30)
+    spare_description: Optional[str] = Field(None, max_length=40)
+    indent_date: Optional[date]
+    replacement_reason: str = Field(..., max_length=30)
+    replacement_remark: str = Field(..., max_length=40)
+ 

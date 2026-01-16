@@ -13,6 +13,7 @@ class StockCGCELSchema(BaseModel):
     grc_qty: Optional[int] = None
     own_qty: Optional[int] = None
     alp: Optional[float] = None
+    sale_price: Optional[float] = None
     indent_qty: Optional[int] = None
     hsn_code: str = Field(..., max_length=8)
 
@@ -26,6 +27,7 @@ class StockCGCELEnquiry(BaseModel):
     grc_qty: Optional[int]
     own_qty: Optional[int]
     alp: Optional[float]
+    sale_price: Optional[float]
 
 
 class StockCGCELEnquiryStockList(BaseModel):

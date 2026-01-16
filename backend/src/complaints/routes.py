@@ -9,7 +9,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
 from complaints.service import ComplaintsService
-from complaints.schemas import ComplaintFilterData, ComplaintEnquiryResponseSchema, ComplaintReallocateRequestSchema, ComplaintResponse, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, CreateComplaint, ComplaintCreateData, EmailSchema
+from complaints.schemas import ComplaintFilterData, ComplaintEnquiryResponseSchema, ComplaintReallocateRequestSchema, ComplaintResponse, ComplaintResponseRFR, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, CreateComplaint, ComplaintCreateData, CreateComplaintRFR, EmailSchema
 from exceptions import ComplaintNotFound
 
 complaints_router = APIRouter()
@@ -19,7 +19,7 @@ role_checker = Depends(RoleChecker(allowed_roles=["ADMIN"]))
 
 
 """
-Upload GRC CGCEL data via CSV file.
+Upload Complaints data via CSV file - all
 """
 
 
@@ -35,6 +35,45 @@ async def upload_complaints(
 ):
     try:
         result = await complaints_service.upload_complaints(session, file)
+    except Exception as exc:
+        return JSONResponse(
+            content={
+                "message": "Processing failed",
+                "resolution": str(exc),
+                "type": "error",
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    if result.get("type") in ("warning", "error"):
+        return JSONResponse(
+            content=result,
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Success
+    return JSONResponse(
+        content=result,
+        status_code=status.HTTP_200_OK,
+    )
+
+"""
+Upload Complaints data via CSV file - only NEW
+"""
+
+
+@complaints_router.post(
+    "/upload_new",
+    status_code=status.HTTP_200_OK,
+    dependencies=[role_checker],
+)
+async def upload_new_complaints(
+    session: AsyncSession = Depends(get_session),
+    file: UploadFile = File(...),
+    _=Depends(access_token_bearer),
+):
+    try:
+        result = await complaints_service.upload_new_complaints(session, file)
     except Exception as exc:
         return JSONResponse(
             content={
@@ -297,3 +336,59 @@ async def get_technician_email_list(
 ):
     result = await complaints_service.get_technician_email_list(session)
     return result
+
+"""
+List all complaints
+"""
+@complaints_router.get(
+    "/all_complaints",
+    status_code=status.HTTP_200_OK,
+)
+async def list_all_complaints(
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    result = await complaints_service.list_all_complaints(session)
+    return JSONResponse(
+        content={"complaints": result},
+    )
+
+"""
+Get complaint details by complaint number for RFR.
+"""
+
+
+@complaints_router.get(
+    "/by_complaint_number_rfr/{complaint_number}", response_model=ComplaintResponseRFR, status_code=status.HTTP_200_OK
+)
+async def get_complaint_by_code_rfr(
+    complaint_number: str,
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    complaint = await complaints_service.get_complaint_by_number(complaint_number, session)
+    return complaint
+
+"""
+Change action head after mail sent
+"""
+@complaints_router.post("/mail_sent_to_ho", status_code=status.HTTP_202_ACCEPTED)
+async def change_action_head_after_mail(
+    complaint_numbers: List[str],
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    await complaints_service.change_action_head_after_mail(complaint_numbers, session)
+    return JSONResponse(content={"message": f"Action Head changed for complaints."})
+
+"""
+Create RFR by updating complaint
+"""
+@complaints_router.patch("/create_rfr", status_code=status.HTTP_201_CREATED)
+async def create_rfr(
+    rfr_data: CreateComplaintRFR,
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    new_complaint = await complaints_service.create_rfr(session, rfr_data)
+    return JSONResponse(content={"message": f"RFR Created : {new_complaint.complaint_number}"})

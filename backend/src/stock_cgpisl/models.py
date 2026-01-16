@@ -17,6 +17,7 @@ class StockCGPISL(SQLModel, table=True):
     grc_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True, index=True))
     own_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True, index=True))
     alp: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
+    sale_price: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
     indent_qty: int = Field(sa_column=Column(pg.INTEGER, nullable=True, index=True))
     party_name: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))
     order_number: str = Field(sa_column=Column(pg.VARCHAR(30), nullable=True))

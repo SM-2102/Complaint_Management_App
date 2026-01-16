@@ -34,6 +34,7 @@ import GRCCGPISLReceiveSparePage from "./pages/GRCCGPISLReceiveSparePage.jsx";
 import GRCCGPISLReturnSparePage from "./pages/GRCCGPISLReturnSparePage.jsx";
 import GRCCGPISLEnquiryPage from "./pages/GRCCGPISLEnquiryPage.jsx";
 import ComplaintPendingPage from "./pages/ComplaintPendingPage.jsx";
+import ComplaintMailToBeSentPage from "./pages/ComplaintMailToBeSentPage.jsx";
 import PageNotAvailable from "./pages/PageNotAvailable.jsx";
 import ComplaintUploadPage from "./pages/ComplaintUploadPage.jsx";
 import ComplaintReallocationPage from "./pages/ComplaintReallocationPage.jsx";
@@ -42,6 +43,7 @@ import CustomerUpdatePage from "./pages/CustomerUpdatePage.jsx";
 import ComplaintCreatePage from "./pages/ComplaintCreatePage.jsx";
 import ComplaintUpdatePage from "./pages/ComplaintUpdatePage.jsx";
 import ComplaintSendPage from "./pages/ComplaintSendPage.jsx";
+import ComplaintRFRCreatePage from "./pages/ComplaintRFRCreatePage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -281,6 +283,14 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             }
           />
           <Route
+            path="/ComplaintMailToBeSent"
+            element={
+              <PrivateRoute>
+                <ComplaintMailToBeSentPage selectedCompany={selectedCompany} />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/AddCGCELInvoiceRecord"
             element={
               <PrivateRoute>
@@ -361,14 +371,6 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             }
           />
           <Route
-            path="/CreateRFRRecord"
-            element={
-              <PrivateRoute>
-                <PageNotAvailable />
-              </PrivateRoute>
-            }
-          />
-          <Route
             path="/GenerateRFRRecord"
             element={
               <PrivateRoute>
@@ -381,6 +383,14 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             element={
               <PrivateRoute>
                 <ComplaintSendPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/CreateRFRRecord"
+            element={
+              <PrivateRoute>
+                <ComplaintRFRCreatePage />
               </PrivateRoute>
             }
           />

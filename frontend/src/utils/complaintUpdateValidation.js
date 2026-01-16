@@ -90,7 +90,6 @@ function validateUpdateComplaint(form, showContact2) {
     if (
       form.complaint_status == "NEW" ||
       form.complaint_status == "FRESH" ||
-      form.complaint_status == "ESCALATION" ||
       form.complaint_status == "PENDING"
     ) {
       errors.push("Status must be Closed or Cancelled");

@@ -11,6 +11,37 @@ from complaints.models import Complaint
 
 
 class MenuService:
+    @staticmethod
+    def _division_case(column):
+        """Return a SQLAlchemy CASE expression that normalizes division names."""
+        return case(
+            (
+                column.in_(["CG-FANS", "FANS"]),
+                "FANS",
+            ),
+            (
+                column.in_(["CG-PUMP", "PUMP"]),
+                "PUMP",
+            ),
+            (
+                column.in_(["CG-SDA", "SDA"]),
+                "SDA",
+            ),
+            (
+                column.in_(["CG-WHC", "WHC"]),
+                "WHC",
+            ),
+            (
+                column == "CG-FHP",
+                "FHP",
+            ),
+            (
+                column == "CG-LT",
+                "LT",
+            ),
+            else_=column,
+        )
+
     @classmethod
     async def complaint_overview(
         cls,
@@ -33,29 +64,7 @@ class MenuService:
         # Aggregate division-wise final_status counts (Y/N) and complaint_type
         # We compute both aggregates with as few queries as practical.
         # Division-wise: one query grouping by complaint_head and product_division
-        division_expr = case(
-    (
-        Complaint.product_division.in_(["CG-FANS", "FANS"]),
-        "FANS",
-    ),
-    (
-        Complaint.product_division.in_(["CG-PUMP", "PUMP"]),
-        "PUMP",
-    ),
-    (
-        Complaint.product_division == "CG-APP",
-        "APP",
-    ),
-    (
-        Complaint.product_division == "CG-FHP",
-        "FHP",
-    ),
-    (
-        Complaint.product_division == "CG-LT",
-        "LT",
-    ),
-    else_=Complaint.product_division,
-)
+        division_expr = cls._division_case(Complaint.product_division)
 
         division_stmt = (
     select(
@@ -113,11 +122,11 @@ class MenuService:
 
         # Compute multiple complaint counts per head in a single grouped query
         # Definitions (per request):
+        # - ALL: final_status = 'N'
         # - CRM OPEN: complaint_number NOT STARTS WITH 'N' AND complaint_status NOT IN ('CANCEL','CLOSED','NEW') AND final_status = 'N'
         # - SPARE PENDING: spare_pending = 'Y' AND final_status = 'N'
-        # - ESCALATION: final_status = 'N' AND complaint_status IN ('ESCALATION','MD-ESCALATION','HO-ESCALATION')
-        # - HIGH PRIORITY: final_status = 'N' AND complaint_priority = 'URGENT'
-        # - MAIL TO BE SENT: final_status = 'N' AND action_head = 'MAIL TO BE SENT'
+        # - ESCALATION: final_status = 'N' AND complaint_status IN ('ESCALATION','MD-ESCALATION','HO-ESCALATION', 'CRM-ESCALATION')
+        # - MAIL TO BE SENT: final_status = 'N' AND action_head = 'MAIL TO BE SENT TO HO'
 
         counts_stmt = (
             select(
@@ -143,7 +152,7 @@ class MenuService:
                         (
                             and_(
                                 Complaint.final_status == "N",
-                                func.upper(Complaint.complaint_priority).in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION", "URGENT"]),
+                                func.upper(Complaint.complaint_priority).in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION", "CRM-ESCALATION"]),
                             ),
                             1,
                         ),
@@ -212,11 +221,13 @@ class MenuService:
                 ...
             ]
         """
+        division_expr = MenuService._division_case(model.division)
+
         division_stmt = (
-            select(model.division, func.count().label("count"))
+            select(division_expr.label("division"), func.count().label("count"))
             .where(model.division.isnot(None))
-            .group_by(model.division)
-            .order_by(model.division)
+            .group_by(division_expr)
+            .order_by(division_expr)
         )
         division_rows = (await session.execute(division_stmt)).all()
         return [{"division": row.division, "count": row.count} for row in division_rows]
@@ -264,14 +275,16 @@ class MenuService:
         # -------------------------------
         # Division-wise aggregation (donut)
         # -------------------------------
+        division_expr = MenuService._division_case(model.division)
+
         division_stmt = (
             select(
-                model.division,
+                division_expr.label("division"),
                 func.count().label("count"),
             )
             .where(model.division.isnot(None))
-            .group_by(model.division)
-            .order_by(model.division)
+            .group_by(division_expr)
+            .order_by(division_expr)
         )
         division_rows = (await session.execute(division_stmt)).all()
         division_donut = [

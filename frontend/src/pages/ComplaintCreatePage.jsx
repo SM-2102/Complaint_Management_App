@@ -831,6 +831,7 @@ const ComplaintCreatePage = () => {
                 <option value="" disabled></option>
                 <option value="NORMAL">NORMAL</option>
                 <option value="URGENT">URGENT</option>
+                <option value="ESCALATION">ESCALATION</option>
                 <option value="HO-ESCALATION">HO-ESCALATION</option>
                 <option value="CRM-ESCALATION">CRM-ESCALATION</option>
                 <option value="MD-ESCALATION">MD-ESCALATION</option>

@@ -102,6 +102,9 @@ const ComplaintSendPage = () => {
         resolution: `Recipients: ${payload.length}`,
       });
       setShowToast(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (err) {
       setError({
         message: err?.message || "Operation failed.",

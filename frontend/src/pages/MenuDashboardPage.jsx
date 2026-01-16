@@ -300,6 +300,15 @@ useEffect(() => {
 
   // Handler for ComplaintStatsCards click
   const handleComplaintStatCardClick = async (cardKey) => {
+    // If the clicked card is 'Mails to be Sent', open the dedicated page
+    if (cardKey === "mail_to_be_sent_complaints") {
+      const params = new URLSearchParams();
+      params.set("mail_to_be_sent_complaints", "Y");
+      if (selectedCompany) params.set("complaint_head", selectedCompany);
+      navigate({ pathname: "/ComplaintMailToBeSent", search: params.toString() });
+      return;
+    }
+
     const params = new URLSearchParams();
     if (cardKey) {
       params.set(cardKey, "Y");

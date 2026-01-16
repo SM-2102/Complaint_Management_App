@@ -91,7 +91,7 @@ class StockCGPISLService:
 
         int_fields = {"cnf_qty", "grc_qty", "own_qty", "indent_qty"}
         float_fields = {
-            "alp",
+            "alp", "sale_price",
         }
 
         for row in raw_rows:
@@ -340,6 +340,7 @@ class StockCGPISLService:
                 grc_qty=row.StockCGPISL.grc_qty,
                 own_qty=row.StockCGPISL.own_qty,
                 alp=row.StockCGPISL.alp,
+                sale_price=row.StockCGPISL.sale_price,
             )
             for row in rows
         ]

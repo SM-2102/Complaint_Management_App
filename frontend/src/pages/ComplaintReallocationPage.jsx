@@ -20,6 +20,7 @@ const columns = [
   { key: "complaint_number", label: "Complaint Number" },
   { key: "complaint_date", label: "Date" },
   { key: "customer_name", label: "Customer Name" },
+  { key: "customer_address", label: "Customer Address" },
   { key: "product_division", label: "Division" },
   { key: "current_status", label: "Current Status" },
 ];
@@ -33,8 +34,7 @@ const initialForm = {
 
 const ComplaintReallocationPage = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState({});
   const [showToast, setShowToast] = useState(false);
   const tableRef = useRef();
   const [updating, setUpdating] = useState(false);
@@ -132,7 +132,7 @@ const ComplaintReallocationPage = () => {
       setError({
         message: "Complaints reallocated successfully!",
         type: "success",
-        resolution: `Reallocated ${selected.length} complaints to ${form.reallocate_to}.`,
+        resolution: `Reallocated to ${form.reallocate_to}.`,
       });
       setShowToast(true);
       setTimeout(() => {
@@ -395,7 +395,7 @@ const ComplaintReallocationPage = () => {
                       padding: "24px 0",
                     }}
                   >
-                    No Records Found
+                    No Complaints Found
                   </TableCell>
                 </TableRow>
               )}

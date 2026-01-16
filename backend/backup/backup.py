@@ -64,6 +64,22 @@ def purge_old_complaints(cursor):
     deleted = cursor.rowcount
     print(f"[PURGE] Complaints deleted: {deleted}")
 
+def purge_notifications(cursor):
+    """
+    Delete resolved notifications
+    """
+    print("\n[PURGE] Removing Resolved Notifications...")
+
+    cursor.execute(
+        """
+        DELETE FROM notifications
+        WHERE resolved = 'Y'
+        """
+    )
+
+    deleted = cursor.rowcount
+    print(f"[PURGE] Notifications deleted: {deleted}")
+
 def purge_old_stock_and_grc(cursor):
     """
     Delete GRC and stock records older than 1 year.
@@ -132,13 +148,13 @@ def export_table_to_csv(cursor, table_name, backup_dir):
 
 def backup_database():
     """Main backup function."""
-    print("\n────────────────────────────────────────────────────────────")
-    print("         Complaint Management DB Backup Utility")
-    print("────────────────────────────────────────────────────────────")
-    print("────────────────────────────────────────────────────────────")
+    print("\n─────────────────────────────────────────────────────────────────────────────────")
+    print("                     Complaint Management DB Backup Utility")
+    print("─────────────────────────────────────────────────────────────────────────────────")
+    print("─────────────────────────────────────────────────────────────────────────────────")
     print("[START] Connecting to database ...")
     print(f"[INFO] Datbase URL: {db_url.split('@')[1] if '@' in db_url else 'Unknown'}")
-    print("────────────────────────────────────────────────────────────")
+    print("─────────────────────────────────────────────────────────────────────────────────")
 
     connection = None
     backup_dir = None
@@ -158,7 +174,7 @@ def backup_database():
         failed = 0
 
         for table in tables:
-            classy_table = f"[EXPORT] {table:<20}... "
+            classy_table = f"[EXPORT] {table:<30}... "
             row_count = export_table_to_csv(cursor, table, backup_dir)
             if row_count is not None:
                 print(f"{classy_table}✔️  Success ({row_count} records)")
@@ -187,32 +203,35 @@ def backup_database():
         print(f"\n[ZIP] Backup zipped : {zip_path}")
 
         # Summary
-        print("\n────────────────────────────────────────────────────────────")
+        print("\n─────────────────────────────────────────────────────────────────────────────────")
         print(f"[RESULT] Tables backed up:   {successful}")
         print(f"[RESULT] Tables failed:      {failed}")
-        print("────────────────────────────────────────────────────────────")
+        print("─────────────────────────────────────────────────────────────────────────────────")
         print(
             f"[COMPLETE] Backup finished at {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}"
         )
-        print("────────────────────────────────────────────────────────────")
+        print("─────────────────────────────────────────────────────────────────────────────────")
 
         # Purge old complaints AFTER successful backup
         purge_old_complaints(cursor)
         purge_old_stock_and_grc(cursor)
+        purge_notifications(cursor)
         # Commit purge
         connection.commit()
         connection.autocommit = True
         cursor.execute("VACUUM ANALYZE complaints;")
         cursor.execute("VACUUM ANALYZE grc_cgcel_return_history;")
         cursor.execute("VACUUM ANALYZE stock_cgcel_indent;")
+        cursor.execute("VACUUM ANALYZE notifications;")
         connection.autocommit = False
         print()
         print("[VACUUM] Complaints Table vacuumed")
         print("[VACUUM] Stock Indent Table vacuumed")
         print("[VACUUM] GRC Return Table vacuumed")
+        print("[VACUUM] Notifications Table vacuumed")
         print()
-        print("────────────────────────────────────────────────────────────")
-        print("────────────────────────────────────────────────────────────")
+        print("─────────────────────────────────────────────────────────────────────────────────")
+        print("─────────────────────────────────────────────────────────────────────────────────")
 
 
     except psycopg2.Error as e:

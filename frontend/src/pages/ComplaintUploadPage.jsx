@@ -15,12 +15,15 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ClearIcon from "@mui/icons-material/Clear";
 import Toast from "../components/Toast";
 import { UploadComplaints } from "../services/complaintUploadService";
+import { UploadNewComplaints } from "../services/complaintUploadnEWService";
 
 const ComplaintUploadPage = () => {
   const [showToast, setShowToast] = useState(false);
   const [error, setError] = useState(null);
   const [file, setFile] = useState(null);
+  const [newFile, setNewFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingNew, setUploadingNew] = useState(false);
 
   const isCsvFile = (file) =>
     file &&
@@ -44,9 +47,32 @@ const ComplaintUploadPage = () => {
     setFile(f);
   };
 
+  const handleNewFileChange = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+
+    if (!isCsvFile(f)) {
+      setError({
+        message: "Invalid file type",
+        resolution: "Only CSV files are allowed",
+        type: "warning",
+      });
+      setShowToast(true);
+      e.target.value = "";
+      return;
+    }
+    setNewFile(f);
+  };
+
   const handleClearFile = () => {
     setFile(null);
     const input = document.getElementById("complaint-file-input");
+    if (input) input.value = "";
+  };
+
+  const handleClearNewFile = () => {
+    setNewFile(null);
+    const input = document.getElementById("complaint-new-file-input");
     if (input) input.value = "";
   };
 
@@ -73,8 +99,31 @@ const ComplaintUploadPage = () => {
     }
   };
 
+  const handleUploadNew = async () => {
+    if (!newFile) return;
+    setUploadingNew(true);
+    try {
+      const res = await UploadNewComplaints(newFile);
+      setError({
+        message: res.message,
+        resolution: res.resolution,
+        type: "success",
+      });
+      handleClearNewFile();
+    } catch (err) {
+      setError({
+        message: err.message || "Upload failed",
+        resolution: err.resolution || "Please try again",
+        type: "error",
+      });
+    } finally {
+      setUploadingNew(false);
+      setShowToast(true);
+    }
+  };
+
   return (
-    <Container maxWidth="sm" sx={{ mt: 10 }}>
+    <Container maxWidth="md" sx={{ mt: 10 }}>
       {showToast && error && (
         <Toast
           message={error.message}
@@ -91,87 +140,177 @@ const ComplaintUploadPage = () => {
           Upload Complaint Records
         </h2>
 
-        {/* Upload Box */}
-        <Box
-          sx={{
-            border: "2px dashed",
-            borderColor: file ? "#8b5cf6" : "grey.300",
-            borderRadius: 2,
-            p: 3,
-            textAlign: "center",
-            bgcolor: file ? "primary.50" : "grey.50",
-            transition: "all 0.2s ease",
-          }}
-        >
-          <Stack spacing={2} alignItems="center">
-            <UploadFileIcon sx={{ fontSize: 40, color: "#7c3aed" }} />
+        {/* Upload Boxes - original and new */}
+        <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", md: "row" } }}>
+          {/* First upload box */}
+          <Box sx={{ flex: 1 }}>
+            <Box
+              sx={{
+                border: "2px dashed",
+                borderColor: file ? "#8b5cf6" : "grey.300",
+                borderRadius: 2,
+                p: 3,
+                textAlign: "center",
+                bgcolor: file ? "primary.50" : "grey.50",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <Stack spacing={2} alignItems="center">
+                <UploadFileIcon sx={{ fontSize: 40, color: "#7c3aed" }} />
 
-            {!file ? (
-              <>
-                <Typography variant="body1" fontWeight={500}>
-                  Select a CSV file
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Only .csv files are supported
-                </Typography>
+                {!file ? (
+                  <>
+                    <Typography variant="body1" fontWeight={500}>
+                      Select a CSV file
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Only .csv files are supported
+                    </Typography>
 
-                <Button
-                  variant="outlined"
-                  component="label"
-                  sx={{
-                    color: "#7c3aed",
-                    borderColor: "#8b5cf6",
-                    "&:hover": {
-                      backgroundColor: "#8b5cf622",
-                      borderColor: "#7c3aed",
-                    },
-                  }}
-                >
-                  Browse File
-                  <input
-                    id="complaint-file-input"
-                    hidden
-                    type="file"
-                    accept=".csv,text/csv"
-                    onChange={handleFileChange}
-                  />
-                </Button>
-              </>
-            ) : (
-              <>
-                <Chip
-                  icon={<InsertDriveFileIcon />}
-                  label={file.name}
-                  onDelete={handleClearFile}
-                  deleteIcon={<ClearIcon />}
-                  sx={{ maxWidth: "100%" }}
-                />
+                    <Button
+                      variant="outlined"
+                      component="label"
+                      sx={{
+                        color: "#7c3aed",
+                        borderColor: "#8b5cf6",
+                        "&:hover": {
+                          backgroundColor: "#8b5cf622",
+                          borderColor: "#7c3aed",
+                        },
+                      }}
+                    >
+                      Browse File
+                      <input
+                        id="complaint-file-input"
+                        hidden
+                        type="file"
+                        accept=".csv,text/csv"
+                        onChange={handleFileChange}
+                      />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Chip
+                      icon={<InsertDriveFileIcon />}
+                      label={file.name}
+                      onDelete={handleClearFile}
+                      deleteIcon={<ClearIcon />}
+                      sx={{ maxWidth: "100%" }}
+                    />
 
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={handleUpload}
-                  disabled={uploading}
-                  startIcon={
-                    uploading ? (
-                      <CircularProgress size={18} sx={{ color: "#8b5cf6" }} />
-                    ) : (
-                      <UploadFileIcon />
-                    )
-                  }
-                  sx={{
-                    backgroundColor: "#7c3aed",
-                    color: "#fff",
-                    "&:hover": {
-                      backgroundColor: "#6d28d9",
-                    },
-                  }}
-                >
-                  {uploading ? "Uploading..." : "Upload File"}
-                </Button>
-              </>
-            )}
-          </Stack>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={handleUpload}
+                      disabled={uploading}
+                      startIcon={
+                        uploading ? (
+                          <CircularProgress size={18} sx={{ color: "#8b5cf6" }} />
+                        ) : (
+                          <UploadFileIcon />
+                        )
+                      }
+                      sx={{
+                        backgroundColor: "#7c3aed",
+                        color: "#fff",
+                        "&:hover": {
+                          backgroundColor: "#6d28d9",
+                        },
+                      }}
+                    >
+                      {uploading ? "Uploading..." : "Upload File"}
+                    </Button>
+                  </>
+                )}
+              </Stack>
+            </Box>
+          </Box>
+
+          {/* Second upload box (uses UploadNewComplaints) */}
+          <Box sx={{ flex: 1 }}>
+            <Box
+              sx={{
+                border: "2px dashed",
+                borderColor: newFile ? "#8b5cf6" : "grey.300",
+                borderRadius: 2,
+                p: 3,
+                textAlign: "center",
+                bgcolor: newFile ? "primary.50" : "grey.50",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <Stack spacing={2} alignItems="center">
+                <UploadFileIcon sx={{ fontSize: 40, color: "#7c3aed" }} />
+
+                {!newFile ? (
+                  <>
+                    <Typography variant="body1" fontWeight={500}>
+                      Select a CSV file (New)
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Only .csv files are supported
+                    </Typography>
+
+                    <Button
+                      variant="outlined"
+                      component="label"
+                      sx={{
+                        color: "#7c3aed",
+                        borderColor: "#8b5cf6",
+                        "&:hover": {
+                          backgroundColor: "#8b5cf622",
+                          borderColor: "#7c3aed",
+                        },
+                      }}
+                    >
+                      Browse File
+                      <input
+                        id="complaint-new-file-input"
+                        hidden
+                        type="file"
+                        accept=".csv,text/csv"
+                        onChange={handleNewFileChange}
+                      />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Chip
+                      icon={<InsertDriveFileIcon />}
+                      label={newFile.name}
+                      onDelete={handleClearNewFile}
+                      deleteIcon={<ClearIcon />}
+                      sx={{ maxWidth: "100%" }}
+                    />
+
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={handleUploadNew}
+                      disabled={uploadingNew}
+                      startIcon={
+                        uploadingNew ? (
+                          <CircularProgress size={18} sx={{ color: "#8b5cf6" }} />
+                        ) : (
+                          <UploadFileIcon />
+                        )
+                      }
+                      sx={{
+                        backgroundColor: "#7c3aed",
+                        color: "#fff",
+                        "&:hover": {
+                          backgroundColor: "#6d28d9",
+                        },
+                      }}
+                    >
+                      {uploadingNew ? "Uploading..." : "Upload File (New)"}
+                    </Button>
+                  </>
+                )}
+              </Stack>
+            </Box>
+          </Box>
         </Box>
       </Paper>
     </Container>

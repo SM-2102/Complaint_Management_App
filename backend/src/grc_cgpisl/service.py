@@ -446,38 +446,46 @@ class GRCCGPISLService:
 
         def generate_overlay(data):
             packet = io.BytesIO()
-            can = canvas.Canvas(packet, pagesize=A4)
+            # We'll create multiple pages in the packet if needed
             width, height = A4
 
-            def draw_centered(can, text, x_start, x_end, y, font="Helvetica", size=9):
+            def draw_centered(canv, text, x_start, x_end, y, font="Helvetica", size=9):
                 text = "" if text is None else str(text)
-                can.setFont(font, size)
-                text_width = can.stringWidth(text, font, size)
+                canv.setFont(font, size)
+                text_width = canv.stringWidth(text, font, size)
                 x_mid = x_start + (x_end - x_start) / 2
-                can.drawString(x_mid - text_width / 2, y, text)
+                canv.drawString(x_mid - text_width / 2, y, text)
 
-            def draw_block(start_y_offset):
-                # Header
-                can.setFont("Helvetica-Bold", 10)
-                can.drawString(
-                    88, 740 - start_y_offset, f"{data.get('challan_number', '')}"
-                )
-                can.drawString(
-                    250, 740 - start_y_offset, date.today().strftime("%d-%m-%Y")
-                )
-                can.drawString(476, 740 - start_y_offset, f"{data.get('division', '')}")
-                can.drawString(
-                    476, 704 - start_y_offset, f"{data.get('docket_number', '')}"
-                )
-                can.drawString(
-                    144, 704 - start_y_offset, f"{data.get('sent_through', '')}"
-                )
-                can.drawString(474, 36 - start_y_offset, f"{token['user']['username']}")
+            def draw_page_header(canv):
+                canv.setFont("Helvetica-Bold", 10)
+                canv.drawString(88, 740, f"{data.get('challan_number', '')}")
+                canv.drawString(250, 740, date.today().strftime("%d-%m-%Y"))
+                canv.drawString(476, 740, f"{data.get('division', '')}")
+                canv.drawString(476, 704, f"{data.get('docket_number', '')}")
+                canv.drawString(144, 704, f"{data.get('sent_through', '')}")
+                canv.drawString(474, 36, f"{token['user']['username']}")
+                canv.setFont("Helvetica", 11)
 
-                can.setFont("Helvetica", 11)
-                y = 660 - start_y_offset
-                items = data.get("grc_rows", [])
-                for idx, item in enumerate(items, 1):
+            items = data.get("grc_rows", [])
+            # layout constants
+            start_y = 660
+            line_height = 19
+            bottom_margin = 30
+            lines_per_page = max(1, int((start_y - bottom_margin) / line_height))
+
+            # create canvas and track pages
+            can = canvas.Canvas(packet, pagesize=A4)
+
+            idx = 0
+            total_items = len(items)
+            while idx < total_items:
+                draw_page_header(can)
+                y = start_y
+                # write up to lines_per_page items
+                for _ in range(lines_per_page):
+                    if idx >= total_items:
+                        break
+                    item = items[idx]
                     if report_type == "Defective":
                         draw_centered(can, item.get("grc_number"), 15, 80, y)
                         draw_centered(can, item.get("grc_date"), 80, 135, y)
@@ -495,22 +503,18 @@ class GRCCGPISLService:
                         draw_centered(can, item.get("grc_date"), 80, 135, y)
                         draw_centered(can, item.get("spare_code"), 135, 240, y)
                         draw_centered(can, item.get("spare_description"), 240, 467, y)
+                        draw_centered(can, item.get("actual_pending_qty") or 0, 467, 510, y)
                     else:
                         draw_centered(can, item.get("grc_number"), 15, 80, y)
                         draw_centered(can, item.get("grc_date"), 80, 135, y)
                         draw_centered(can, item.get("spare_code"), 135, 240, y)
                         draw_centered(can, item.get("spare_description"), 240, 467, y)
-                        draw_centered(
-                            can, item.get("actual_pending_qty") or 0, 467, 510, y
-                        )
+                        draw_centered(can, item.get("actual_pending_qty") or 0, 467, 510, y)
                         draw_centered(can, item.get("good_qty") or 0, 510, 545, y)
                         draw_centered(can, item.get("defective_qty") or 0, 545, 580, y)
-                    y -= 19
-                    if y < 50:
-                        break  # Avoid overflow for now
-
-            # Draw only one block (single copy)
-            draw_block(start_y_offset=0)
+                    y -= line_height
+                    idx += 1
+                can.showPage()
 
             can.save()
             packet.seek(0)
@@ -537,13 +541,37 @@ class GRCCGPISLService:
         template_buffer = io.BytesIO(template_bytes)
         template_pdf = PdfReader(template_buffer)
 
-        # Merge overlays
+        # Merge overlays onto template pages for every overlay page.
+        # Use a fresh copy of the template page for each overlay page so the template
+        # content appears on every output page.
         writer = PdfWriter()
-        for i in range(len(template_pdf.pages)):
-            page = template_pdf.pages[i]
-            overlay_page = overlay.pages[min(i, len(overlay.pages) - 1)]
-            page.merge_page(overlay_page)
-            writer.add_page(page)
+        t_pages = len(template_pdf.pages)
+        o_pages = len(overlay.pages)
+
+        if t_pages == 0:
+            # No template pages: append overlay pages directly
+            for i in range(o_pages):
+                writer.add_page(overlay.pages[i])
+        else:
+            for i in range(o_pages):
+                overlay_page = overlay.pages[i]
+                tpl_index = i % t_pages
+                # Make a copy of the template page by creating a new PdfReader from bytes
+                # to avoid modifying the original template pages in-place.
+                tpl_writer = PdfWriter()
+                tpl_writer.add_page(template_pdf.pages[tpl_index])
+                tpl_stream = io.BytesIO()
+                tpl_writer.write(tpl_stream)
+                tpl_stream.seek(0)
+                tpl_reader = PdfReader(tpl_stream)
+                page_copy = tpl_reader.pages[0]
+                try:
+                    page_copy.merge_page(overlay_page)
+                except Exception:
+                    # If merge fails, append the overlay page alone
+                    writer.add_page(overlay_page)
+                else:
+                    writer.add_page(page_copy)
 
         output_stream = io.BytesIO()
         writer.write(output_stream)

@@ -69,6 +69,7 @@ const API_ENDPOINTS = {
   GRC_CGPISL_ENQUIRY: `${BASE_API_URL}grc_cgpisl/enquiry`,
 
   COMPLAINT_UPLOAD: `${BASE_API_URL}complaints/upload`,
+  COMPLAINT_UPLOAD_NEW: `${BASE_API_URL}complaints/upload_new`,
   COMPLAINT_ENQUIRY: `${BASE_API_URL}complaints/enquiry`, //append query params as needed
   COMPLAINT_STATS_ENQUIRY: `${BASE_API_URL}complaints/complaint_stats_enquiry`, //append card name
   COMPLAINT_FILTER_DATA: `${BASE_API_URL}complaints/complaint_filter_data`,
@@ -82,6 +83,10 @@ const API_ENDPOINTS = {
   COMPLAINT_UPDATE: `${BASE_API_URL}complaints/update`, //append complaint number
   COMPLAINT_MAIL_TECHNICIAN: `${BASE_API_URL}complaints/mail_technician_list`,
   COMPLAINT_SEND_EMAIL: `${BASE_API_URL}complaints/send_email`,
+  COMPLAINT_ALL_COMPLAINTS: `${BASE_API_URL}complaints/all_complaints`,
+  COMPLAINT_MAIL_SENT_TO_HO: `${BASE_API_URL}complaints/mail_sent_to_ho`,
+  COMPLAINT_SEARCH_NUMBER_RFR: `${BASE_API_URL}complaints/by_complaint_number_rfr`, //append complaint number
+  COMPLAINT_RFR_CREATE: `${BASE_API_URL}complaints/create_rfr`,
 
   CUSTOMER_CREATE: `${BASE_API_URL}customer/create`,
   CUSTOMER_NEXT_CODE: `${BASE_API_URL}customer/next_code`,

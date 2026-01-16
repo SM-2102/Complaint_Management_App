@@ -10,11 +10,11 @@ from sqlalchemy import case, insert, tuple_, update, select, distinct, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
-from mail import mail, create_email_message
+# from mail import mail, create_email_message
 
 from utils.date_utils import format_date_ddmmyyyy
 from utils.file_utils import capital_to_proper_case
-from complaints.schemas import ComplaintReallocateRequestSchema, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, ComplaintsSchema, ComplaintFilterData, ComplaintEnquiryResponseSchema, CreateComplaint, ComplaintCreateData, EmailSchema, UpdateComplaint
+from complaints.schemas import ComplaintReallocateRequestSchema, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, ComplaintsSchema, ComplaintFilterData, ComplaintEnquiryResponseSchema, CreateComplaint, ComplaintCreateData, CreateComplaintRFR, EmailSchema, UpdateComplaint
 from complaints.models import Complaint, ActionTable
 from employee.models import Employee 
 from customer.models import Customer
@@ -153,7 +153,6 @@ class ComplaintsService:
                     .where(table.c.complaint_number.in_(to_reopen))
                     .values(final_status="N")
                 )
-                updated += len(to_reopen)
 
             await session.commit()
 
@@ -175,6 +174,124 @@ class ComplaintsService:
         return {
             "message": "Complaints Uploaded",
             "resolution": f"Inserted : {inserted}, Updated : {updated}",
+            "type": "success",
+        }
+    
+    async def upload_new_complaints(self, session: AsyncSession, file: UploadFile):
+        content = await file.read()
+        try:
+            text = content.decode("utf-8-sig")
+        except Exception:
+            text = content.decode("utf-8", errors="ignore")
+
+        reader = csv.DictReader(io.StringIO(text))
+
+        if not reader.fieldnames:
+            return {
+                "message": "Invalid file",
+                "resolution": "CSV file has no headers",
+                "type": "warning",
+            }
+
+        records = []
+        line_no = 1
+
+        # Fields to convert to uppercase
+        uppercase_fields = [
+            "complaint_number",
+            "complaint_head",
+            "complaint_type",
+            "complaint_status",
+            "complaint_priority",
+            "customer_type",
+            "customer_name",
+            "customer_address1",
+            "customer_address2",
+            "customer_city",
+            "product_division",
+            "current_status",
+        ]
+
+        for raw_row in reader:
+            line_no += 1
+
+            # Normalize CSV headers to snake_case-like keys
+            row = {}
+            for k, v in raw_row.items():
+                key = (k or "").strip().lower()
+                val = v.strip() if v else ""
+                # Convert to uppercase if field is in uppercase_fields and value is not None
+                if key in uppercase_fields and val != "":
+                    row[key] = val.upper()
+                else:
+                    row[key] = val if val != "" else None
+
+            # Override / ensure defaults required by the user
+            row["spare_pending"] = "N"
+            row["created_by"] = "D Manna"
+            row["final_status"] = "N"
+
+            try:
+                validated = ComplaintsSchema(**row)
+            except ValidationError as ve:
+                return {
+                    "message": f"Validation failed for {row.get('complaint_number')}",
+                    "resolution": str(ve),
+                    "type": "warning",
+                }
+
+            records.append(validated)
+
+        if not records:
+            return {
+                "message": "Uploaded Successfully",
+                "resolution": "No valid rows found",
+            }
+
+    
+        to_insert = []
+        present_fields = set()
+        for r in records:
+            present_fields.update(r.dict(exclude_unset=True).keys())
+        present_fields.discard("complaint_number")
+
+        for r in records:
+            data_dict = {
+                k: v
+                for k, v in r.dict(exclude_unset=False).items()
+                if k == "complaint_number" or k in present_fields
+            }
+            to_insert.append(data_dict)
+
+        inserted = 0
+
+        table = Complaint.__table__
+
+        try:
+            if to_insert:
+                await session.execute(insert(table).values(to_insert))
+                inserted = len(to_insert)
+
+            await session.commit()
+
+        except IntegrityError as e:
+            await session.rollback()
+            return {
+                "message": "Database integrity error",
+                "resolution": str(e),
+                "type": "error",
+            }
+        except Exception as e:
+            await session.rollback()
+            return {
+                "message": "Unexpected server error",
+                "resolution": str(e),
+                "type": "error",
+            }
+
+        return {
+            "message": "Complaints Uploaded",
+            "resolution": f"Inserted : {inserted}",
             "type": "success",
         }
 
@@ -257,7 +374,7 @@ class ComplaintsService:
         if crm_open_complaints == "Y":
             statement = statement.where((model.final_status == "N") & (model.complaint_number.notlike("N%"))& (model.complaint_status.notin_(["CLOSED", "NEW", "CANCEL"])))
         if escalation_complaints == "Y":
-            statement = statement.where((model.final_status == "N") & (model.complaint_priority.in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION", "URGENT"])))
+            statement = statement.where((model.final_status == "N") & (model.complaint_priority.in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION", "CRM-ESCALATION"])))
         if mail_to_be_sent_complaints == "Y":
             statement = statement.where((model.final_status == "N") & (func.upper(model.action_head) == "MAIL TO BE SENT TO HO"))
         return statement
@@ -300,16 +417,18 @@ class ComplaintsService:
                 complaint_time=row.complaint_time,
                 complaint_status=row.complaint_status,
                 customer_name=row.customer_name,
+                customer_address=row.customer_address1 + (", " + row.customer_address2 if row.customer_address2 else "") + ", " + row.customer_city + " - " + row.customer_pincode,
                 customer_contact1=row.customer_contact1,
                 customer_contact2=row.customer_contact2,
                 product_division=row.product_division,
                 current_status=row.current_status,
                 action_by=row.action_by,
                 product_model=row.product_model,
+                product_serial_number=row.product_serial_number,
                 action_head=row.action_head,
             )
             for row in rows
-        ]       
+        ]    
         return records
     
     async def get_employees(self, session: AsyncSession) -> List[str]:
@@ -327,7 +446,7 @@ class ComplaintsService:
         session: AsyncSession,  
         allocated_to: str,
     ):
-        statement = select(Complaint.complaint_number, Complaint.complaint_date, Complaint.customer_name, Complaint.current_status, Complaint.product_division).where(Complaint.action_by == allocated_to).where(Complaint.final_status == "N").order_by(Complaint.complaint_number)
+        statement = select(Complaint.complaint_number, Complaint.complaint_date, Complaint.customer_name, Complaint.current_status, Complaint.product_division, Complaint.customer_address1, Complaint.customer_address2, Complaint.customer_city, Complaint.customer_pincode).where(Complaint.action_by == allocated_to).where(Complaint.final_status == "N").order_by(Complaint.complaint_number)
         result = await session.execute(statement)
         rows = result.all()
         records = [
@@ -335,6 +454,7 @@ class ComplaintsService:
                 complaint_number=row.complaint_number,
                 complaint_date=format_date_ddmmyyyy(row.complaint_date),
                 customer_name=row.customer_name,
+                customer_address=row.customer_address1 + (", " + row.customer_address2 if row.customer_address2 else "") + ", " + row.customer_city + " - " + row.customer_pincode,
                 current_status=row.current_status,
                 product_division=row.product_division,
             )
@@ -546,134 +666,135 @@ class ComplaintsService:
         return existing_complaint
     
  
-    async def send_pending_emails(
-        self,
-        session: AsyncSession,
-        recipients: List[EmailSchema],
-    ):
-        ESCALATION_STATUSES = {
-            "ESCALATION",
-            "CRM-ESCALATION",
-            "MD-ESCALATION",
-            "URGENT",
-        }
+    # async def send_pending_emails(
+    #     self,
+    #     session: AsyncSession,
+    #     recipients: List[EmailSchema],
+    # ):
+    #     ESCALATION_STATUSES = {
+    #         "ESCALATION",
+    #         "CRM-ESCALATION",
+    #         "MD-ESCALATION",
+    #         "HO-ESCALATION",
+    #         "URGENT",
+    #     }
 
-        for recipient in recipients:
-            statement = (
-                select(Complaint)
-                .where(
-                    Complaint.final_status == "N",
-                    func.upper(Complaint.complaint_status) != "CLOSED",
-                    Complaint.action_by == recipient.name,
-                )
-                .order_by(Complaint.complaint_number)
-            )
+    #     for recipient in recipients:
+    #         statement = (
+    #             select(Complaint)
+    #             .where(
+    #                 Complaint.final_status == "N",
+    #                 func.upper(Complaint.complaint_status) != "CLOSED",
+    #                 Complaint.action_by == recipient.name,
+    #             )
+    #             .order_by(Complaint.complaint_number)
+    #         )
 
-            result = await session.execute(statement)
-            complaints = result.scalars().all()
+    #         result = await session.execute(statement)
+    #         complaints = result.scalars().all()
 
-            if not complaints:
-                continue  # No pending complaints for this recipient
+    #         if not complaints:
+    #             continue  # No pending complaints for this recipient
 
-            # Build table rows
-            table_rows = ""
+    #         # Build table rows
+    #         table_rows = ""
 
-            for row in complaints:
-                complaint_datetime = " ".join(
-                    filter(None, [
-                        row.complaint_date.strftime("%d-%m-%y") if row.complaint_date else "",
-                        str(row.complaint_time) if row.complaint_time else "",
-                    ])
-                )
+    #         for row in complaints:
+    #             complaint_datetime = " ".join(
+    #                 filter(None, [
+    #                     row.complaint_date.strftime("%d-%m-%y") if row.complaint_date else "",
+    #                     str(row.complaint_time) if row.complaint_time else "",
+    #                 ])
+    #             )
 
-                customer_address = ", ".join(
-                    filter(None, [
-                        row.customer_address1,
-                        row.customer_address2,
-                        row.customer_city,
-                        row.customer_pincode,
-                    ])
-                )
+    #             customer_address = ", ".join(
+    #                 filter(None, [
+    #                     row.customer_address1,
+    #                     row.customer_address2,
+    #                     row.customer_city,
+    #                     row.customer_pincode,
+    #                 ])
+    #             )
 
-                customer_contact = " / ".join(
-                    filter(None, [
-                        row.customer_contact1,
-                        row.customer_contact2,
-                    ])
-                )
+    #             customer_contact = " / ".join(
+    #                 filter(None, [
+    #                     row.customer_contact1,
+    #                     row.customer_contact2,
+    #                 ])
+    #             )
 
-                # Days difference
-                days_old = (date.today() - row.complaint_date).days if row.complaint_date else 0
+    #             # Days difference
+    #             days_old = (date.today() - row.complaint_date).days if row.complaint_date else 0
 
-                # Escalation logic
-                is_escalated = (
-                    days_old > 5
-                    or (row.complaint_priority and row.complaint_priority.upper() in ESCALATION_STATUSES)
-                )
+    #             # Escalation logic
+    #             is_escalated = (
+    #                 days_old > 5
+    #                 or (row.complaint_priority and row.complaint_priority.upper() in ESCALATION_STATUSES)
+    #             )
 
-                row_style = (
-                    "background-color:#fde2e2;color:#7a1f1f;"
-                    if is_escalated
-                    else ""
-                )
+    #             row_style = (
+    #                 "background-color:#fde2e2;color:#7a1f1f;"
+    #                 if is_escalated
+    #                 else ""
+    #             )
 
-                table_rows += f"""
-                    <tr style="{row_style}">
-                        <td>{row.complaint_number}</td>
-                        <td>{complaint_datetime}</td>
-                        <td>{row.complaint_type}</td>
-                        <td>{row.complaint_status}</td>
-                        <td>{row.customer_name}</td>
-                        <td>{customer_address}</td>
-                        <td>{customer_contact}</td>
-                        <td>{row.product_division}</td>
-                        <td>{row.product_model or ""}</td>
-                        <td>{row.product_serial_number or ""}</td>
-                        <td>{row.current_status}</td>
-                    </tr>
-                """
+    #             table_rows += f"""
+    #                 <tr style="{row_style}">
+    #                     <td>{row.complaint_number}</td>
+    #                     <td>{complaint_datetime}</td>
+    #                     <td>{row.complaint_type}</td>
+    #                     <td>{row.complaint_status}</td>
+    #                     <td>{row.customer_name}</td>
+    #                     <td>{customer_address}</td>
+    #                     <td>{customer_contact}</td>
+    #                     <td>{row.product_division}</td>
+    #                     <td>{row.product_model or ""}</td>
+    #                     <td>{row.product_serial_number or ""}</td>
+    #                     <td>{row.current_status}</td>
+    #                 </tr>
+    #             """
 
-            # Email body (HTML table)
-            body = f"""
-            <p>Dear {recipient.name},</p>
+    #         # Email body (HTML table)
+    #         body = f"""
+    #         <p>Dear {recipient.name},</p>
 
-            <p>The following complaints are pending for your action:</p>
+    #         <p>The following complaints are pending for your action:</p>
 
-            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-                <thead style="background-color: #d6c1f0;">
-                    <tr>
-                        <th>Number</th>
-                        <th>DateTime</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Customer Name</th>
-                        <th>Customer Address</th>
-                        <th>Contact</th>
-                        <th>Div</th>
-                        <th>Model</th>
-                        <th>Serial No</th>
-                        <th>Current Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {table_rows}
-                </tbody>
-            </table>
+    #         <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+    #             <thead style="background-color: #d6c1f0;">
+    #                 <tr>
+    #                     <th>Number</th>
+    #                     <th>DateTime</th>
+    #                     <th>Type</th>
+    #                     <th>Status</th>
+    #                     <th>Customer Name</th>
+    #                     <th>Customer Address</th>
+    #                     <th>Contact</th>
+    #                     <th>Div</th>
+    #                     <th>Model</th>
+    #                     <th>Serial No</th>
+    #                     <th>Current Status</th>
+    #                 </tr>
+    #             </thead>
+    #             <tbody>
+    #                 {table_rows}
+    #             </tbody>
+    #         </table>
 
-            <p style="color:#7a1f1f;font-weight:bold;">
-                Rows highlighted in red indicate escalated or overdue complaints.
-            </p>
-            """
+    #         <p style="color:#7a1f1f;font-weight:bold;">
+    #             Rows highlighted in red indicate escalated or overdue complaints.
+    #         </p>
+    #         """
 
-            message = create_email_message(
-                subject = f"Latest Complaints as on {datetime.now().strftime('%d-%m-%Y')}",
-                recipients=[recipient.email],  # single recipient per mail
-                body=body,
-            )
+    #         message = create_email_message(
+    #             subject = f"Latest Complaints as on {datetime.now().strftime("%d-%m-%Y_%H-%M"))}",
+    #             recipients=[recipient.email],  # single recipient per mail
+    #             body=body,
+    #         )
 
-            await mail.send_message(message)
+    #         await mail.send_message(message)
 
-        return
+    #     return
 
     
     async def get_technician_email_list(
@@ -693,3 +814,48 @@ class ComplaintsService:
             for row in rows
         ]
         return email_list
+    
+    async def list_all_complaints(
+        self,
+        session: AsyncSession,
+    ):
+        statement = select(Complaint.complaint_number).order_by(Complaint.complaint_number)
+        result = await session.execute(statement)
+        complaint_numbers = result.scalars().all()
+        return complaint_numbers
+    
+    async def change_action_head_after_mail(self, complaint_numbers, session: AsyncSession):
+        if not complaint_numbers:
+            return
+
+        statement = (
+            update(Complaint)
+            .where(Complaint.complaint_number.in_(complaint_numbers))
+            .values(action_head="MAIL SENT TO HO - WAITING FOR DECISION")
+        )
+        await session.execute(statement)
+        await session.commit()
+
+    async def create_rfr(self, session:AsyncSession, rfrData:CreateComplaintRFR):
+        existing_complaint = await self.get_complaint_by_number(rfrData.complaint_number, session)
+        if not existing_complaint:
+            raise ComplaintNotFound()
+        # Update the existing complaint with RFR details
+        existing_complaint.product_model = rfrData.product_model
+        existing_complaint.product_serial_number = rfrData.product_serial_number
+        existing_complaint.invoice_date = rfrData.invoice_date
+        existing_complaint.invoice_number = rfrData.invoice_number
+        existing_complaint.purchased_from = rfrData.purchased_from
+        existing_complaint.distributor_name = rfrData.distributor_name
+        existing_complaint.customer_type = rfrData.customer_type
+        existing_complaint.current_status = rfrData.current_status
+        existing_complaint.spare_code = rfrData.spare_code
+        existing_complaint.spare_description = rfrData.spare_description
+        existing_complaint.indent_date = rfrData.indent_date
+        existing_complaint.replacement_reason = rfrData.replacement_reason
+        existing_complaint.replacement_remark = rfrData.replacement_remark
+        existing_complaint.action_head = "RFR TO BE SENT TO HO"
+        await session.commit()
+        await session.refresh(existing_complaint)
+        return existing_complaint
+            
