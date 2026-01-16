@@ -20,7 +20,7 @@ const columns = [
   { key: "complaint_date", label: "Date" },
   { key: "customer_name", label: "Customer Name" },
   { key: "product_model", label: "Model" },
-  { key: "product_serial_number", label: "Serial No." },
+  { key: "product_serial_number", label: "Serial Number" },
   { key: "current_status", label: "Current Status" },
   { key: "export_flag", label: "Export" },
 ];
@@ -340,7 +340,9 @@ const ComplaintMailToBeSentPage = ({ selectedCompany }) => {
                       { key: "complaint_number", label: "Complaint" },
                       { key: "complaint_date", label: "Date" },
                       { key: "customer_name", label: "Customer Name" },
-                      { key: "product_model", label: "Product" },
+                      { key: "product_model", label: "Model" },
+                      { key: "product_serial_number", label: "Serial Number"},
+                      { key: "current_status", label: "Current Status"},
                     ].map((col) => (
                       <th
                         key={col.key}
@@ -362,7 +364,7 @@ const ComplaintMailToBeSentPage = ({ selectedCompany }) => {
                 <tbody>
                   {selectedRows.length === 0 ? (
                     <tr>
-                      <td colSpan={4} style={{ textAlign: "center", padding: 12, color: "#888" }}>
+                      <td colSpan={6} style={{ textAlign: "center", padding: 12, color: "#888" }}>
                         No data to export
                       </td>
                     </tr>
@@ -383,7 +385,13 @@ const ComplaintMailToBeSentPage = ({ selectedCompany }) => {
                           {row.customer_name}
                         </td>
                         <td style={{ border: "1px solid #d1d5db", padding: "6px 10px", textAlign: "center", fontSize: 14 }}>
-                          {row.product_model || row.product_division || "-"}
+                          {row.product_model || "-"}
+                        </td>
+                        <td style={{ border: "1px solid #d1d5db", padding: "6px 10px", textAlign: "center", fontSize: 14 }}>
+                          {row.product_serial_number || "-"}
+                        </td>
+                        <td style={{ border: "1px solid #d1d5db", padding: "6px 10px", textAlign: "center", fontSize: 14 }}>
+                          {row.current_status || "-"}
                         </td>
                       </tr>
                     ))
