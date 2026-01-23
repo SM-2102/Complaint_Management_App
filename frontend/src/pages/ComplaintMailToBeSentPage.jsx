@@ -281,7 +281,7 @@ const ComplaintMailToBeSentPage = ({ selectedCompany }) => {
                       try {
                         const complaintNumbers = selectedRows.map((r) => r.complaint_number);
                         await complaintSentToHO(complaintNumbers);
-                        setError({ message: "Complaints sent to HO", type: "success" });
+                        setError({ message: "Confirmed : Mail Sent to HO", type: "success" });
                         setShowToast(true);
                         setShowExportModal(false);
                         // Optionally clear export flags for sent rows                        

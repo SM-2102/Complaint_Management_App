@@ -124,7 +124,7 @@ export const menuConfig = [
     bgColor: "#e7d7f8ff",
     actions: [
       {
-        label: "CGCEL Upload GRC",
+        label: "Upload GRC Records",
         path: "/UploadCGCELGRCRecords",
         company: "CGCEL",
       },
@@ -134,7 +134,7 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "CGCEL Receive GRC",
+        label: "Receive GRC Records",
         path: "/ReceiveCGCELGRCRecords",
         company: "CGCEL",
       },
@@ -144,7 +144,7 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "CGCEL Spare Return",
+        label: "Spare Return",
         path: "/GRCCGCELSpareReturn",
         company: "CGCEL",
       },
@@ -154,7 +154,7 @@ export const menuConfig = [
         company: "CGPISL",
       },
       {
-        label: "CGCEL GRC Enquiry",
+        label: "GRC Enquiry",
         path: "/GRCCGCELEnquiry",
         company: "CGCEL",
       },

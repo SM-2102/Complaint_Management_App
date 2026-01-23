@@ -22,7 +22,7 @@ const initialForm = {
   remark: "NIL",
 };
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC"];
 
 const StockCGCELRaiseIndentPage = () => {
   const [form, setForm] = useState(initialForm);

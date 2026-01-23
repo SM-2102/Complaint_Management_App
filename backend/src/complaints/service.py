@@ -10,7 +10,7 @@ from sqlalchemy import case, insert, tuple_, update, select, distinct, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
-from mail import mail, create_email_message
+# from mail import mail, create_email_message
 
 from utils.date_utils import format_date_ddmmyyyy
 from utils.file_utils import capital_to_proper_case
@@ -666,135 +666,135 @@ class ComplaintsService:
         return existing_complaint
     
  
-    async def send_pending_emails(
-        self,
-        session: AsyncSession,
-        recipients: List[EmailSchema],
-    ):
-        ESCALATION_STATUSES = {
-            "ESCALATION",
-            "CRM-ESCALATION",
-            "MD-ESCALATION",
-            "HO-ESCALATION",
-            "URGENT",
-        }
+    # async def send_pending_emails(
+    #     self,
+    #     session: AsyncSession,
+    #     recipients: List[EmailSchema],
+    # ):
+    #     ESCALATION_STATUSES = {
+    #         "ESCALATION",
+    #         "CRM-ESCALATION",
+    #         "MD-ESCALATION",
+    #         "HO-ESCALATION",
+    #         "URGENT",
+    #     }
 
-        for recipient in recipients:
-            statement = (
-                select(Complaint)
-                .where(
-                    Complaint.final_status == "N",
-                    func.upper(Complaint.complaint_status) != "CLOSED",
-                    Complaint.action_by == recipient.name,
-                )
-                .order_by(Complaint.complaint_number)
-            )
+    #     for recipient in recipients:
+    #         statement = (
+    #             select(Complaint)
+    #             .where(
+    #                 Complaint.final_status == "N",
+    #                 func.upper(Complaint.complaint_status) != "CLOSED",
+    #                 Complaint.action_by == recipient.name,
+    #             )
+    #             .order_by(Complaint.complaint_number)
+    #         )
 
-            result = await session.execute(statement)
-            complaints = result.scalars().all()
+    #         result = await session.execute(statement)
+    #         complaints = result.scalars().all()
 
-            if not complaints:
-                continue  # No pending complaints for this recipient
+    #         if not complaints:
+    #             continue  # No pending complaints for this recipient
 
-            # Build table rows
-            table_rows = ""
+    #         # Build table rows
+    #         table_rows = ""
 
-            for row in complaints:
-                complaint_datetime = " ".join(
-                    filter(None, [
-                        row.complaint_date.strftime("%d-%m-%y") if row.complaint_date else "",
-                        str(row.complaint_time) if row.complaint_time else "",
-                    ])
-                )
+    #         for row in complaints:
+    #             complaint_datetime = " ".join(
+    #                 filter(None, [
+    #                     row.complaint_date.strftime("%d-%m-%y") if row.complaint_date else "",
+    #                     str(row.complaint_time) if row.complaint_time else "",
+    #                 ])
+    #             )
 
-                customer_address = ", ".join(
-                    filter(None, [
-                        row.customer_address1,
-                        row.customer_address2,
-                        row.customer_city,
-                        row.customer_pincode,
-                    ])
-                )
+    #             customer_address = ", ".join(
+    #                 filter(None, [
+    #                     row.customer_address1,
+    #                     row.customer_address2,
+    #                     row.customer_city,
+    #                     row.customer_pincode,
+    #                 ])
+    #             )
 
-                customer_contact = " / ".join(
-                    filter(None, [
-                        row.customer_contact1,
-                        row.customer_contact2,
-                    ])
-                )
+    #             customer_contact = " / ".join(
+    #                 filter(None, [
+    #                     row.customer_contact1,
+    #                     row.customer_contact2,
+    #                 ])
+    #             )
 
-                # Days difference
-                days_old = (date.today() - row.complaint_date).days if row.complaint_date else 0
+    #             # Days difference
+    #             days_old = (date.today() - row.complaint_date).days if row.complaint_date else 0
 
-                # Escalation logic
-                is_escalated = (
-                    days_old > 5
-                    or (row.complaint_priority and row.complaint_priority.upper() in ESCALATION_STATUSES)
-                )
+    #             # Escalation logic
+    #             is_escalated = (
+    #                 days_old > 5
+    #                 or (row.complaint_priority and row.complaint_priority.upper() in ESCALATION_STATUSES)
+    #             )
 
-                row_style = (
-                    "background-color:#fde2e2;color:#7a1f1f;"
-                    if is_escalated
-                    else ""
-                )
+    #             row_style = (
+    #                 "background-color:#fde2e2;color:#7a1f1f;"
+    #                 if is_escalated
+    #                 else ""
+    #             )
 
-                table_rows += f"""
-                    <tr style="{row_style}">
-                        <td>{row.complaint_number}</td>
-                        <td>{complaint_datetime}</td>
-                        <td>{row.complaint_type}</td>
-                        <td>{row.complaint_status}</td>
-                        <td>{row.customer_name}</td>
-                        <td>{customer_address}</td>
-                        <td>{customer_contact}</td>
-                        <td>{row.product_division}</td>
-                        <td>{row.product_model or ""}</td>
-                        <td>{row.product_serial_number or ""}</td>
-                        <td>{row.current_status}</td>
-                    </tr>
-                """
+    #             table_rows += f"""
+    #                 <tr style="{row_style}">
+    #                     <td>{row.complaint_number}</td>
+    #                     <td>{complaint_datetime}</td>
+    #                     <td>{row.complaint_type}</td>
+    #                     <td>{row.complaint_status}</td>
+    #                     <td>{row.customer_name}</td>
+    #                     <td>{customer_address}</td>
+    #                     <td>{customer_contact}</td>
+    #                     <td>{row.product_division}</td>
+    #                     <td>{row.product_model or ""}</td>
+    #                     <td>{row.product_serial_number or ""}</td>
+    #                     <td>{row.current_status}</td>
+    #                 </tr>
+    #             """
 
-            # Email body (HTML table)
-            body = f"""
-            <p>Dear {recipient.name},</p>
+    #         # Email body (HTML table)
+    #         body = f"""
+    #         <p>Dear {recipient.name},</p>
 
-            <p>The following complaints are pending for your action:</p>
+    #         <p>The following complaints are pending for your action:</p>
 
-            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-                <thead style="background-color: #d6c1f0;">
-                    <tr>
-                        <th>Number</th>
-                        <th>DateTime</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Customer Name</th>
-                        <th>Customer Address</th>
-                        <th>Contact</th>
-                        <th>Div</th>
-                        <th>Model</th>
-                        <th>Serial No</th>
-                        <th>Current Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {table_rows}
-                </tbody>
-            </table>
+    #         <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+    #             <thead style="background-color: #d6c1f0;">
+    #                 <tr>
+    #                     <th>Number</th>
+    #                     <th>DateTime</th>
+    #                     <th>Type</th>
+    #                     <th>Status</th>
+    #                     <th>Customer Name</th>
+    #                     <th>Customer Address</th>
+    #                     <th>Contact</th>
+    #                     <th>Div</th>
+    #                     <th>Model</th>
+    #                     <th>Serial No</th>
+    #                     <th>Current Status</th>
+    #                 </tr>
+    #             </thead>
+    #             <tbody>
+    #                 {table_rows}
+    #             </tbody>
+    #         </table>
 
-            <p style="color:#7a1f1f;font-weight:bold;">
-                Rows highlighted in red indicate escalated or overdue complaints.
-            </p>
-            """
+    #         <p style="color:#7a1f1f;font-weight:bold;">
+    #             Rows highlighted in red indicate escalated or overdue complaints.
+    #         </p>
+    #         """
 
-            message = create_email_message(
-                subject = f"Latest Complaints as on {datetime.now().strftime("%d-%m-%Y")}",
-                recipients=[recipient.email],  # single recipient per mail
-                body=body,
-            )
+    #         message = create_email_message(
+    #             subject = f"Latest Complaints as on {datetime.now().strftime("%d-%m-%Y_%H-%M"))}",
+    #             recipients=[recipient.email],  # single recipient per mail
+    #             body=body,
+    #         )
 
-            await mail.send_message(message)
+    #         await mail.send_message(message)
 
-        return
+    #     return
 
     
     async def get_technician_email_list(

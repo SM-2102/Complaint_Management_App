@@ -44,6 +44,7 @@ import ComplaintCreatePage from "./pages/ComplaintCreatePage.jsx";
 import ComplaintUpdatePage from "./pages/ComplaintUpdatePage.jsx";
 import ComplaintSendPage from "./pages/ComplaintSendPage.jsx";
 import ComplaintRFRCreatePage from "./pages/ComplaintRFRCreatePage.jsx";
+import ComplaintRFRGeneratePage from "./pages/ComplaintRFRGeneratePage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -371,14 +372,6 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             }
           />
           <Route
-            path="/GenerateRFRRecord"
-            element={
-              <PrivateRoute>
-                <PageNotAvailable />
-              </PrivateRoute>
-            }
-          />
-          <Route
             path="/ReportGeneration"
             element={
               <PrivateRoute>
@@ -391,6 +384,14 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
             element={
               <PrivateRoute>
                 <ComplaintRFRCreatePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/GenerateRFRRecord"
+            element={
+              <PrivateRoute>
+                <ComplaintRFRGeneratePage />
               </PrivateRoute>
             }
           />

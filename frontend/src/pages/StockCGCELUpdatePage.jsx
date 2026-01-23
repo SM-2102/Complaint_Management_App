@@ -20,7 +20,7 @@ const initialForm = {
   remark: "",
 };
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC"];
 
 const StockCGCELUpdatePage = () => {
   const [form, setForm] = useState(initialForm);

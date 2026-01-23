@@ -22,7 +22,7 @@ const columns = [
   { key: "indent", label: "Generate" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC"];
 
 const initialForm = {
   indent_code: "",

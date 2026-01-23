@@ -728,7 +728,7 @@ useEffect(() => {
             <div className="flex items-center gap-2 w-1/2">
               <label
                 htmlFor="product_model"
-                className="w-50 text-md font-medium text-gray-700"
+                className="w-50 text-md font-medium text-purple-700"
               >
                 Product Model
               </label>
@@ -746,7 +746,7 @@ useEffect(() => {
             <div className="flex items-center gap-2 w-1/2">
               <label
                 htmlFor="product_serial_number"
-                className="w-58 text-md font-medium text-gray-700"
+                className="w-58 text-md font-medium text-purple-700"
               >
                 Serial Number
               </label>
@@ -1107,7 +1107,7 @@ useEffect(() => {
             <div className="flex items-center gap-2 w-1/2">
               <label
                 htmlFor="updated_time"
-                className="w-76 text-md font-medium text-gray-700 ml-7"
+                className="w-76 text-md font-medium text-purple-700 ml-7"
               >
                 Upload Time
               </label>

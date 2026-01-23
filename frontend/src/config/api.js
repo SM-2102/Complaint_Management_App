@@ -87,6 +87,9 @@ const API_ENDPOINTS = {
   COMPLAINT_MAIL_SENT_TO_HO: `${BASE_API_URL}complaints/mail_sent_to_ho`,
   COMPLAINT_SEARCH_NUMBER_RFR: `${BASE_API_URL}complaints/by_complaint_number_rfr`, //append complaint number
   COMPLAINT_RFR_CREATE: `${BASE_API_URL}complaints/create_rfr`,
+  COMPLAINT_NEXT_RFR_NUMBER: `${BASE_API_URL}complaints/next_rfr_number`,
+  COMPLAINT_GENERATE_RFR_DATA: `${BASE_API_URL}complaints/generate_rfr_data`, //append division
+  COMPLAINT_GENERATE_RFR: `${BASE_API_URL}complaints/rfr_report`,
 
   CUSTOMER_CREATE: `${BASE_API_URL}customer/create`,
   CUSTOMER_NEXT_CODE: `${BASE_API_URL}customer/next_code`,

@@ -10,6 +10,7 @@ import { fetchStockCGCELList } from "../services/stockCGCELStockListService.js";
 const columns = [
   { key: "grc_number", label: "GRC Number" },
   { key: "grc_date", label: "GRC Date" },
+  { key: "ageing_in_days", label: "Ageing (Days)" },
   { key: "spare_code", label: "Spare Code" },
   { key: "spare_description", label: "Spare Description" },
   { key: "issue_qty", label: "Issue Qty" },
@@ -21,7 +22,7 @@ const columns = [
   { key: "docket_number", label: "Docket Number" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC"];
 
 const Filter = ({
   open = false,
@@ -511,22 +512,47 @@ const GRCCGCELEnquiryPage = () => {
 
   // Fetch data when page/limit changes or after search
 
+  // Helper to calculate ageing in days
+  const calculateAgeing = (grcDate) => {
+    if (!grcDate) return "-";
+    let date;
+    // Handle dd-mm-yyyy format
+    if (/^\d{2}-\d{2}-\d{4}$/.test(grcDate)) {
+      const [day, month, year] = grcDate.split("-").map(Number);
+      date = new Date(year, month - 1, day);
+    } else {
+      date = new Date(grcDate);
+    }
+    if (isNaN(date.getTime())) return "-";
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    const diff = today - date;
+    return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  };
+
   const fetchData = async (params = {}, pageNum = page, pageLimit = limit) => {
     setLoading(true);
     setError(null);
     try {
       const offset = (pageNum - 1) * pageLimit;
       const res = await grcCGCELEnquiry(params, pageLimit, offset);
+      let records = [];
+      let total = 0;
       if (res && typeof res === "object" && Array.isArray(res.records)) {
-        setData(res.records);
-        setTotalRecords(res.total_records || 0);
+        records = res.records;
+        total = res.total_records || 0;
       } else if (Array.isArray(res)) {
-        setData(res);
-        setTotalRecords(res.length);
-      } else {
-        setData([]);
-        setTotalRecords(0);
+        records = res;
+        total = res.length;
       }
+      // Add ageing_in_days to each record
+      const recordsWithAgeing = records.map((row) => ({
+        ...row,
+        ageing_in_days: calculateAgeing(row.grc_date),
+      }));
+      setData(recordsWithAgeing);
+      setTotalRecords(total);
     } catch (err) {
       setError(err.message || "Failed to fetch data");
       setData([]);

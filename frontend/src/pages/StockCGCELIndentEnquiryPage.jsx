@@ -17,7 +17,7 @@ const columns = [
   { key: "created_by", label: "Created By" },
 ];
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC"];
 
 const Filter = ({
   open = false,

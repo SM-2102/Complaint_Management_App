@@ -22,6 +22,7 @@ import { validateReturnQuantities } from "../utils/grcQuantityValidation";
 const columns = [
   { key: "grc_number", label: "GRC Number" },
   { key: "grc_date", label: "GRC Date" },
+  { key: "ageing_days", label: "Ageing (Days)" },
   { key: "spare_code", label: "Spare Code" },
   { key: "spare_description", label: "Spare Description" },
   { key: "issue_qty", label: "Issue Qty" },
@@ -98,6 +99,22 @@ const Row = React.memo(function Row({
   qtyErrors,
 }) {
   const hasQtyError = !!(qtyErrors && qtyErrors[rowIndex]);
+  const ageingDays = (() => {
+    if (!row || !row.grc_date) return null;
+    // Expecting formats like '14-01-2026' or '14/01/2026'
+    const parts = String(row.grc_date).trim().split(/[-/]/);
+    if (parts.length < 3) return null;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) return null;
+    // Use UTC to avoid timezone shifts when comparing dates
+    const grcUtc = Date.UTC(year, month - 1, day);
+    const today = new Date();
+    const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const days = Math.floor((todayUtc - grcUtc) / 86400000);
+    return days >= 0 ? days : 0;
+  })();
   return (
     <TableRow
       key={`${row.spare_code}-${row.grc_number}`}
@@ -118,7 +135,9 @@ const Row = React.memo(function Row({
             }),
           }}
         >
-          {col.key === "invoice" ? (
+          {col.key === "ageing_days" ? (
+            ageingDays !== null ? ageingDays : "-"
+          ) : col.key === "invoice" ? (
             <button
               type="button"
               style={{

@@ -7,18 +7,19 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { stockCGCELEnquiry } from "../services/stockCGCELEnquiryService";
 import { fetchStockCGCELList } from "../services/stockCGCELStockListService.js";
 
-const columns = [
+const defaultColumns = [
   { key: "spare_code", label: "Spare Code" },
   { key: "spare_description", label: "Spare Description" },
   { key: "division", label: "Division" },
   { key: "cnf_qty", label: "CNF Quantity" },
   { key: "grc_qty", label: "GRC Quantity" },
   { key: "own_qty", label: "Own Stock" },
-  { key: "alp", label: "ALP" },
-  { key: "sale_price", label: "Sale Price" },
+  { key: "sale_price", label: "Sale Price" }
 ];
 
-const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC", "LAPP"];
+const alpColumn = { key: "alp", label: "ALP" };
+
+const divisionOptions = ["FANS", "PUMP", "LIGHT", "SDA", "WHC"];
 
 const Filter = ({
   open = false,
@@ -39,6 +40,8 @@ const Filter = ({
   spareDescriptions,
   onSearch,
   onClear,
+  showALP,
+  setShowALP,
 }) => {
   const [spareCodeSuggestions, setSpareCodeSuggestions] = useState([]);
   const [showSpareCodeSuggestions, setShowSpareCodeSuggestions] =
@@ -406,12 +409,35 @@ const Filter = ({
             </div>
           </div>
           {/* Centered Search & Clear Buttons */}
+          <div style={{ marginTop: 12, display: "flex", justifyContent: "center" }}>
+            <button
+              onClick={() => setShowALP((s) => !s)}
+              style={{
+                padding: "8px 16px",
+                background: showALP
+                  ? "linear-gradient(90deg, #ff9800 60%, #f57c00 100%)"
+                  : "linear-gradient(90deg, #607d8b 60%, #455a64 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 10,
+                fontWeight: "600",
+                fontSize: 14,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                cursor: "pointer",
+                letterSpacing: 0.5,
+                transition: "background 0.15s, box-shadow 0.15s",
+              }}
+            >
+              {showALP ? "Hide ALP" : "Show ALP"}
+            </button>
+          </div>
+
           <div
             style={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              marginTop: 16,
+              marginTop: 8,
               gap: 16,
             }}
           >
@@ -489,6 +515,8 @@ const StockCGCELEnquiryPage = () => {
   const [searched, setSearched] = useState(false);
   const [spareCodes, setSpareCodes] = useState([]);
   const [spareDescriptions, setSpareDescriptions] = useState([]);
+
+  const [showALP, setShowALP] = useState(false);
 
   // Pagination states
   const [page, setPage] = useState(1);
@@ -619,6 +647,8 @@ const StockCGCELEnquiryPage = () => {
         spareDescriptions={spareDescriptions}
         onSearch={handleSearch}
         onClear={handleClear}
+        showALP={showALP}
+        setShowALP={setShowALP}
       />
       {/* Results or placeholder */}
       {error ? (
@@ -631,7 +661,7 @@ const StockCGCELEnquiryPage = () => {
         <>
           <EnquiryTableCGCEL
             data={data}
-            columns={columns}
+            columns={showALP ? [...defaultColumns, alpColumn] : defaultColumns}
             title="Stock CGCEL Enquiry List"
             sum_column="amount"
             total_records={totalRecords}
@@ -639,7 +669,7 @@ const StockCGCELEnquiryPage = () => {
               searched && data.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={columns.length}
+                    colSpan={(showALP ? [...defaultColumns, alpColumn] : defaultColumns).length}
                     style={{
                       textAlign: "center",
                       color: "#888",

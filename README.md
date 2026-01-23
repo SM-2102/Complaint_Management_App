@@ -6,9 +6,7 @@
 
 ## To Do List
 
-
-- Create RFR Record
-- Print RFR Record
+- Generate RFR Record
 - Invoice Create
 - Invoice Update
 
@@ -46,6 +44,8 @@
 - [x] **ComplaintNumberCreatePage** - Create Complaint Number
 - [x] **ComplaintNumberUpdatePage** - Update Complaint Number
 - [x] **ComplaintNumberSendPage** - Send Complaint Number via Email
+- [x] **ComplaintRFRCreatePage** - Create RFR Record
+- [x] **ComplaintRFRGeneratePage** - Generate RFR Record
 
 ### Stock CGCEL Module
 
@@ -117,6 +117,7 @@
 
 ### Complaint Module
 - [x] **/complaints/upload** - [ADMIN]
+- [x] **/complaints/upload_new** - [ADMIN]
 - [x] **/complaints/action_heads**
 - [x] **/complaints/enquiry{params}**
 - [x] **/complaints/complaint_filter_data**
@@ -130,6 +131,13 @@
 - [x] **/update/{complaint_number}**
 - [x] **/send_email**
 - [x] **/mail_technician_list**
+- [x] **/all_complaints**
+- [x] **/by_complaint_number_rfr/{complaint_number}**
+- [x] **/mail_sent_to_ho**
+- [x] **/create_rfr**
+- [x] **/generate_rfr_data/{division}**
+- [x] **/next_rfr_number**
+- [x] **/generate_rfr**
 
 ### StockCGCEL Module
 

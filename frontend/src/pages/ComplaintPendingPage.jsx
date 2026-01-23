@@ -32,6 +32,15 @@ const COMPLAINT_TYPE_OPTIONS = [
   { value: "SERVICE", label: "SERVICE" },
   { value: "INSTALL", label: "INSTALL" },
 ];
+const COMPLAINT_STATUS_OPTIONS = [
+  { value: "", label: "ALL" },
+  { value: "FRESH", label: "FRESH" },
+  { value: "PENDING", label: "PENDING" },
+  { value: "NEW", label: "NEW" },
+  { value: "OW", label: "OW" },
+  { value: "CLOSED", label: "CLOSED" },
+  { value: "CANCEL", label: "CANCEL" }, 
+];
 const PRIORITY_OPTIONS = [
   { value: "", label: "ALL" },
   { value: "NORMAL", label: "NORMAL" },
@@ -61,6 +70,12 @@ const DEFAULT_FILTER_CONFIG = [
     type: "select",
     options: PRIORITY_OPTIONS,
   },
+  {
+    name: "complaint_status",
+    label: "Complaint Status",
+    type: "select",
+    options: COMPLAINT_STATUS_OPTIONS,
+  },
   { name: "action_by", label: "Action By", type: "select", options: [] },
   { name: "action_head", label: "Action Head", type: "select", options: [] },
   {
@@ -86,6 +101,12 @@ const DEFAULT_FILTER_CONFIG = [
     label: "Customer Contact",
     type: "text",
     placeholder: "Search by Phone Number...",
+  },
+  {
+    name: "product_serial_number",
+    label: "Serial Number",
+    type: "text",
+    placeholder: "Search by Serial No...",
   },
   {
     name: "complaint_number",
@@ -207,7 +228,7 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const PAGE_SIZE = 25;
+  const PAGE_SIZE = 50;
   // Fetch filter options for action_head and action_by
   // Track if filter options are loaded
   const [filterOptionsLoaded, setFilterOptionsLoaded] = useState(false);
@@ -408,14 +429,16 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
           <form className="space-y-3" onSubmit={handleSearch}>
             {filterOptionsLoaded ? (
               <>
-                {/* First row: Division, Complaint Type, Priority, Action By, Action Head */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-7 md:gap-7 items-end">
+                {/* First row: Division, Complaint Type, Priority, Complaint Status, Action By, Action Head */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-7 md:gap-7 items-end">
                   {[
                     "product_division",
                     "complaint_type",
                     "complaint_priority",
+                    "complaint_status",
                     "action_by",
-                    "action_head",
+                    "spare_pending",
+                    "final_status",
                   ].map((name) => {
                     const config =
                       name === "product_division"
@@ -438,10 +461,10 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
                 {/* Second row: Final Status, Spare Pending, Customer Name, Customer Contact, Complaint Number */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-7 md:gap-7 items-end">
                   {[
-                    "spare_pending",
-                    "final_status",
+                    "action_head",
                     "customer_name",
                     "customer_contact",
+                    "product_serial_number",
                     "complaint_number",
                   ].map((name) => {
                     const config = filterConfig.find((f) => f.name === name);
@@ -637,7 +660,7 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
                           </div>
                         )}
                       </td>
-                      <td className="py-2 break-words text-sm text-center">
+                      <td className="px-0.5 py-2 break-words text-sm text-center">
                         {row.action_head}
                       </td>
                     </tr>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import API_ENDPOINTS from "../config/api";
+import { authFetch } from "../services/authFetchService";
 
 export const DashboardDataContext = createContext();
 
@@ -29,12 +30,11 @@ export const DashboardDataProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(API_ENDPOINTS.MENU_DASHBOARD, {
+      const response = await authFetch(API_ENDPOINTS.MENU_DASHBOARD, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
