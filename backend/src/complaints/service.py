@@ -12,9 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
 # from mail import mail, create_email_message
 
+from parameter.models import Parameter
 from utils.date_utils import format_date_ddmmyyyy
 from utils.file_utils import capital_to_proper_case
-from complaints.schemas import ComplaintReallocateRequestSchema, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, ComplaintsSchema, ComplaintFilterData, ComplaintEnquiryResponseSchema, CreateComplaint, ComplaintCreateData, CreateComplaintRFR, EmailSchema, UpdateComplaint
+from complaints.schemas import ComplaintReallocateRequestSchema, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, ComplaintsSchema, ComplaintFilterData, ComplaintEnquiryResponseSchema, CreateComplaint, ComplaintCreateData, CreateComplaintRFR, EmailSchema, GenerateRFRRequestSchema, GenerateRFRResponseSchema, NewComplaintsSchema, UpdateComplaint
 from complaints.models import Complaint, ActionTable
 from employee.models import Employee 
 from customer.models import Customer
@@ -210,6 +211,8 @@ class ComplaintsService:
             "customer_city",
             "product_division",
             "current_status",
+            "product_model",
+            "product_serial_number"
         ]
 
         for raw_row in reader:
@@ -232,7 +235,7 @@ class ComplaintsService:
             row["final_status"] = "N"
 
             try:
-                validated = ComplaintsSchema(**row)
+                validated = NewComplaintsSchema(**row)
             except ValidationError as ve:
                 return {
                     "message": f"Validation failed for {row.get('complaint_number')}",
@@ -304,7 +307,7 @@ class ComplaintsService:
     async def get_complaint_filter_data(self, session: AsyncSession) -> ComplaintFilterData:
 
         # Fetch all action_head from ActionTable
-        action_head_result = await session.execute(select(ActionTable.action_head).order_by(ActionTable.action_head))
+        action_head_result = await session.execute(select(Complaint.action_head).distinct().order_by(Complaint.action_head))
         action_heads = action_head_result.scalars().all()
 
         # Fetch all username from Employee where is_active='Y' and role != 'ADMIN'
@@ -335,6 +338,8 @@ class ComplaintsService:
         customer_contact: Optional[str] = None,
         customer_name: Optional[str] = None,
         complaint_head: Optional[str] = None,
+        complaint_status: Optional[str] = None,
+        product_serial_number: Optional[str] = None,
         spare_pending_complaints: Optional[str] = None,
         all_complaints: Optional[str] = None,
         crm_open_complaints: Optional[str] = None,
@@ -360,11 +365,15 @@ class ComplaintsService:
             statement = statement.where(model.complaint_number.ilike(f"%{complaint_number}%"))
         if customer_contact:
             statement = statement.where(
-                (model.customer_contact1 == customer_contact) |
-                (model.customer_contact2 == customer_contact)
+                (model.customer_contact1.ilike(f"%{customer_contact}%")) |
+                (model.customer_contact2.ilike(f"%{customer_contact}%"))
             )
         if customer_name:
             statement = statement.where(model.customer_name.ilike(f"%{customer_name}%"))
+        if complaint_status:
+            statement = statement.where(model.complaint_status == complaint_status)
+        if product_serial_number:
+            statement = statement.where(model.product_serial_number.ilike(f"%{product_serial_number}%"))
         if complaint_head and complaint_head != "ALL":
             statement = statement.where(model.complaint_head == complaint_head)
         if spare_pending_complaints == "Y":
@@ -393,6 +402,8 @@ class ComplaintsService:
         customer_contact: Optional[str] = None,
         customer_name: Optional[str] = None,
         complaint_head: Optional[str] = None,
+        complaint_status: Optional[str] = None,
+        product_serial_number: Optional[str] = None,
         spare_pending_complaints: Optional[str] = None,
         all_complaints: Optional[str] = None,
         crm_open_complaints: Optional[str] = None,
@@ -403,7 +414,7 @@ class ComplaintsService:
     ):
         statement = select(Complaint)
         statement = self._apply_complaint_filters(
-            statement, product_division, complaint_type, complaint_priority, action_head, spare_pending, final_status, action_by, complaint_number, customer_contact, customer_name, complaint_head, spare_pending_complaints, all_complaints, crm_open_complaints, escalation_complaints, mail_to_be_sent_complaints 
+            statement, product_division, complaint_type, complaint_priority, action_head, spare_pending, final_status, action_by, complaint_number, customer_contact, customer_name, complaint_head, complaint_status, product_serial_number, spare_pending_complaints, all_complaints, crm_open_complaints, escalation_complaints, mail_to_be_sent_complaints 
         )
 
         statement = statement.order_by(Complaint.complaint_date, Complaint.complaint_number)
@@ -728,15 +739,22 @@ class ComplaintsService:
 
     #             # Escalation logic
     #             is_escalated = (
-    #                 days_old > 5
-    #                 or (row.complaint_priority and row.complaint_priority.upper() in ESCALATION_STATUSES)
+    #                 row.complaint_priority and row.complaint_priority.upper() in ESCALATION_STATUSES
     #             )
+                
+    #             # Old complaint logic
+    #             is_old = days_old > 4
+    #             is_new = days_old < 2
 
-    #             row_style = (
-    #                 "background-color:#fde2e2;color:#7a1f1f;"
-    #                 if is_escalated
-    #                 else ""
-    #             )
+    #             # Priority coloring: escalated -> red, old -> yellow, new -> green
+    #             if is_escalated:
+    #                 row_style = "background-color:#fde2e2;color:#7a1f1f;"
+    #             elif is_old:
+    #                 row_style = "background-color:#fff4cc;color:#7a6b00;"  # light yellow / dark yellow text
+    #             elif is_new:
+    #                 row_style = "background-color:#e6ffed;color:#116530;"  # light green / dark green text
+    #             else:
+    #                 row_style = ""
 
     #             table_rows += f"""
     #                 <tr style="{row_style}">
@@ -782,19 +800,25 @@ class ComplaintsService:
     #         </table>
 
     #         <p style="color:#7a1f1f;font-weight:bold;">
-    #             Rows highlighted in red indicate escalated or overdue complaints.
+    #             Rows highlighted in red indicate escalated complaints.
+    #         </p>
+    #         <p style="color:#7a6b00;font-weight:bold;">
+    #             Rows highlighted in yellow indicate overdue complaints.
+    #         </p>
+    #         <p style="color:#116530;font-weight:bold;">
+    #             Rows highlighted in green indicate new complaints.
     #         </p>
     #         """
 
     #         message = create_email_message(
-    #             subject = f"Latest Complaints as on {datetime.now().strftime("%d-%m-%Y_%H-%M"))}",
+    #             subject = f"Latest Complaints as on {datetime.now().strftime("%d-%m-%Y_%H-%M")}",
     #             recipients=[recipient.email],  # single recipient per mail
     #             body=body,
     #         )
 
     #         await mail.send_message(message)
 
-    #     return
+        # return
 
     
     async def get_technician_email_list(
@@ -831,7 +855,8 @@ class ComplaintsService:
         statement = (
             update(Complaint)
             .where(Complaint.complaint_number.in_(complaint_numbers))
-            .values(action_head="MAIL SENT TO HO - WAITING FOR DECISION")
+            .values(action_head="MAIL SENT FOR HO INSTRUCTION",
+                    action_by="D Manna")
         )
         await session.execute(statement)
         await session.commit()
@@ -858,4 +883,57 @@ class ComplaintsService:
         await session.commit()
         await session.refresh(existing_complaint)
         return existing_complaint
+    
+    async def get_generate_rfr_data(self, session: AsyncSession, product_division):
+        statement = select(Complaint.complaint_number, Complaint.customer_name, Complaint.product_model, Complaint.product_serial_number, Complaint.current_status).where(Complaint.action_head == "RFR TO BE SENT TO HO",
+                   Complaint.product_division == product_division).order_by(Complaint.customer_name)
+        result = await session.execute(statement)
+        rows = result.all()
+        records = [
+            GenerateRFRResponseSchema(
+                complaint_number=row.complaint_number,
+                customer_name=row.customer_name,
+                product_model=row.product_model,
+                product_serial_number=row.product_serial_number,
+                current_status=row.current_status,
+                )
+            for row in rows
+        ]    
+        return records
+    
+    async def next_rfr_number(self, session: AsyncSession):
+        statement = select(Parameter.value).where(Parameter.name == "rfr_number")
+        result = await session.execute(statement)
+        last_number = result.scalar()
+        last_number = last_number[3:] if last_number else "0"
+        next_number = int(last_number) + 1
+        next_number = "RFR" + str(next_number).zfill(5)
+        return next_number
+    
+    async def generate_rfr_report(
+        self,
+        session: AsyncSession,
+        data : GenerateRFRRequestSchema,
+    ):
+        next_rfr_number = await self.next_rfr_number(session)
+        for complaint_number in data.complaint_numbers:
+            statement = (
+                update(Complaint)
+                .where(Complaint.complaint_number == complaint_number)
+                .values(action_head="RFR GENERATED",
+                        action_by="D Manna",
+                        rfr_number=next_rfr_number)
+            )
+            await session.execute(statement)
+        # Update the Parameter table with the new RFR number
+        new_rfr_value = "RFR" + str(int(next_rfr_number[3:]) + 1).zfill(5)
+        update_param_stmt = (
+            update(Parameter)
+            .where(Parameter.name == "rfr_number")
+            .values(value=new_rfr_value)
+        )
+        await session.execute(update_param_stmt)
+        await session.commit()
+    
+    
             

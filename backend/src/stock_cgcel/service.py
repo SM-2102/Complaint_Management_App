@@ -258,12 +258,12 @@ class StockCGCELService:
     ):
         if spare_description:
             statement = statement.where(
-                model.spare_description.ilike(f"{spare_description}")
+                model.spare_description.ilike(f"%{spare_description}%")
             )
         if division:
             statement = statement.where(model.division == division)
         if spare_code:
-            statement = statement.where(model.spare_code.ilike(f"{spare_code}"))
+            statement = statement.where(model.spare_code.ilike(f"%{spare_code}%"))
         if cnf:
             if cnf == "Y":
                 statement = statement.where(

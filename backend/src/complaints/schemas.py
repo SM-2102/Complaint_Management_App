@@ -17,11 +17,11 @@ class ComplaintsSchema(BaseModel):
     action_by: str = Field(..., max_length=30)
     technician: str = Field(..., max_length=30)
     customer_type: str = Field(..., max_length=20)
-    customer_name: Optional[str] = Field(None, max_length=40)
-    customer_address1: Optional[str] = Field(None, max_length=40)
+    customer_name: str = Field(None, max_length=40)
+    customer_address1: str = Field(None, max_length=40)
     customer_address2: Optional[str] = Field(None, max_length=40)
-    customer_city: Optional[str] = Field(None, max_length=30)
-    customer_pincode: Optional[str] = Field(None, pattern=r"^\d{6}$")
+    customer_city: str = Field(None, max_length=30)
+    customer_pincode: str = Field(None, pattern=r"^\d{6}$")
     customer_contact1: str = Field(..., min_length=10, max_length=10, pattern=r"^\d{10}$")
     customer_contact2: Optional[str] = Field(None, pattern=r"^\d{10}$")
     product_division: str = Field(..., max_length=20)
@@ -30,6 +30,10 @@ class ComplaintsSchema(BaseModel):
     complaint_status: str
     created_by: str 
     final_status: str
+
+class NewComplaintsSchema(ComplaintsSchema):
+    product_model: Optional[str] = Field(None, max_length=25)
+    product_serial_number: Optional[str] = Field(None, max_length=20)
 
 class ComplaintFilterData(BaseModel):
     action_head: List[str] = []
@@ -218,4 +222,17 @@ class CreateComplaintRFR(BaseModel):
     indent_date: Optional[date]
     replacement_reason: str = Field(..., max_length=30)
     replacement_remark: str = Field(..., max_length=40)
+
+class GenerateRFRResponseSchema(BaseModel):
+    complaint_number: str
+    customer_name: str
+    product_model: Optional[str]
+    product_serial_number: Optional[str]
+    current_status: str
  
+class GenerateRFRRequestSchema(BaseModel):
+    complaint_numbers: List[str]
+    product_division: str
+    rfr_number: str
+    rfr_type: str
+    product_type: str

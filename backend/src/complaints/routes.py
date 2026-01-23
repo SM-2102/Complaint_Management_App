@@ -9,7 +9,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
 from complaints.service import ComplaintsService
-from complaints.schemas import ComplaintFilterData, ComplaintEnquiryResponseSchema, ComplaintReallocateRequestSchema, ComplaintResponse, ComplaintResponseRFR, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, CreateComplaint, ComplaintCreateData, CreateComplaintRFR, EmailSchema
+from complaints.schemas import ComplaintFilterData, ComplaintEnquiryResponseSchema, ComplaintReallocateRequestSchema, ComplaintResponse, ComplaintResponseRFR, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, CreateComplaint, ComplaintCreateData, CreateComplaintRFR, EmailSchema, GenerateRFRRequestSchema, GenerateRFRResponseSchema
 from exceptions import ComplaintNotFound
 
 complaints_router = APIRouter()
@@ -137,6 +137,8 @@ async def enquiry_complaint(
     customer_contact: Optional[str] = None,
     customer_name: Optional[str] = None,
     complaint_head: Optional[str] = None,
+    complaint_status: Optional[str] = None,
+    product_serial_number: Optional[str] = None,
     all_complaints: Optional[str] = None,
     spare_pending_complaints: Optional[str] = None,
     crm_open_complaints: Optional[str] = None,
@@ -161,6 +163,8 @@ async def enquiry_complaint(
             customer_contact,
             customer_name,
             complaint_head,
+            complaint_status,
+            product_serial_number,
             spare_pending_complaints,
             all_complaints,
             crm_open_complaints,
@@ -392,3 +396,49 @@ async def create_rfr(
 ):
     new_complaint = await complaints_service.create_rfr(session, rfr_data)
     return JSONResponse(content={"message": f"RFR Created : {new_complaint.complaint_number}"})
+
+"""
+Get Generate RFR by division
+"""
+@complaints_router.get("/generate_rfr_data/{product_division}", response_model=List[GenerateRFRResponseSchema], status_code=status.HTTP_200_OK)
+async def get_generate_rfr_data(
+    product_division: str,
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    result = await complaints_service.get_generate_rfr_data(session, product_division)
+    return result
+
+"""
+Get next rfr number
+"""
+@complaints_router.get(
+    "/next_rfr_number",
+    status_code=status.HTTP_200_OK,
+)   
+async def next_rfr_number(
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    result = await complaints_service.next_rfr_number(session)
+    return JSONResponse(
+        content={"next_rfr_number": result},
+    )
+
+"""
+Generate RFR Report
+"""
+@complaints_router.post(
+    "/rfr_report",
+    status_code=status.HTTP_200_OK,
+)
+async def generate_rfr_report(
+    data : GenerateRFRRequestSchema,
+    session: AsyncSession = Depends(get_session),
+    _=Depends(access_token_bearer),
+):
+    await complaints_service.generate_rfr_report(session, data)
+    return JSONResponse(
+        content={"message": f"RFR Report generated successfully."},
+    )
+    

@@ -132,6 +132,7 @@ class GRCCGCELService:
                 if k in ("spare_code", "grc_number") or k in present_fields
             }
             data_dict["status"] = "N"
+            data_dict.setdefault("actual_pending_qty", data_dict.get("grc_pending_qty"))
             key = (r.spare_code, r.grc_number)
             if key in existing:
                 to_update[key] = data_dict
@@ -595,7 +596,7 @@ class GRCCGCELService:
 
         if spare_code:
             statement = statement.where(
-                model.spare_code.ilike(f"{spare_code}")
+                model.spare_code.ilike(f"%{spare_code}%")
             )
 
         if from_grc_date:
@@ -608,7 +609,7 @@ class GRCCGCELService:
 
         if grc_number:
             statement = statement.where(
-                model.grc_number == grc_number
+                model.grc_number.ilike(f"%{grc_number}%")
             )
 
         if challan_number:

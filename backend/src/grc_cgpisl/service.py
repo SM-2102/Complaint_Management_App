@@ -594,7 +594,7 @@ class GRCCGPISLService:
 
         if spare_code:
             statement = statement.where(
-                model.spare_code.ilike(f"{spare_code}")
+                model.spare_code.ilike(f"%{spare_code}%")
             )
 
         if from_grc_date:
@@ -607,7 +607,7 @@ class GRCCGPISLService:
 
         if grc_number:
             statement = statement.where(
-                model.grc_number == grc_number
+                model.grc_number.ilike(f"%{grc_number}%")
             )
 
         if challan_number:
