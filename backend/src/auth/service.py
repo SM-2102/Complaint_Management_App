@@ -36,7 +36,6 @@ class AuthService:
         occasion_stmt = (
             select(Holiday.name, Holiday.details)
             .where(Holiday.holiday_date == today.date(), Holiday.is_holiday == "N")
-            .limit(1)
         )
 
         # Run both queries concurrently
@@ -46,11 +45,11 @@ class AuthService:
             birthday_task, occasion_task
         )
         birthday_names = birthday_result.scalars().all()
-        occasion_row = occasion_result.first()
+        occasion_rows = occasion_result.all()
 
-        holiday = None
-        if occasion_row:
-            holiday = {"name": occasion_row[0], "details": occasion_row[1]}
+        holidays = []
+        if occasion_rows:
+            holidays = [{"name": row[0], "details": row[1]} for row in occasion_rows]
         else:
             # After 3 PM, try holiday for tomorrow
             if today.time() >= time(15, 0):
@@ -58,17 +57,16 @@ class AuthService:
                 holiday_stmt = (
                     select(Holiday.name, Holiday.details)
                     .where(Holiday.holiday_date == tomorrow, Holiday.is_holiday == "Y")
-                    .limit(1)
                 )
                 holiday_result = await session.execute(holiday_stmt)
-                holiday_row = holiday_result.first()
-                if holiday_row:
-                    holiday = {"name": holiday_row[0], "details": holiday_row[1]}
+                holiday_rows = holiday_result.all()
+                if holiday_rows:
+                    holidays = [{"name": row[0], "details": row[1]} for row in holiday_rows]
 
         return {
             "user": existing_user,
             "birthday_names": birthday_names,
-            "holiday": holiday,
+            "holiday": holidays,
         }
 
     async def get_user_by_username(self, username: str, session: AsyncSession):

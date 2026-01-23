@@ -65,7 +65,8 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
   const [showBirthday, setShowBirthday] = useState(false);
   const [birthdayNames, setBirthdayNames] = useState([]);
   const [showHoliday, setShowHoliday] = useState(false);
-  const [holiday, setHoliday] = useState(null);
+  const [holidays, setHolidays] = useState([]);
+  const [currentHolidayIndex, setCurrentHolidayIndex] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const { user } = useAuth();
   const birthdayCheckedRef = useRef(false);
@@ -103,9 +104,23 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
         setBirthdayNames(navState.birthday_names);
         setShowBirthday(true);
       }
-      if (navState.holiday && navState.holiday.name) {
-        setHoliday(navState.holiday);
-        // do not show holiday immediately here; BirthdayWish onDone will trigger showHoliday
+      // Handle single or multiple holidays
+      if (navState.holiday) {
+        const holidayList = Array.isArray(navState.holiday)
+          ? navState.holiday
+          : [navState.holiday];
+        const validHolidays = holidayList.filter((h) => h && h.name);
+        if (validHolidays.length > 0) {
+          setHolidays(validHolidays);
+          setCurrentHolidayIndex(0);
+          // If no birthday is being shown, show holiday directly
+          if (
+            !Array.isArray(navState.birthday_names) ||
+            navState.birthday_names.length === 0
+          ) {
+            setShowHoliday(true);
+          }
+        }
       }
       // Clear transient navigation state so it doesn't re-trigger on back/refresh
       try {
@@ -136,9 +151,17 @@ const MenuDashboardPage = ({ selectedCompany, setSelectedCompany }) => {
     const storedHoliday = sessionStorage.getItem("holiday");
     if (storedHoliday) {
       try {
-        const h = JSON.parse(storedHoliday);
-        if (h && h.name) {
-          setHoliday(h);
+        const parsed = JSON.parse(storedHoliday);
+        // Handle single or multiple holidays
+        const holidayList = Array.isArray(parsed) ? parsed : [parsed];
+        const validHolidays = holidayList.filter((h) => h && h.name);
+        if (validHolidays.length > 0) {
+          setHolidays(validHolidays);
+          setCurrentHolidayIndex(0);
+          // If no birthday is being shown, show the holiday directly
+          if (birthdayNames.length === 0) {
+            setShowHoliday(true);
+          }
         }
       } catch {
         console.error("Invalid holiday in sessionStorage");
@@ -161,13 +184,21 @@ useEffect(() => {
   // Show holiday after birthday wish is fully done (fade-out complete)
   useEffect(() => {
     let holidayTimer;
-    if (showHoliday && holiday) {
-      holidayTimer = setTimeout(() => setShowHoliday(false), 5000);
+    if (showHoliday && holidays.length > 0) {
+      holidayTimer = setTimeout(() => {
+        // Move to next holiday if available
+        if (currentHolidayIndex < holidays.length - 1) {
+          setCurrentHolidayIndex(currentHolidayIndex + 1);
+        } else {
+          // All holidays shown, hide the display
+          setShowHoliday(false);
+        }
+      }, 5000);
     }
     return () => {
       if (holidayTimer) clearTimeout(holidayTimer);
     };
-  }, [showHoliday, holiday]);
+  }, [showHoliday, currentHolidayIndex, holidays]);
 
   const queryParams = new URLSearchParams(location.search);
   const openCardKey = queryParams.get("open") || null;
@@ -331,13 +362,16 @@ useEffect(() => {
             names={birthdayNames}
             onDone={() => {
               setShowBirthday(false);
-              if (holiday && holiday.name) {
+              if (holidays.length > 0) {
+                setCurrentHolidayIndex(0);
                 setShowHoliday(true);
               }
             }}
           />
         )}
-        {!showBirthday && showHoliday && <HolidayWish holiday={holiday} />}
+        {!showBirthday && showHoliday && holidays.length > 0 && (
+          <HolidayWish holiday={holidays[currentHolidayIndex]} />
+        )}
 
         {/* Discreet Company Filter Dots - Top Right Corner, No SVG, Minimal Focus */}
         <div className="flex justify-end items-start w-full mt-3 mb-4">
