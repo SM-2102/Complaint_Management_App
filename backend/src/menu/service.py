@@ -39,6 +39,7 @@ class MenuService:
                 column == "CG-LT",
                 "LT",
             ),
+            (column == "CG-HT", "HT"),
             else_=column,
         )
 

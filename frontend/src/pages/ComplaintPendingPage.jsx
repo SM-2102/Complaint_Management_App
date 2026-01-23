@@ -660,7 +660,7 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
                           </div>
                         )}
                       </td>
-                      <td className="px-0.5 py-2 break-words text-sm text-center">
+                      <td className="px-1 py-2 break-words text-sm text-center">
                         {row.action_head}
                       </td>
                     </tr>
