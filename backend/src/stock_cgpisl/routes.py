@@ -156,7 +156,9 @@ async def get_cgpisl_by_code(
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    spare = await stock_cgpisl_service.get_stock_cgpisl_by_code(data.spare_code, session)
+    spare = await stock_cgpisl_service.get_stock_cgpisl_by_code(
+        data.spare_code, session
+    )
     return spare
 
 

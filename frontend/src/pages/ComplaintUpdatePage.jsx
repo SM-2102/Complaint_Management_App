@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
 import YesNoToggle from "../components/YesNoToggle";
 import FinalStatusToggle from "../components/FinalStatus";
@@ -61,6 +61,7 @@ const ALL_STATUSES = [
 
 const ComplaintUpdatePage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [isLocked, setIsLocked] = useState(false);
   const [initialComplaintNumber, setInitialComplaintNumber] = useState("");
@@ -361,6 +362,17 @@ useEffect(() => {
           final_status: data.final_status ?? "N",
         }));
         setShowContact2(!!data.customer_contact2);
+        if (data.final_status === "Y") {
+        setError({
+          message: "Already Completed",
+          resolution: "This record is not editable",
+          type: "info",
+        });
+        setShowToast(true);
+        setIsLocked(true);
+      } else {
+        setIsLocked(false);
+      }
       } catch (err) {
         if (!mounted) return;
         setError({
@@ -581,7 +593,7 @@ useEffect(() => {
                     type="text"
                     value={form.complaint_number}
                     onChange={handleChange}
-                    disabled={submitting || isLocked}
+                    disabled={submitting}
                     autoComplete="off"
                     className={`w-full px-3 py-1 rounded-lg border ${errs_label.complaint_number ? "border-red-300" : "border-gray-300"} text-gray-900`}
                     maxLength={15}
@@ -728,7 +740,7 @@ useEffect(() => {
             <div className="flex items-center gap-2 w-1/2">
               <label
                 htmlFor="product_model"
-                className="w-50 text-md font-medium text-purple-700"
+                className="w-50 text-md font-medium text-gray-700"
               >
                 Product Model
               </label>
@@ -740,13 +752,13 @@ useEffect(() => {
                 value={form.product_model}
                 onChange={handleChange}
                 disabled={submitting || isLocked}
-                className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
+                className={`w-full px-3 py-1 rounded-lg border border-purple-300 text-gray-900 bg-purple-100`}
               />
             </div>
             <div className="flex items-center gap-2 w-1/2">
               <label
                 htmlFor="product_serial_number"
-                className="w-58 text-md font-medium text-purple-700"
+                className="w-58 text-md font-medium text-gray-700"
               >
                 Serial Number
               </label>
@@ -758,7 +770,7 @@ useEffect(() => {
                 value={form.product_serial_number}
                 onChange={handleChange}
                 disabled={submitting || isLocked}
-                className={`w-full px-3 py-1 rounded-lg border border-gray-300 text-gray-900`}
+                className={`w-full px-3 py-1 rounded-lg border border-purple-300 text-gray-900 bg-purple-100`}
               />
             </div>
           </div>
@@ -1107,7 +1119,7 @@ useEffect(() => {
             <div className="flex items-center gap-2 w-1/2">
               <label
                 htmlFor="updated_time"
-                className="w-76 text-md font-medium text-purple-700 ml-7"
+                className="w-76 text-md font-medium text-gray-700 ml-7"
               >
                 Upload Time
               </label>
@@ -1119,7 +1131,7 @@ useEffect(() => {
                 value={form.updated_time}
                 onChange={handleChange}
                 disabled={submitting || isLocked}
-                className={`w-full px-3 py-1 rounded-lg border ${errs_label.updated_time ? "border-red-300" : "border-gray-300"} text-gray-900`}
+                className={`w-full px-3 py-1 rounded-lg border ${errs_label.updated_time ? "border-red-300" : "border-purple-300"} text-gray-900 bg-purple-100`}
                 placeholder="DD-HHMM"
               />
             </div>
@@ -1514,11 +1526,23 @@ useEffect(() => {
             </span>
             <div className="flex-grow h-0.5 rounded-full bg-gradient-to-l from-purple-200 via-purple-400 to-purple-200 opacity-80 shadow-sm"></div>
           </div>
-          <div className="flex items-center w-full">
-            <div className="flex-1" />
+          <div className="flex items-center w-full gap-7">
+            <div className="flex" />
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/CreateRFRRecord", {
+                  state: { complaint_number: form.complaint_number },
+                })
+              }
+              disabled={!form.complaint_number || submitting || isLocked}
+              className="py-1 px-3 rounded-lg bg-purple-600 text-white font-medium text-md shadow hover:bg-purple-800 transition-colors disabled:opacity-60"
+            >
+              Create RFR for This Complaint
+            </button>
             <label
               htmlFor="final_status"
-              className="w-30 text-md font-medium text-gray-700"
+              className="w-30 text-md font-medium text-gray-700 ml-19"
             >
               Final Status
             </label>

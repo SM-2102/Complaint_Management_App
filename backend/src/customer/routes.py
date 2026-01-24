@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.dependencies import AccessTokenBearer
-from db.db import get_session
 from customer.schemas import (
     CreateCustomer,
     CustomerCode,
@@ -14,8 +13,9 @@ from customer.schemas import (
     CustomerResponseForComplaint,
     UpdateCustomer,
 )
-from exceptions import CustomerNotFound
 from customer.service import CustomerService
+from db.db import get_session
+from exceptions import CustomerNotFound
 
 customer_router = APIRouter()
 customer_service = CustomerService()
@@ -111,8 +111,11 @@ async def update_customer(
     existing_customer = await customer_service.get_customer_by_code(code, session)
     if not existing_customer:
         raise CustomerNotFound()
-    new_customer = await customer_service.update_customer(code, customer, session, token)
+    new_customer = await customer_service.update_customer(
+        code, customer, session, token
+    )
     return JSONResponse(content={"message": f"Customer Updated : {new_customer.name}"})
+
 
 """
 Get customer details by name for complaint.
@@ -120,7 +123,9 @@ Get customer details by name for complaint.
 
 
 @customer_router.post(
-    "/by_name_for_complaint", response_model=CustomerResponseForComplaint, status_code=status.HTTP_200_OK
+    "/by_name_for_complaint",
+    response_model=CustomerResponseForComplaint,
+    status_code=status.HTTP_200_OK,
 )
 async def get_customer_by_name_for_complaint(
     data: CustomerName,
@@ -129,4 +134,3 @@ async def get_customer_by_name_for_complaint(
 ):
     customer = await customer_service.get_customer_by_name(data.name, session)
     return customer
-

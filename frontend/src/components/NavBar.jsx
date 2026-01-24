@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 const submenuOrder = {
   complaint: [
     "Complaint Enquiry",
-    "Report Generation",
+    "Mail Technicians",
     "Add New Complaint",
     "Update Complaint",
     "Upload Complaints",

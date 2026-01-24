@@ -9,13 +9,13 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
 from grc_cgcel.schemas import (
+    GRCCGCELEnquiry,
     GRCCGCELReceiveSchema,
+    GRCCGCELReturnFinalizePayload,
     GRCCGCELReturnSave,
     GRCCGCELReturnSchema,
     GRCCGCELUpdateReceiveSchema,
     GRCFullPayload,
-    GRCCGCELReturnFinalizePayload,
-    GRCCGCELEnquiry,
 )
 from grc_cgcel.service import GRCCGCELService
 
@@ -213,6 +213,7 @@ async def print_grc_report(
             "Content-Disposition": f'attachment; filename="{data.challan_number}.pdf"'
         },
     )
+
 
 """
 GRC CGCEL enquiry using query parameters.

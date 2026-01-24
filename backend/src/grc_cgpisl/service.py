@@ -10,7 +10,7 @@ from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
-from sqlalchemy import case, insert, tuple_, update, select, distinct
+from sqlalchemy import case, distinct, insert, select, tuple_, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
@@ -19,6 +19,7 @@ from exceptions import SpareNotFound, UpdateFailed
 from grc_cgpisl.models import GRCCGPISL, GRCCGPISLDispute, GRCCGPISLReturnHistory
 from grc_cgpisl.schemas import (
     GRCCGPISLDisputeCreate,
+    GRCCGPISLEnquiry,
     GRCCGPISLHistorySchema,
     GRCCGPISLReceiveSchema,
     GRCCGPISLReturnFinalizePayload,
@@ -27,7 +28,6 @@ from grc_cgpisl.schemas import (
     GRCCGPISLSchema,
     GRCCGPISLUpdateReceiveSchema,
     GRCFullPayload,
-    GRCCGPISLEnquiry,
 )
 from utils.date_utils import format_date_ddmmyyyy
 from utils.file_utils import safe_join
@@ -280,10 +280,14 @@ class GRCCGPISLService:
             await session.rollback()
 
     async def grc_return_by_division(self, division: str, session: AsyncSession):
-        statement = select(GRCCGPISL).where(
-            GRCCGPISL.division == division,
-            GRCCGPISL.status == "N",
-        ).order_by(GRCCGPISL.grc_number)
+        statement = (
+            select(GRCCGPISL)
+            .where(
+                GRCCGPISL.division == division,
+                GRCCGPISL.status == "N",
+            )
+            .order_by(GRCCGPISL.grc_number)
+        )
         result = await session.execute(statement)
         rows = result.all()
         return [
@@ -331,7 +335,9 @@ class GRCCGPISLService:
                 tuple_(GRCCGPISL.spare_code, GRCCGPISL.grc_number).in_(keys)
             )
         )
-        existing_records = {(r.spare_code, r.grc_number): r for r in result.scalars().all()}
+        existing_records = {
+            (r.spare_code, r.grc_number): r for r in result.scalars().all()
+        }
         for data in updateData:
             key = (data.spare_code, data.grc_number)
             existing_record = existing_records.get(key)
@@ -347,7 +353,10 @@ class GRCCGPISLService:
             await session.rollback()
 
     async def finalize_cgpisl_grc_return(
-        self, updateData: GRCCGPISLReturnFinalizePayload, session: AsyncSession, token: dict
+        self,
+        updateData: GRCCGPISLReturnFinalizePayload,
+        session: AsyncSession,
+        token: dict,
     ):
         # updateData: GRCCGPISLReturnFinalizePayload
         #   - challan_number: str
@@ -361,7 +370,9 @@ class GRCCGPISLService:
                 tuple_(GRCCGPISL.spare_code, GRCCGPISL.grc_number).in_(keys)
             )
         )
-        existing_records = {(r.spare_code, r.grc_number): r for r in result.scalars().all()}
+        existing_records = {
+            (r.spare_code, r.grc_number): r for r in result.scalars().all()
+        }
         history_records = []
         updated_records = []
         for row in updateData.grc_rows:
@@ -377,11 +388,15 @@ class GRCCGPISLService:
                 history_kwargs = {
                     "division": updateData.division,
                     "spare_code": row.spare_code,
-                    "spare_description": getattr(existing_record, "spare_description", None),
+                    "spare_description": getattr(
+                        existing_record, "spare_description", None
+                    ),
                     "grc_number": row.grc_number,
                     "grc_date": getattr(existing_record, "grc_date", None),
                     "issue_qty": getattr(existing_record, "issue_qty", None),
-                    "grc_pending_qty": getattr(existing_record, "grc_pending_qty", None),
+                    "grc_pending_qty": getattr(
+                        existing_record, "grc_pending_qty", None
+                    ),
                     "good_qty": good_qty,
                     "defective_qty": defective_qty,
                     "returning_qty": returning_qty,
@@ -399,9 +414,15 @@ class GRCCGPISLService:
             new_defective_qty = getattr(row, "defective_qty", 0) or 0
             existing_record.returning_qty = new_good_qty + new_defective_qty
             prev_returned_qty = getattr(existing_record, "returned_qty", 0) or 0
-            existing_record.returned_qty = prev_returned_qty + new_good_qty + new_defective_qty
-            prev_actual_pending_qty = getattr(existing_record, "actual_pending_qty", 0) or 0
-            existing_record.actual_pending_qty = prev_actual_pending_qty - (new_good_qty + new_defective_qty)
+            existing_record.returned_qty = (
+                prev_returned_qty + new_good_qty + new_defective_qty
+            )
+            prev_actual_pending_qty = (
+                getattr(existing_record, "actual_pending_qty", 0) or 0
+            )
+            existing_record.actual_pending_qty = prev_actual_pending_qty - (
+                new_good_qty + new_defective_qty
+            )
             existing_record.challan_date = date.today()
             existing_record.good_qty = 0
             existing_record.defective_qty = 0
@@ -503,13 +524,17 @@ class GRCCGPISLService:
                         draw_centered(can, item.get("grc_date"), 80, 135, y)
                         draw_centered(can, item.get("spare_code"), 135, 240, y)
                         draw_centered(can, item.get("spare_description"), 240, 467, y)
-                        draw_centered(can, item.get("actual_pending_qty") or 0, 467, 510, y)
+                        draw_centered(
+                            can, item.get("actual_pending_qty") or 0, 467, 510, y
+                        )
                     else:
                         draw_centered(can, item.get("grc_number"), 15, 80, y)
                         draw_centered(can, item.get("grc_date"), 80, 135, y)
                         draw_centered(can, item.get("spare_code"), 135, 240, y)
                         draw_centered(can, item.get("spare_description"), 240, 467, y)
-                        draw_centered(can, item.get("actual_pending_qty") or 0, 467, 510, y)
+                        draw_centered(
+                            can, item.get("actual_pending_qty") or 0, 467, 510, y
+                        )
                         draw_centered(can, item.get("good_qty") or 0, 510, 545, y)
                         draw_centered(can, item.get("defective_qty") or 0, 545, 580, y)
                     y -= line_height
@@ -577,7 +602,7 @@ class GRCCGPISLService:
         writer.write(output_stream)
         output_stream.seek(0)
         return output_stream
-    
+
     def _apply_cgpisl_filters(
         self,
         statement,
@@ -593,29 +618,21 @@ class GRCCGPISLService:
             statement = statement.where(model.division == division)
 
         if spare_code:
-            statement = statement.where(
-                model.spare_code.ilike(f"%{spare_code}%")
-            )
+            statement = statement.where(model.spare_code.ilike(f"%{spare_code}%"))
 
         if from_grc_date:
-            statement = statement.where(
-                model.grc_date >= from_grc_date
-            )
+            statement = statement.where(model.grc_date >= from_grc_date)
 
         if to_grc_date:
             statement = statement.where(model.grc_date <= to_grc_date)
 
         if grc_number:
-            statement = statement.where(
-                model.grc_number.ilike(f"%{grc_number}%")
-            )
+            statement = statement.where(model.grc_number.ilike(f"%{grc_number}%"))
 
         if challan_number:
             if len(challan_number) != 6:
                 challan_number = "G" + str(challan_number).zfill(5)
-            statement = statement.where(
-                model.challan_number == challan_number
-            )        
+            statement = statement.where(model.challan_number == challan_number)
 
         return statement
 
@@ -628,7 +645,7 @@ class GRCCGPISLService:
         to_grc_date: Optional[date] = None,
         grc_number: Optional[str] = None,
         challan_number: Optional[str] = None,
-        grc_status: Optional[str] = None,       
+        grc_status: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
         return_total: bool = False,
@@ -667,10 +684,7 @@ class GRCCGPISLService:
                 )
             else:
                 # IMPORTANT: apply filters FIRST, then distinct
-                base_query = select(
-                    model.spare_code,
-                    model.grc_number
-                )
+                base_query = select(model.spare_code, model.grc_number)
 
                 base_query = self._apply_cgpisl_filters(
                     base_query,
@@ -699,25 +713,26 @@ class GRCCGPISLService:
         for row in rows:
             # Build dict for only fields present in schema
             record = {}
-            record['spare_code'] = getattr(row, 'spare_code', None)
-            record['spare_description'] = getattr(row, 'spare_description', None)
-            record['grc_number'] = getattr(row, 'grc_number', None)
-            record['grc_date'] = format_date_ddmmyyyy(getattr(row, 'grc_date', None))
-            record['issue_qty'] = getattr(row, 'issue_qty', None)
-            record['grc_pending_qty'] = getattr(row, 'grc_pending_qty', None)
-            record['returning_qty'] = getattr(row, 'returning_qty', None)
-            record['dispute_remark'] = getattr(row, 'dispute_remark', None)
+            record["spare_code"] = getattr(row, "spare_code", None)
+            record["spare_description"] = getattr(row, "spare_description", None)
+            record["grc_number"] = getattr(row, "grc_number", None)
+            record["grc_date"] = format_date_ddmmyyyy(getattr(row, "grc_date", None))
+            record["issue_qty"] = getattr(row, "issue_qty", None)
+            record["grc_pending_qty"] = getattr(row, "grc_pending_qty", None)
+            record["returning_qty"] = getattr(row, "returning_qty", None)
+            record["dispute_remark"] = getattr(row, "dispute_remark", None)
             if grc_status == "N":
                 # Enforce business rule: Pending GRC must not expose challan details
-                record['challan_number'] = None
-                record['challan_date'] = None
-                record['docket_number'] = None
+                record["challan_number"] = None
+                record["challan_date"] = None
+                record["docket_number"] = None
             else:
-                record['challan_number'] = getattr(row, 'challan_number', None)
-                record['challan_date'] = format_date_ddmmyyyy(getattr(row, 'challan_date', None))
-                record['docket_number'] = getattr(row, 'docket_number', None)
+                record["challan_number"] = getattr(row, "challan_number", None)
+                record["challan_date"] = format_date_ddmmyyyy(
+                    getattr(row, "challan_date", None)
+                )
+                record["docket_number"] = getattr(row, "docket_number", None)
             records.append(GRCCGPISLEnquiry(**record))
         if return_total:
             return records, total_records
         return records
-

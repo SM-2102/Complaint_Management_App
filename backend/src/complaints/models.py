@@ -22,7 +22,11 @@ class Complaint(SQLModel, table=True):
     complaint_priority: str = Field(sa_column=Column(pg.VARCHAR(15), nullable=False))
 
     # Action details
-    action_head: str = Field(sa_column=Column(pg.VARCHAR(40), ForeignKey("action.action_head"), nullable=False))
+    action_head: str = Field(
+        sa_column=Column(
+            pg.VARCHAR(40), ForeignKey("action.action_head"), nullable=False
+        )
+    )
     action_by: str = Field(
         sa_column=Column(
             pg.VARCHAR(30),
@@ -92,7 +96,9 @@ class Complaint(SQLModel, table=True):
     updated_time: str = Field(sa_column=Column(pg.VARCHAR(7), nullable=True))
 
     # Payment
-    payment_collected: str = Field(sa_column=Column(pg.CHAR(1), nullable=True, default='N'))
+    payment_collected: str = Field(
+        sa_column=Column(pg.CHAR(1), nullable=True, default="N")
+    )
     payment_mode: str = Field(sa_column=Column(pg.VARCHAR(10), nullable=True))
     payment_details: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     amount_sc: float = Field(sa_column=Column(pg.FLOAT, nullable=True))
@@ -100,7 +106,7 @@ class Complaint(SQLModel, table=True):
     appoint_date: date = Field(sa_column=Column(pg.DATE, nullable=True))
 
     # Final status
-    final_status: str = Field(sa_column=Column(pg.CHAR(1), nullable=False, default='N'))
+    final_status: str = Field(sa_column=Column(pg.CHAR(1), nullable=False, default="N"))
 
     def __repr__(self):
         return f"<Complaint {self.complaint_number}>"

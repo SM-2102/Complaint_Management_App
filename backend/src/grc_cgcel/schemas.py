@@ -79,11 +79,13 @@ class GRCCGCELReturnSave(BaseModel):
     sent_through: Optional[str]
     docket_number: Optional[str]
 
+
 class GRCCGCELFinalizeRow(BaseModel):
     spare_code: str
     grc_number: int
     good_qty: Optional[int]
     defective_qty: Optional[int]
+
 
 class GRCCGCELReturnFinalizePayload(BaseModel):
     challan_number: str
@@ -128,6 +130,7 @@ class GRCCGCELHistorySchema(BaseModel):
     sent_through: Optional[str]
     remark: Optional[str]
     challan_by: Optional[str]
+
 
 class GRCCGCELEnquiry(BaseModel):
     spare_code: str

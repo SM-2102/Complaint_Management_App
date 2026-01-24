@@ -22,22 +22,27 @@ class ComplaintsSchema(BaseModel):
     customer_address2: Optional[str] = Field(None, max_length=40)
     customer_city: str = Field(None, max_length=30)
     customer_pincode: str = Field(None, pattern=r"^\d{6}$")
-    customer_contact1: str = Field(..., min_length=10, max_length=10, pattern=r"^\d{10}$")
+    customer_contact1: str = Field(
+        ..., min_length=10, max_length=10, pattern=r"^\d{10}$"
+    )
     customer_contact2: Optional[str] = Field(None, pattern=r"^\d{10}$")
     product_division: str = Field(..., max_length=20)
     current_status: str = Field(..., max_length=50)
     spare_pending: str
     complaint_status: str
-    created_by: str 
+    created_by: str
     final_status: str
+
 
 class NewComplaintsSchema(ComplaintsSchema):
     product_model: Optional[str] = Field(None, max_length=25)
     product_serial_number: Optional[str] = Field(None, max_length=20)
 
+
 class ComplaintFilterData(BaseModel):
     action_head: List[str] = []
     action_by: List[str] = []
+
 
 class ComplaintEnquiryResponseSchema(BaseModel):
     complaint_number: str
@@ -55,6 +60,7 @@ class ComplaintEnquiryResponseSchema(BaseModel):
     product_serial_number: Optional[str]
     action_head: str
 
+
 class ComplaintTechniciansReallocationSchema(BaseModel):
     complaint_number: str
     complaint_date: str
@@ -63,10 +69,12 @@ class ComplaintTechniciansReallocationSchema(BaseModel):
     current_status: str
     product_division: str
 
+
 class ComplaintReallocateRequestSchema(BaseModel):
     complaint_numbers: List[str]
     old_technician: str
     new_technician: str
+
 
 class CreateComplaint(BaseModel):
     complaint_number: str = Field(..., max_length=15)
@@ -90,7 +98,8 @@ class CreateComplaint(BaseModel):
     current_status: str = Field(..., max_length=50)
     updated_time: Optional[str] = Field(None, max_length=7)
     appoint_date: Optional[date]
-    
+
+
 class ComplaintCreateData(BaseModel):
     complaint_number: str
     customer_name: List[str] = []
@@ -98,12 +107,14 @@ class ComplaintCreateData(BaseModel):
     action_by: List[str] = []
     technician: List[str] = []
 
+
 class ComplaintUpdateData(BaseModel):
     complaint_number: List[str] = []
     customer_name: List[str] = []
     action_head: List[str] = []
     action_by: List[str] = []
     technician: List[str] = []
+
 
 class ComplaintResponse(BaseModel):
     complaint_date: date
@@ -143,6 +154,7 @@ class ComplaintResponse(BaseModel):
     amount_spare: Optional[float]
     final_status: str
 
+
 class UpdateComplaint(BaseModel):
     product_division: str
     complaint_head: str
@@ -180,6 +192,7 @@ class UpdateComplaint(BaseModel):
     amount_spare: Optional[float]
     final_status: str = Field(..., max_length=1)
 
+
 class EmailSchema(BaseModel):
     name: str
     email: str
@@ -207,6 +220,7 @@ class ComplaintResponseRFR(BaseModel):
     replacement_reason: Optional[str]
     replacement_remark: Optional[str]
 
+
 class CreateComplaintRFR(BaseModel):
     complaint_number: str = Field(..., max_length=15)
     product_model: str = Field(..., max_length=25)
@@ -223,13 +237,15 @@ class CreateComplaintRFR(BaseModel):
     replacement_reason: str = Field(..., max_length=30)
     replacement_remark: str = Field(..., max_length=40)
 
+
 class GenerateRFRResponseSchema(BaseModel):
     complaint_number: str
     customer_name: str
     product_model: Optional[str]
     product_serial_number: Optional[str]
     current_status: str
- 
+
+
 class GenerateRFRRequestSchema(BaseModel):
     complaint_numbers: List[str]
     product_division: str

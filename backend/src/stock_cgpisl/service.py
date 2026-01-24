@@ -80,7 +80,9 @@ class StockCGPISLService:
         spare_codes = [r["spare_code"] for r in raw_rows]
 
         result = await session.execute(
-            select(StockCGPISL.spare_code).where(StockCGPISL.spare_code.in_(spare_codes))
+            select(StockCGPISL.spare_code).where(
+                StockCGPISL.spare_code.in_(spare_codes)
+            )
         )
         existing_codes = set(result.scalars().all())
 
@@ -91,7 +93,8 @@ class StockCGPISLService:
 
         int_fields = {"cnf_qty", "grc_qty", "own_qty", "indent_qty"}
         float_fields = {
-            "alp", "sale_price",
+            "alp",
+            "sale_price",
         }
 
         for row in raw_rows:
@@ -203,7 +206,11 @@ class StockCGPISLService:
                 inserted = len(to_insert)
 
             if to_update:
-                update_fields = present_fields - {"division", "spare_description", "hsn_code"}
+                update_fields = present_fields - {
+                    "division",
+                    "spare_description",
+                    "hsn_code",
+                }
 
                 values_dict = {}
                 for field in update_fields:
@@ -402,7 +409,10 @@ class StockCGPISLService:
             raise SpareNotFound()
 
     async def create_indent_cgpisl(
-        self, spare_code: str, indentData: StockCGPISLIndentCreate, session: AsyncSession
+        self,
+        spare_code: str,
+        indentData: StockCGPISLIndentCreate,
+        session: AsyncSession,
     ):
         existing_record = await self.get_stock_cgpisl_by_code(spare_code, session)
         for key, value in indentData.model_dump().items():
@@ -413,7 +423,6 @@ class StockCGPISLService:
             await session.rollback()
         await session.refresh(existing_record)
         return existing_record
-
 
     async def get_cgpisl_indent_details_by_division(
         self, division: str, session: AsyncSession

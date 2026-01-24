@@ -15,7 +15,7 @@ export const menuConfig = [
       },
       { label: "Add New Complaint", path: "/CreateComplaint", company: "ALL" },
       { label: "Update Complaint", path: "/UpdateComplaint", company: "ALL" },
-      { label: "Report Generation", path: "/ReportGeneration", company: "ALL" },
+      { label: "Mail Technicians", path: "/ReportGeneration", company: "ALL" },
       {
         label: "Complaint Reallocation",
         path: "/ComplaintReallocation",

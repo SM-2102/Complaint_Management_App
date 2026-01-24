@@ -16,6 +16,7 @@ from src.grc_cgcel.models import GRCCGCEL, GRCCGCELDispute, GRCCGCELReturnHistor
 from src.grc_cgpisl.models import GRCCGPISL, GRCCGPISLDispute, GRCCGPISLReturnHistory
 from src.stock_cgcel.models import StockCGCEL, StockCGCELMovement, StockCGCELIndent
 from src.stock_cgpisl.models import StockCGPISL, StockCGPISLIndent
+from src.parameter.models import Parameter
 from sqlmodel import SQLModel
 from src.config import Config
 

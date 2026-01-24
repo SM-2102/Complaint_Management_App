@@ -61,26 +61,42 @@ class SpareNotFound(BaseException):
 class StockNotAvailable(BaseException):
     """Stock Not Available"""
 
+
 class CustomerAlreadyExists(BaseException):
     """Customer Already Exists"""
+
 
 class CustomerNotFound(BaseException):
     """Customer Not Found"""
 
+
 class CannotChangeCustomerName(BaseException):
     """Cannot change the customer name"""
+
 
 class ComplaintNumberAlreadyExists(BaseException):
     """Complaint Number Already Exists"""
 
+
 class ComplaintNotFound(BaseException):
     """Complaint Not Found"""
+
 
 class ComplaintNumberGenerationFailed(BaseException):
     """Failed to generate a unique complaint number after retries"""
 
+
 class UpdateFailed(BaseException):
     """Failed to update the complaint"""
+
+
+class EmailSendingFailed(BaseException):
+    """Failed to send email"""
+
+
+class ComplaintClosed(BaseException):
+    """Complaint is already closed"""
+
 
 def create_exception_handler(
     status_code: int, initial_detail: Any
@@ -321,6 +337,30 @@ def register_exceptions(app: FastAPI):
         ),
     )
 
+    app.add_exception_handler(
+        EmailSendingFailed,
+        create_exception_handler(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            initial_detail={
+                "message": "Failed to send email",
+                "resolution": "Please send the email manually",
+                "error_code": "email_sending_failed",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        ComplaintClosed,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "Complaint is already closed",
+                "resolution": "No further actions can be performed.",
+                "error_code": "complaint_closed",
+            },
+        ),
+    )
+
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request, exc):
         # Customize the error message here
@@ -332,8 +372,6 @@ def register_exceptions(app: FastAPI):
                 "error_code": "validation_error",
             },
         )
-    
-
 
     # @app.exception_handler(500)
     # async def internal_server_error(request, exc):

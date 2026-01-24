@@ -33,9 +33,8 @@ class AuthService:
             extract("day", Employee.dob) == today.day,
             extract("month", Employee.dob) == today.month,
         )
-        occasion_stmt = (
-            select(Holiday.name, Holiday.details)
-            .where(Holiday.holiday_date == today.date(), Holiday.is_holiday == "N")
+        occasion_stmt = select(Holiday.name, Holiday.details).where(
+            Holiday.holiday_date == today.date(), Holiday.is_holiday == "N"
         )
 
         # Run both queries concurrently
@@ -54,14 +53,15 @@ class AuthService:
             # After 3 PM, try holiday for tomorrow
             if today.time() >= time(15, 0):
                 tomorrow = today.date() + timedelta(days=1)
-                holiday_stmt = (
-                    select(Holiday.name, Holiday.details)
-                    .where(Holiday.holiday_date == tomorrow, Holiday.is_holiday == "Y")
+                holiday_stmt = select(Holiday.name, Holiday.details).where(
+                    Holiday.holiday_date == tomorrow, Holiday.is_holiday == "Y"
                 )
                 holiday_result = await session.execute(holiday_stmt)
                 holiday_rows = holiday_result.all()
                 if holiday_rows:
-                    holidays = [{"name": row[0], "details": row[1]} for row in holiday_rows]
+                    holidays = [
+                        {"name": row[0], "details": row[1]} for row in holiday_rows
+                    ]
 
         return {
             "user": existing_user,

@@ -9,13 +9,13 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from auth.dependencies import AccessTokenBearer, RoleChecker
 from db.db import get_session
 from grc_cgpisl.schemas import (
+    GRCCGPISLEnquiry,
     GRCCGPISLReceiveSchema,
+    GRCCGPISLReturnFinalizePayload,
     GRCCGPISLReturnSave,
     GRCCGPISLReturnSchema,
     GRCCGPISLUpdateReceiveSchema,
     GRCFullPayload,
-    GRCCGPISLReturnFinalizePayload,
-    GRCCGPISLEnquiry,
 )
 from grc_cgpisl.service import GRCCGPISLService
 
@@ -213,6 +213,7 @@ async def print_grc_report(
             "Content-Disposition": f'attachment; filename="{data.challan_number}.pdf"'
         },
     )
+
 
 """
 GRC CGPISL enquiry using query parameters.

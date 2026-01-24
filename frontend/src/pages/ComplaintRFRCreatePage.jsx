@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import Toast from "../components/Toast";
 import { FiSearch } from "react-icons/fi";
 import { validateCreateRFR } from "../utils/complaintCreateRFRValidation";
@@ -37,6 +38,7 @@ const REPLACEMENT_REASONS = [
 ];
 
 const ComplaintRFRCreatePage = () => {
+  const location = useLocation();
   const [form, setForm] = useState(initialForm);
   const [complaintNumbers, setComplaintNumbers] = useState([]);
   const [complaintNumberSuggestions, setComplaintNumberSuggestions] = useState(
@@ -89,18 +91,29 @@ const ComplaintRFRCreatePage = () => {
     };
   }, []);
 
-  const handleSearchByNumber = async () => {
+  // accept optional explicit complaint number to avoid stale state issues
+  const handleSearchByNumber = async (numArg) => {
     setError({});
     setShowToast(false);
+    const complaintNum = typeof numArg === "string" && numArg ? numArg : form.complaint_number;
+    if (!complaintNum) {
+      setError({ message: "Please provide complaint number", type: "warning" });
+      setShowToast(true);
+      return;
+    }
     try {
-      const data = await searchComplaintByNumberRFR(form.complaint_number);
+      const data = await searchComplaintByNumberRFR(complaintNum);
       setForm((prev) => ({
         ...prev,
+        complaint_number: complaintNum,
         complaint_date: data.complaint_date ?? "",
         product_division: data.product_division ?? "",
         customer_type: data.customer_type ?? "",
         customer_name: data.customer_name ?? "",
-        customer_address: data.customer_address1 + ((" " + data.customer_address2) ? data.customer_address2 : "") + ", " + data.customer_city + " - " + data.customer_pincode,
+        customer_address:
+          (data.customer_address1 || "") +
+          ((data.customer_address2 && " " + data.customer_address2) || "") +
+          ", " + (data.customer_city || "") + " - " + (data.customer_pincode || ""),
         product_model: data.product_model ?? "",
         product_serial_number: data.product_serial_number ?? "",
         purchased_from: data.purchased_from ?? "",
@@ -123,6 +136,21 @@ const ComplaintRFRCreatePage = () => {
       setShowToast(true);
     }
   };
+
+  // If navigated here with state or query param containing complaint_number,
+  // prefill the complaint_number and trigger search.
+  useEffect(() => {
+    const fromState = location?.state?.complaint_number;
+    const params = new URLSearchParams(location?.search || "");
+    const fromQuery = params.get("complaint_number");
+    const toUse = fromState || fromQuery;
+    if (toUse) {
+      // set UI immediately and call search with explicit value to avoid race
+      setForm((prev) => ({ ...prev, complaint_number: toUse }));
+      handleSearchByNumber(toUse);
+    }
+    // we only want to run when location changes
+  }, [location]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

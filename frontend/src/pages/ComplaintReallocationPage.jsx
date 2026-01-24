@@ -186,7 +186,7 @@ const ComplaintReallocationPage = () => {
           pb: 2,
           borderRadius: 4,
           background: "#f8fafc",
-          maxWidth: 900,
+          maxWidth: 1000,
           width: "100%",
           boxSizing: "border-box",
           margin: "0 16px",

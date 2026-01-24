@@ -25,10 +25,8 @@ class StockCGPISL(SQLModel, table=True):
     remark: str = Field(sa_column=Column(pg.VARCHAR(40), nullable=True))
     hsn_code: str = Field(sa_column=Column(pg.VARCHAR(8), nullable=False))
 
-
     def __repr__(self):
         return f"<SpareCGPISL {self.spare_code}>"
-
 
 
 class StockCGPISLIndent(SQLModel, table=True):

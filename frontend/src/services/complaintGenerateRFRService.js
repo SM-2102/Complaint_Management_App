@@ -7,13 +7,16 @@ import { authFetch } from "./authFetchService";
  */
 async function generateRFR(data) {
   const url = `${API_ENDPOINTS.COMPLAINT_GENERATE_RFR}`;
-  const response = await authFetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body : JSON.stringify(data),
-  });
+  // Support sending either a plain object (JSON) or FormData (for file uploads)
+  const options = { method: "POST" };
+  if (data instanceof FormData) {
+    options.body = data;
+    // Let fetch set Content-Type for multipart/form-data
+  } else {
+    options.headers = { "Content-Type": "application/json" };
+    options.body = JSON.stringify(data);
+  }
+  const response = await authFetch(url, options);
   if (!response.ok) {
     throw new Error(`Failed to generate RFR`);
   }

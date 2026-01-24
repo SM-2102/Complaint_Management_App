@@ -47,6 +47,10 @@ const ComplaintRFRGeneratePage = () => {
   const [form, setForm] = useState(initialForm);
   const [rfrListLoading, setRfrListLoading] = useState(false);
   const [selected, setSelected] = useState([]); // array of complaint_number
+  const [selectedFiles, setSelectedFiles] = useState([]); // array of File
+  const [fileError, setFileError] = useState("");
+  const [totalQuantity, setTotalQuantity] = useState("");
+  const [quantityError, setQuantityError] = useState("");
 
 
   // Handler for Product Division change - fetch generate RFR list
@@ -56,6 +60,10 @@ const ComplaintRFRGeneratePage = () => {
     // clear any previous list data / selections
     setData([]);
     setSelected([]);
+    if (value !== "LIGHT") {
+      setTotalQuantity("");
+      setQuantityError("");
+    }
 
     if (!value) {
       setData([]);
@@ -142,43 +150,94 @@ const ComplaintRFRGeneratePage = () => {
   };
 
   // Actual send logic separated so it can be triggered from the modal
-  const performSendRFR = async () => {
-    setSubmitting(true);
-    setUpdating(true);
-    try {
-      const payload = {
-        complaint_numbers: selected,
-        product_division: form.product_division,
-        rfr_number: form.rfr_number,
-        rfr_type: form.rfr_type,
-        product_type: form.product_type,
-      };
-      await generateRFR(payload);
-      setError({ message: "RFR generated successfully.",
-        resolution: "RFR Number: " + form.rfr_number,
-        type: "success" });
-      setShowToast(true);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-    } catch (err) {
-      setError({
-        message: err?.message || "Failed to generate RFR.",
-        resolution: err?.resolution || "",
-        type: "error",
-      });
-      setShowToast(true);
-    } finally {
-      setUpdating(false);
-      setSubmitting(false);
+const performSendRFR = async () => {
+  setSubmitting(true);
+  setUpdating(true);
+
+  try {
+    const fd = new FormData();
+
+    fd.append("product_division", form.product_division);
+    fd.append("rfr_number", form.rfr_number);
+    fd.append("rfr_type", form.rfr_type);
+    fd.append("product_type", form.product_type);
+    fd.append("complaint_numbers", JSON.stringify(selected));
+
+    if (form.product_division === "LIGHT" && form.rfr_type === "SINGLE") {
+      fd.append("total_quantity", totalQuantity);
     }
-  };
+
+    // Append files ONLY if present
+    selectedFiles.forEach((file) => {
+      fd.append("images", file);
+    });
+
+    await generateRFR(fd);
+
+    setError({
+      message: "RFR generated successfully.",
+      resolution: `RFR Number: ${form.rfr_number}`,
+      type: "success",
+    });
+    setShowToast(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+
+  } catch (err) {
+    setError({
+      message: err?.message || "Failed to generate RFR.",
+      type: "error",
+    });
+    setShowToast(true);
+  } finally {
+    setUpdating(false);
+    setSubmitting(false);
+  }
+};
+
 
   const handleAddAnother = async (confirm) => {
-    setShowAddAnother(false);
-    if (confirm) {
-      await performSendRFR();
+  if (confirm) {
+    if (form.product_division === "LIGHT" && form.rfr_type === "SINGLE") {
+      if (!totalQuantity || Number(totalQuantity) <= 0) {
+        setQuantityError("Total quantity is required.");
+        return;
+      }
     }
+    await performSendRFR();
+  }
+  setShowAddAnother(false);
+};
+
+  const handleFilesChange = (e) => {
+    setFileError("");
+    const files = Array.from(e.target.files || []);
+    if (!files || files.length === 0) {
+      setSelectedFiles([]);
+      return;
+    }
+    if (files.length > 8) {
+      setFileError("You can upload up to 8 images only.");
+      e.target.value = "";
+      setSelectedFiles([]);
+      return;
+    }
+    const tooLarge = files.find((f) => f.size > 1048576);
+    if (tooLarge) {
+      setFileError("Each image must be 1MB or smaller.");
+      e.target.value = "";
+      setSelectedFiles([]);
+      return;
+    }
+    setSelectedFiles(files);
+  };
+
+  const clearSelectedFiles = () => {
+    setSelectedFiles([]);
+    setFileError("");
+    const input = document.getElementById("rfr-images-input");
+    if (input) input.value = "";
   };
 
 
@@ -469,27 +528,126 @@ const ComplaintRFRGeneratePage = () => {
           </button>
         </Box>
         {/* </div> */}
-        {showAddAnother && !showToast && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm z-40">
-            <div className="bg-white rounded-lg shadow-lg p-6 min-w-[300px] flex flex-col items-center">
-              <div className="text-lg font-semibold mb-4">Send RFR?</div>
-              <div className="flex gap-4">
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800"
-                  onClick={() => handleAddAnother(true)}
-                >
-                  Yes
-                </button>
-                <button
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-                  onClick={() => handleAddAnother(false)}
-                >
-                  No
-                </button>
-              </div>
-            </div>
+{showAddAnother && !showToast && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-40">
+    <div className="bg-white rounded-lg shadow-xl p-6 min-w-[380px]">
+      
+      {/* Header */}
+      <div className="text-lg font-semibold text-purple-700 text-center mb-4">
+        Confirm RFR Submission
+      </div>
+
+      {/* Attachments */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-purple-700 mb-2">
+          Supporting Documents
+        </label>
+
+        {/* Hidden native input */}
+        <input
+          id="rfr-images-input"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFilesChange}
+          className="hidden"
+        />
+
+        {/* Custom trigger */}
+        <button
+          type="button"
+          onClick={() => document.getElementById("rfr-images-input").click()}
+          className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Add Attachments
+        </button>
+
+        {/* Helper text */}
+        {(!selectedFiles || selectedFiles.length === 0) && (
+          <div className="text-xs text-gray-500 mt-2">
+            No attachments added
           </div>
         )}
+
+        {/* Error */}
+        {fileError && (
+          <div className="text-sm text-red-600 mt-2">
+            {fileError}
+          </div>
+        )}
+
+        {/* Selected files */}
+        {selectedFiles && selectedFiles.length > 0 && (
+          <div className="mt-4 text-sm text-gray-700">
+            <div className="font-medium mb-1">Attached Files</div>
+            <ul className="space-y-1 max-h-40 overflow-auto">
+              {selectedFiles.map((f, i) => (
+                <li key={i} className="flex justify-between items-center">
+                  <span className="truncate max-w-[260px]">
+                    {f.name}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {Math.round(f.size / 1024)} KB
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              type="button"
+              onClick={clearSelectedFiles}
+              className="mt-3 text-sm text-gray-600 hover:text-gray-800 underline"
+            >
+              Remove all attachments
+            </button>
+          </div>
+        )}
+      </div>
+
+      {form.product_division === "LIGHT" && form.rfr_type === "SINGLE" && (
+  <div className="mb-4 flex items-center gap-3">
+  <label className="text-sm font-medium text-purple-700 min-w-[150px]">
+    Total Quantity (LIGHT)<span className="text-red-500">*</span>
+  </label>
+
+  <input
+    type="number"
+    min="1"
+    value={totalQuantity}
+    onChange={(e) => {
+      setTotalQuantity(e.target.value);
+      setQuantityError("");
+    }}
+    className={`w-full px-3 py-1 rounded-md border ${
+      quantityError ? "border-red-400" : "border-gray-300"
+    } focus:outline-none focus:ring-2 focus:ring-purple-400`}
+  />
+
+  </div>
+)}
+
+
+      {/* Actions */}
+      <div className="flex justify-end gap-3">
+        <button
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+          onClick={() => handleAddAnother(false)}
+        >
+          Cancel
+        </button>
+        <button
+          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          onClick={() => handleAddAnother(true)}
+        >
+          {updating ? "Sending..." : "Send RFR"}
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
+
         {showToast && (
           <Toast
             message={error.message}

@@ -29,10 +29,11 @@ class CreateCustomer(BaseModel):
     discount_light: Optional[float]
     discount_whc: Optional[float]
     discount_cgwhc: Optional[float]
-  
+
 
 class CustomerResponse(CreateCustomer):
     code: str
+
 
 class UpdateCustomer(CreateCustomer):
     pass
@@ -44,6 +45,7 @@ class CustomerCode(BaseModel):
 
 class CustomerName(BaseModel):
     name: str
+
 
 class CustomerResponseForComplaint(BaseModel):
     address1: str

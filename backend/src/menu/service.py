@@ -1,13 +1,13 @@
 from datetime import date, timedelta
 
-from sqlalchemy import case, func, literal, select, union_all, and_, or_
+from sqlalchemy import and_, case, func, literal, or_, select, union_all
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
+from complaints.models import Complaint
 from grc_cgcel.models import GRCCGCEL
 from grc_cgpisl.models import GRCCGPISL
 from stock_cgcel.models import StockCGCEL
 from stock_cgpisl.models import StockCGPISL
-from complaints.models import Complaint
 
 
 class MenuService:
@@ -68,21 +68,19 @@ class MenuService:
         division_expr = cls._division_case(Complaint.product_division)
 
         division_stmt = (
-    select(
-        Complaint.complaint_head.label("head"),
-        division_expr.label("division"),
-        func.sum(case((Complaint.final_status == "Y", 1), else_=0)).label("Y"),
-        func.sum(case((Complaint.final_status == "N", 1), else_=0)).label("N"),
-    )
-    .where(Complaint.product_division.isnot(None))
-    .group_by(
-        Complaint.complaint_head,
-        division_expr,
-    )
-    .order_by(Complaint.complaint_head, division_expr)
-)
-
-
+            select(
+                Complaint.complaint_head.label("head"),
+                division_expr.label("division"),
+                func.sum(case((Complaint.final_status == "Y", 1), else_=0)).label("Y"),
+                func.sum(case((Complaint.final_status == "N", 1), else_=0)).label("N"),
+            )
+            .where(Complaint.product_division.isnot(None))
+            .group_by(
+                Complaint.complaint_head,
+                division_expr,
+            )
+            .order_by(Complaint.complaint_head, division_expr)
+        )
 
         division_rows = (await session.execute(division_stmt)).all()
 
@@ -138,7 +136,9 @@ class MenuService:
                             and_(
                                 Complaint.final_status == "N",
                                 ~Complaint.complaint_number.like("N%"),
-                                ~func.upper(Complaint.complaint_status).in_(["CANCEL", "CLOSED", "NEW"]),
+                                ~func.upper(Complaint.complaint_status).in_(
+                                    ["CANCEL", "CLOSED", "NEW"]
+                                ),
                             ),
                             1,
                         ),
@@ -146,25 +146,51 @@ class MenuService:
                     )
                 ).label("crm_open"),
                 func.sum(
-                    case((and_(Complaint.final_status == "N", Complaint.spare_pending == "Y"), 1), else_=0)
+                    case(
+                        (
+                            and_(
+                                Complaint.final_status == "N",
+                                Complaint.spare_pending == "Y",
+                            ),
+                            1,
+                        ),
+                        else_=0,
+                    )
                 ).label("spare_pending"),
                 func.sum(
                     case(
                         (
                             and_(
                                 Complaint.final_status == "N",
-                                func.upper(Complaint.complaint_priority).in_(["ESCALATION", "MD-ESCALATION", "HO-ESCALATION", "CRM-ESCALATION"]),
+                                func.upper(Complaint.complaint_priority).in_(
+                                    [
+                                        "ESCALATION",
+                                        "MD-ESCALATION",
+                                        "HO-ESCALATION",
+                                        "CRM-ESCALATION",
+                                    ]
+                                ),
                             ),
                             1,
                         ),
                         else_=0,
                     )
                 ).label("escalation"),
+                func.sum(case((and_(Complaint.final_status == "N"), 1), else_=0)).label(
+                    "all"
+                ),
                 func.sum(
-                    case((and_(Complaint.final_status == "N"), 1), else_=0)
-                ).label("all"),
-                func.sum(
-                    case((and_(Complaint.final_status == "N", func.upper(Complaint.action_head) == "MAIL TO BE SENT TO HO"), 1), else_=0)
+                    case(
+                        (
+                            and_(
+                                Complaint.final_status == "N",
+                                func.upper(Complaint.action_head)
+                                == "MAIL TO BE SENT TO HO",
+                            ),
+                            1,
+                        ),
+                        else_=0,
+                    )
                 ).label("mail_to_be_sent"),
             )
             .group_by(Complaint.complaint_head)
@@ -208,7 +234,7 @@ class MenuService:
                 "mail_to_be_sent_complaints": mail_to_be_sent_complaints,
             }
         }
-    
+
     @staticmethod
     async def _division_donut_only(
         session: AsyncSession,

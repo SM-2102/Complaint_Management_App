@@ -92,7 +92,8 @@ class StockCGCELService:
 
         int_fields = {"cnf_qty", "grc_qty", "own_qty", "indent_qty"}
         float_fields = {
-            "alp", "sale_price",
+            "alp",
+            "sale_price",
         }
 
         for row in raw_rows:
@@ -204,7 +205,11 @@ class StockCGCELService:
                 inserted = len(to_insert)
 
             if to_update:
-                update_fields = present_fields - {"division", "spare_description", "hsn_code"}
+                update_fields = present_fields - {
+                    "division",
+                    "spare_description",
+                    "hsn_code",
+                }
 
                 values_dict = {}
                 for field in update_fields:

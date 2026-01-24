@@ -36,9 +36,10 @@ def split_text_to_lines(text, font, font_size, max_width, string_width_func):
         lines.append(line or "")
     return lines
 
+
 def capital_to_proper_case(line: str) -> str:
     """
     Converts a capitalized string to proper case.
     Example: "JOHN DOE" -> "John Doe"
     """
-    return ' '.join(word.capitalize() for word in line.split())
+    return " ".join(word.capitalize() for word in line.split())

@@ -336,11 +336,15 @@ const ComplaintPendingPage = ({ selectedCompany }) => {
       searchParams.delete("spare_pending_complaints");
       searchParams.delete("escalation_complaints");
       searchParams.delete("crm_open_complaints");
-      searchParams.delete("high_priority_complaints");
+      searchParams.delete("all_complaints");
       searchParams.delete("mail_to_be_sent_complaints");
       navigate({ search: searchParams.toString() }, { replace: true });
       // Also remove from params object before fetching data
       delete params.spare_pending_complaints;
+      delete params.escalation_complaints;
+      delete params.crm_open_complaints;
+      delete params.all_complaints;
+      delete params.mail_to_be_sent_complaints;
       // Save current state so user can return without losing data
       try {
         sessionStorage.setItem(

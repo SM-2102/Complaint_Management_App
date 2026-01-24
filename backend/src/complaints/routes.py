@@ -1,16 +1,41 @@
+import json
 import token
 from datetime import date
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Query, Body
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from fastapi.responses import JSONResponse, StreamingResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.dependencies import AccessTokenBearer, RoleChecker
-from db.db import get_session
+from complaints.schemas import (
+    ComplaintCreateData,
+    ComplaintEnquiryResponseSchema,
+    ComplaintFilterData,
+    ComplaintReallocateRequestSchema,
+    ComplaintResponse,
+    ComplaintResponseRFR,
+    ComplaintTechniciansReallocationSchema,
+    ComplaintUpdateData,
+    CreateComplaint,
+    CreateComplaintRFR,
+    EmailSchema,
+    GenerateRFRRequestSchema,
+    GenerateRFRResponseSchema,
+)
 from complaints.service import ComplaintsService
-from complaints.schemas import ComplaintFilterData, ComplaintEnquiryResponseSchema, ComplaintReallocateRequestSchema, ComplaintResponse, ComplaintResponseRFR, ComplaintTechniciansReallocationSchema, ComplaintUpdateData, CreateComplaint, ComplaintCreateData, CreateComplaintRFR, EmailSchema, GenerateRFRRequestSchema, GenerateRFRResponseSchema
-from exceptions import ComplaintNotFound
+from db.db import get_session
+from exceptions import ComplaintClosed
 
 complaints_router = APIRouter()
 complaints_service = ComplaintsService()
@@ -57,6 +82,7 @@ async def upload_complaints(
         status_code=status.HTTP_200_OK,
     )
 
+
 """
 Upload Complaints data via CSV file - only NEW
 """
@@ -96,9 +122,11 @@ async def upload_new_complaints(
         status_code=status.HTTP_200_OK,
     )
 
+
 """
 Get list of action heads.
 """
+
 
 @complaints_router.get(
     "/action_heads",
@@ -113,11 +141,11 @@ async def get_action_heads(
         content={"action_heads": result},
     )
 
+
 """
 Complaint enquiry using query parameters.
 
 """
-
 
 
 @complaints_router.get(
@@ -181,6 +209,8 @@ async def enquiry_complaint(
 """
 Get complaint filter data.
 """
+
+
 @complaints_router.get(
     "/complaint_filter_data",
     status_code=status.HTTP_200_OK,
@@ -193,9 +223,12 @@ async def get_complaint_filter_data(
     result = await complaints_service.get_complaint_filter_data(session)
     return result
 
+
 """
 List of employees.
 """
+
+
 @complaints_router.get(
     "/employees",
     status_code=status.HTTP_200_OK,
@@ -209,9 +242,12 @@ async def list_of_employees(
         content={"employees": result},
     )
 
+
 """
 Complaint Data for Reallocation
 """
+
+
 @complaints_router.get(
     "/complaint_allocation_data/{allocated_to}",
     status_code=status.HTTP_200_OK,
@@ -222,12 +258,17 @@ async def get_complaint_reallocation_data(
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    result = await complaints_service.get_complaint_reallocation_data(session, allocated_to)
+    result = await complaints_service.get_complaint_reallocation_data(
+        session, allocated_to
+    )
     return result
+
 
 """
 Reallocate Complaints to a new technician.
 """
+
+
 @complaints_router.post(
     "/reallocate_complaints",
     status_code=status.HTTP_200_OK,
@@ -240,9 +281,12 @@ async def reallocate_complaints(
     await complaints_service.reallocate_complaints(session, reallocate_request)
     return JSONResponse("Complaints reallocated successfully.")
 
+
 """
 Create complaint 
 """
+
+
 @complaints_router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_complaint(
     complaint: CreateComplaint,
@@ -250,12 +294,19 @@ async def create_complaint(
     session: AsyncSession = Depends(get_session),
     token=Depends(access_token_bearer),
 ):
-    new_complaint = await complaints_service.create_complaint(session, complaint, entryType, token)
-    return JSONResponse(content={"message": f"Complaint Created : {new_complaint.complaint_number}"})
+    new_complaint = await complaints_service.create_complaint(
+        session, complaint, entryType, token
+    )
+    return JSONResponse(
+        content={"message": f"Complaint Created : {new_complaint.complaint_number}"}
+    )
+
 
 """
 Create complaint data
 """
+
+
 @complaints_router.get(
     "/complaint_create_data",
     status_code=status.HTTP_200_OK,
@@ -268,25 +319,33 @@ async def get_complaint_create_data(
     result = await complaints_service.get_complaint_create_data(session)
     return result
 
+
 """
 Get complaint details by complaint number.
 """
 
 
 @complaints_router.get(
-    "/by_complaint_number/{complaint_number}", response_model=ComplaintResponse, status_code=status.HTTP_200_OK
+    "/by_complaint_number/{complaint_number}",
+    response_model=ComplaintResponse,
+    status_code=status.HTTP_200_OK,
 )
 async def get_complaint_by_code(
     complaint_number: str,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    complaint = await complaints_service.get_complaint_by_number(complaint_number, session)
+    complaint = await complaints_service.get_complaint_by_number(
+        complaint_number, session
+    )
     return complaint
+
 
 """
 Update complaint data
 """
+
+
 @complaints_router.get(
     "/complaint_update_data",
     status_code=status.HTTP_200_OK,
@@ -299,12 +358,15 @@ async def get_complaint_update_data(
     result = await complaints_service.get_complaint_update_data(session)
     return result
 
+
 """
 Update complaint details by code if complaint available.
 """
 
 
-@complaints_router.patch("/update/{complaint_number}", status_code=status.HTTP_202_ACCEPTED)
+@complaints_router.patch(
+    "/update/{complaint_number}", status_code=status.HTTP_202_ACCEPTED
+)
 async def update_complaint(
     complaint_number: str,
     complaint: dict = Body(...),
@@ -312,12 +374,19 @@ async def update_complaint(
     token=Depends(access_token_bearer),
 ):
     # Pass the raw payload to service; service will handle `revisit` if present
-    new_complaint = await complaints_service.update_complaint(complaint_number, complaint, session, token)
-    return JSONResponse(content={"message": f"Complaint Updated : {new_complaint.complaint_number}"})
+    new_complaint = await complaints_service.update_complaint(
+        complaint_number, complaint, session, token
+    )
+    return JSONResponse(
+        content={"message": f"Complaint Updated : {new_complaint.complaint_number}"}
+    )
+
 
 """
 Send pending emails for complaints.
 """
+
+
 @complaints_router.post("/send_email", status_code=status.HTTP_200_OK)
 async def send_pending_emails(
     recipients: List[EmailSchema],
@@ -327,13 +396,17 @@ async def send_pending_emails(
     await complaints_service.send_pending_emails(session, recipients)
     return JSONResponse(content={"message": f"Emails sent successfully."})
 
+
 """
 List technicians and emails
 """
+
+
 @complaints_router.get(
     "/mail_technician_list",
     response_model=List[EmailSchema],
-    status_code=status.HTTP_200_OK)
+    status_code=status.HTTP_200_OK,
+)
 async def get_technician_email_list(
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
@@ -341,9 +414,12 @@ async def get_technician_email_list(
     result = await complaints_service.get_technician_email_list(session)
     return result
 
+
 """
 List all complaints
 """
+
+
 @complaints_router.get(
     "/all_complaints",
     status_code=status.HTTP_200_OK,
@@ -357,25 +433,35 @@ async def list_all_complaints(
         content={"complaints": result},
     )
 
+
 """
 Get complaint details by complaint number for RFR.
 """
 
 
 @complaints_router.get(
-    "/by_complaint_number_rfr/{complaint_number}", response_model=ComplaintResponseRFR, status_code=status.HTTP_200_OK
+    "/by_complaint_number_rfr/{complaint_number}",
+    response_model=ComplaintResponseRFR,
+    status_code=status.HTTP_200_OK,
 )
 async def get_complaint_by_code_rfr(
     complaint_number: str,
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
 ):
-    complaint = await complaints_service.get_complaint_by_number(complaint_number, session)
+    complaint = await complaints_service.get_complaint_by_number(
+        complaint_number, session
+    )
+    if complaint.final_status == "Y":
+        raise ComplaintClosed()
     return complaint
+
 
 """
 Change action head after mail sent
 """
+
+
 @complaints_router.post("/mail_sent_to_ho", status_code=status.HTTP_202_ACCEPTED)
 async def change_action_head_after_mail(
     complaint_numbers: List[str],
@@ -385,9 +471,12 @@ async def change_action_head_after_mail(
     await complaints_service.change_action_head_after_mail(complaint_numbers, session)
     return JSONResponse(content={"message": f"Action Head changed for complaints."})
 
+
 """
 Create RFR by updating complaint
 """
+
+
 @complaints_router.patch("/create_rfr", status_code=status.HTTP_201_CREATED)
 async def create_rfr(
     rfr_data: CreateComplaintRFR,
@@ -395,12 +484,21 @@ async def create_rfr(
     _=Depends(access_token_bearer),
 ):
     new_complaint = await complaints_service.create_rfr(session, rfr_data)
-    return JSONResponse(content={"message": f"RFR Created : {new_complaint.complaint_number}"})
+    return JSONResponse(
+        content={"message": f"RFR Created : {new_complaint.complaint_number}"}
+    )
+
 
 """
 Get Generate RFR by division
 """
-@complaints_router.get("/generate_rfr_data/{product_division}", response_model=List[GenerateRFRResponseSchema], status_code=status.HTTP_200_OK)
+
+
+@complaints_router.get(
+    "/generate_rfr_data/{product_division}",
+    response_model=List[GenerateRFRResponseSchema],
+    status_code=status.HTTP_200_OK,
+)
 async def get_generate_rfr_data(
     product_division: str,
     session: AsyncSession = Depends(get_session),
@@ -409,13 +507,16 @@ async def get_generate_rfr_data(
     result = await complaints_service.get_generate_rfr_data(session, product_division)
     return result
 
+
 """
 Get next rfr number
 """
+
+
 @complaints_router.get(
     "/next_rfr_number",
     status_code=status.HTTP_200_OK,
-)   
+)
 async def next_rfr_number(
     session: AsyncSession = Depends(get_session),
     _=Depends(access_token_bearer),
@@ -425,20 +526,45 @@ async def next_rfr_number(
         content={"next_rfr_number": result},
     )
 
+
 """
 Generate RFR Report
 """
+
+
 @complaints_router.post(
     "/rfr_report",
     status_code=status.HTTP_200_OK,
 )
+@complaints_router.post("/rfr_report", status_code=status.HTTP_200_OK)
 async def generate_rfr_report(
-    data : GenerateRFRRequestSchema,
+    complaint_numbers: str = Form(...),  # JSON string
+    product_division: str = Form(...),
+    rfr_number: str = Form(...),
+    rfr_type: str = Form(...),
+    product_type: str = Form(...),
+    total_quantity: int = Form(None),
+    images: List[UploadFile] | None = File(None),
     session: AsyncSession = Depends(get_session),
-    _=Depends(access_token_bearer),
+    token=Depends(access_token_bearer),
 ):
-    await complaints_service.generate_rfr_report(session, data)
+    try:
+        complaint_numbers_list = json.loads(complaint_numbers)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid complaint_numbers")
+    if images:
+        if len(images) > 8:
+            raise HTTPException(status_code=400, detail="Maximum 8 images are allowed.")
+    data = GenerateRFRRequestSchema(
+        complaint_numbers=complaint_numbers_list,
+        product_division=product_division,
+        rfr_number=rfr_number,
+        rfr_type=rfr_type,
+        product_type=product_type,
+    )
+    await complaints_service.generate_rfr_report(
+        session, data, token, images, total_quantity
+    )
     return JSONResponse(
         content={"message": f"RFR Report generated successfully."},
     )
-    
