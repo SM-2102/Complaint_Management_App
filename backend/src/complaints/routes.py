@@ -536,7 +536,6 @@ Generate RFR Report
     "/rfr_report",
     status_code=status.HTTP_200_OK,
 )
-@complaints_router.post("/rfr_report", status_code=status.HTTP_200_OK)
 async def generate_rfr_report(
     complaint_numbers: str = Form(...),  # JSON string
     product_division: str = Form(...),

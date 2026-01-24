@@ -135,9 +135,9 @@
 - [x] **/by_complaint_number_rfr/{complaint_number}**
 - [x] **/mail_sent_to_ho**
 - [x] **/create_rfr**
-- [x] **/generate_rfr_data/{division}**
+- [x] **/generate_rfr_data/{product_division}**
 - [x] **/next_rfr_number**
-- [x] **/generate_rfr**
+- [x] **/rfr_report**
 
 ### StockCGCEL Module
 
@@ -216,7 +216,7 @@
 - [x] **Employee**
 - [x] **User**
 - [x] **Email**
-- [ ] **Complaint Number**
+- [x] **Complaint Number**
 - [ ] **Stock_CGCEL**
 - [ ] **Stock_CGPISL**
 - [x] **GRC_CGCEL**
@@ -224,3 +224,61 @@
 - [ ] **Final Deployment**
 
 ---
+
+
+
+invoice_type	varchar(10)
+invoice_number	varchar(14) primary key like US/25-26/00001 for UNQUE
+invoice_date	date
+ccode	varchar(6) foreign key customer_code from customer table
+* State	varchar(30) - will get state from gst table
+* po_number	varchar(30)
+* po_date	date
+* Reference_number	varchar(30)
+* reference_date	date
+* dispatch_doc_number	varchar(30)
+* dispatch_date	date
+* dispatch_through	varchar(30)
+* Destination	varchar(30)
+* terms_of_delivery	varchar(40)
+* terms_of_payment	varchar(40)
+discount1	float
+discount2	float
+discount3	float
+discount4	float
+discount5	float
+discount6	float
+discount7	float
+discount8	float
+spare_code1	varchar(30)
+spare_code2	varchar(30)
+spare_code3	varchar(30)
+spare_code4	varchar(30)
+spare_code5	varchar(30)
+spare_code6	varchar(30)
+spare_code7	varchar(30)
+spare_code8	varchar(30)
+qty1	int
+qty2	int
+qty3	int
+qty4	int
+qty5	int
+qty6	int
+qty7	int
+qty8	int
+rate1	float
+rate2	float
+rate3	float
+rate4	float
+rate5	float
+rate6	float
+rate7	float
+rate8	float
+cgst	float
+sgst	float
+igst	float
+round_off	float
+total	float
+bank_name	varchar(5)
+* created_by	varchar(20)
+final	char(1)
