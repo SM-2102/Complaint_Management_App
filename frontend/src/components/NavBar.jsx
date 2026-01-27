@@ -103,6 +103,14 @@ const NavBar = ({ open, setOpen, company = "ALL" }) => {
       });
     }
   });
+  
+  if (isAdmin) {
+  menuItems.push({
+    title: "Modify Parameter",
+    path: "/ModifyParameter",
+    isDirect: true,
+  });
+}
 
   // Add 'Customer Entry' menu with two submenus
   menuItems.push({

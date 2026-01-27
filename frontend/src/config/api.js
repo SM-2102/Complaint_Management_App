@@ -98,6 +98,9 @@ const API_ENDPOINTS = {
   CUSTOMER_SEARCH_CODE: `${BASE_API_URL}customer/by_code`,
   CUSTOMER_SEARCH_NAME: `${BASE_API_URL}customer/by_name`,
   CUSTOMER_SEARCH_NAME_FOR_COMPLAINT: `${BASE_API_URL}customer/by_name_for_complaint`, //append complaint number
+
+  PARAMETER_LIST: `${BASE_API_URL}parameter/parameters`,
+  PARAMETER_UPDATE: `${BASE_API_URL}parameter/update`,
 };
 
 export default API_ENDPOINTS;

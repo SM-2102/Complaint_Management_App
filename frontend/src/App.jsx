@@ -45,6 +45,7 @@ import ComplaintUpdatePage from "./pages/ComplaintUpdatePage.jsx";
 import ComplaintSendPage from "./pages/ComplaintSendPage.jsx";
 import ComplaintRFRCreatePage from "./pages/ComplaintRFRCreatePage.jsx";
 import ComplaintRFRGeneratePage from "./pages/ComplaintRFRGeneratePage.jsx";
+import ParameterModifyPage from "./pages/ParameterModifyPage.jsx";
 
 function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
   return (
@@ -69,6 +70,14 @@ function AppRoutesWithNav({ selectedCompany, setSelectedCompany }) {
                   selectedCompany={selectedCompany}
                   setSelectedCompany={setSelectedCompany}
                 />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ModifyParameter"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
+                <ParameterModifyPage />
               </PrivateRoute>
             }
           />

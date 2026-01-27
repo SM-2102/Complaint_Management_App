@@ -335,7 +335,8 @@ class ComplaintsService:
 
         # Fetch all action_head from ActionTable
         action_head_result = await session.execute(
-            select(Complaint.action_head).distinct().order_by(Complaint.action_head)
+            select(Complaint.action_head).distinct().where(Complaint.final_status == "N")
+            .order_by(Complaint.action_head)
         )
         action_heads = action_head_result.scalars().all()
 
@@ -1089,7 +1090,7 @@ class ComplaintsService:
         return records
 
     async def next_rfr_number(self, session: AsyncSession):
-        statement = select(Parameter.value).where(Parameter.name == "rfr_number")
+        statement = select(Parameter.rfr_number)
         result = await session.execute(statement)
         last_number = result.scalar()
         last_number = last_number[3:] if last_number else "0"
@@ -1127,8 +1128,8 @@ class ComplaintsService:
 
         update_param_stmt = (
             update(Parameter)
-            .where(Parameter.name == "rfr_number")
-            .values(value=data.rfr_number)
+            .where(Parameter.id == 1)  
+            .values(rfr_number=data.rfr_number)
         )
         await session.execute(update_param_stmt)
         await session.commit()
