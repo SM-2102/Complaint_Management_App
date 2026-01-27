@@ -84,6 +84,9 @@
 - [x] **CustomerCreatePage** - Create Customer record
 - [x] **CustomerUpdatePage** - Update Customer record
 
+### Parameter Module
+- [ ] **ParameterUpdatePage**
+
 ---
 
 ## Backend Routes
@@ -200,6 +203,9 @@
 - [x] **/customer/by_code** 
 - [x] **/customer/by_name**
 - [x] **/customer/update{code}**
+
+### Parameter Module
+- [ ] **/parameter/parameters**
 
 ---
 
